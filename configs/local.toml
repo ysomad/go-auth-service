@@ -1,0 +1,4 @@
+bind_addr = ":8080"
+log_level = "debug"
+database_url = "host=localhost port=5432 dbname=auth_db user=user password=password sslmode=disable"
+session_key = "3JMn9mUCPoRuon5f2hSWUW5NDFy4k2tFr8KpdEhq3pm8L1C8ToOeSzVTP2AOlBTYHkaMRfQD0QLFCIKX2NTbebhgftC94jtqvqZIa7Nits218dcyt0IeI7ECsPIHSMJmmgMGVNKqFgTHMmgiJelUMnllXkEPBXYpCKcSJYsjUXIn7qKm6vAyQjVpzh7NqXGThX8PSGNxCVK3leA7RVf9jjQX4sc3kFEcxEIugwi7CVLNPdVwnyH3hcTKOuxxRuW"
