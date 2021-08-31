@@ -1,29 +1,39 @@
-.DEFAULT_GOAL := build
+include .env.example
+export
 
-# Go
+compose-up:
+	docker-compose up --build -d postgres && docker-compose logs -f
+.PHONY: compose-up
 
-build:
-	go build -v ./cmd/server
+compose-down:
+	docker-compose down --remove-orphans
+.PHONY: compose-down
+
+swag-v1:
+	swag init -g internal/delivery/http/v1/router.go
+.PHONY: swag-v1
+
+run: swag-v1
+	go mod tidy && go mod download && \
+	DISABLE_SWAGGER_HTTP_HANDLER='' GIN_MODE=debug CGO_ENABLED=0 go run -tags migrate ./cmd/app
+.PHONY: run
+
+docker-rm-volume:
+	docker volume rm go-service-template_pg-data
+.PHONY: docker-rm-volume
 
 test:
-	go test -v -race -timeout 30s ./...
+	go test -v -cover -race ./internal/...
+.PHONY: test
 
+mock:
+	mockery --all -r --case snake
+.PHONY: mock
 
-# Docker
+migrate-create:
+	migrate create -ext sql -dir migrations 'migrate_name'
+.PHONY: migrate-create
 
-dockerBuild:
-	docker-compose -f ./build/docker-compose.yml build
-
-dockerUp:
-	docker-compose -f ./build/docker-compose.yml up -d
-
-dockerDown:
-	docker-compose -f ./build/docker-compose.yml down
-
-dockerLogs:
-	docker-compose -f ./build/docker-compose.yml logs
-
-dockerBuildUp: dockerDown dockerBuild dockerUp
-
-
-.PHONY: build test
+migrate-up:
+	migrate -path migrations -database '$(PG_URL)?sslmode=disable' up
+.PHONY: migrate-up
