@@ -15,6 +15,43 @@ definitions:
         example: text for translation
         type: string
     type: object
+  domain.User:
+    properties:
+      created_at:
+        example: "2009-11-10 23:00:00"
+        type: string
+      email:
+        example: email@gmail.com
+        type: string
+      first_name:
+        example: Alex
+        type: string
+      id:
+        example: 1
+        type: integer
+      last_name:
+        example: Malone
+        type: string
+      password:
+        example: secret
+        type: string
+    required:
+    - created_at
+    - email
+    - password
+    type: object
+  v1.createUserRequest:
+    properties:
+      email:
+        example: user@mail.com
+        type: string
+      password:
+        example: secret
+        type: string
+    required:
+    - email
+    - password
+    type: object
   v1.doTranslateRequest:
     properties:
       destination:
@@ -44,11 +81,11 @@ definitions:
         example: message
         type: string
     type: object
-host: localhost:8080
+host: 0.0.0.0:8080
 info:
   contact: {}
-  description: Using a translation service as an example
-  title: Go Service Template API
+  description: REST API authentication service
+  title: Golang auth service
   version: "1.0"
 paths:
   /translation/do-translate:
@@ -98,4 +135,31 @@ paths:
       summary: Show history
       tags:
       - translation
+  /users/create:
+    post:
+      consumes:
+      - application/json
+      description: Register a new user
+      operationId: create
+      parameters:
+      - description: Register a new user
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/v1.createUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.User'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.response'
+      summary: Create
+      tags:
+      - create
 swagger: "2.0"

@@ -1,3 +1,4 @@
+//go:build migrate
 // +build migrate
 
 package app

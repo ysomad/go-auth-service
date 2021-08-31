@@ -32,10 +32,11 @@ func Run(cfg *config.Config) {
 		repo.NewTranslationRepo(pg),
 		webapi.NewTranslationWebAPI(),
 	)
+	userService := service.NewUserService(repo.NewUserRepo(pg))
 
 	// HTTP Server
 	handler := gin.New()
-	v1.NewRouter(handler, translationService)
+	v1.NewRouter(handler, translationService, userService)
 	httpServer := httpserver.NewServer(handler, httpserver.Port(cfg.HTTP.Port))
 
 	// Waiting signal

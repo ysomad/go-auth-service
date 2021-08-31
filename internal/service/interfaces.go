@@ -21,4 +21,17 @@ type (
 	TranslationWebAPI interface {
 		Translate(domain.Translation) (domain.Translation, error)
 	}
+
+	// User interfaces
+
+	User interface {
+		Create(context.Context, domain.User) error
+	}
+
+	UserRepo interface {
+		Create(context.Context, domain.User) error
+	}
+
+	JWTAuthentication interface {
+	}
 )

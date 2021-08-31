@@ -93,6 +93,47 @@ var doc = `{
                     }
                 }
             }
+        },
+        "/users/create": {
+            "post": {
+                "description": "Register a new user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "create"
+                ],
+                "summary": "Create",
+                "operationId": "create",
+                "parameters": [
+                    {
+                        "description": "Register a new user",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/v1.createUserRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/domain.User"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/v1.response"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -114,6 +155,57 @@ var doc = `{
                 "translation": {
                     "type": "string",
                     "example": "text for translation"
+                }
+            }
+        },
+        "domain.User": {
+            "type": "object",
+            "required": [
+                "created_at",
+                "email",
+                "password"
+            ],
+            "properties": {
+                "created_at": {
+                    "type": "string",
+                    "example": "2009-11-10 23:00:00"
+                },
+                "email": {
+                    "type": "string",
+                    "example": "email@gmail.com"
+                },
+                "first_name": {
+                    "type": "string",
+                    "example": "Alex"
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "last_name": {
+                    "type": "string",
+                    "example": "Malone"
+                },
+                "password": {
+                    "type": "string",
+                    "example": "secret"
+                }
+            }
+        },
+        "v1.createUserRequest": {
+            "type": "object",
+            "required": [
+                "email",
+                "password"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "user@mail.com"
+                },
+                "password": {
+                    "type": "string",
+                    "example": "secret"
                 }
             }
         },
@@ -174,11 +266,11 @@ type swaggerInfo struct {
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = swaggerInfo{
 	Version:     "1.0",
-	Host:        "localhost:8080",
+	Host:        "0.0.0.0:8080",
 	BasePath:    "/api/v1",
 	Schemes:     []string{},
-	Title:       "Go Service Template API",
-	Description: "Using a translation service as an example",
+	Title:       "Golang auth service",
+	Description: "REST API authentication service",
 }
 
 type s struct{}

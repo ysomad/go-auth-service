@@ -31,9 +31,13 @@ mock:
 .PHONY: mock
 
 migrate-create:
-	migrate create -ext sql -dir migrations 'migrate_name'
+	migrate create -ext sql -dir migrations $(name)
 .PHONY: migrate-create
 
 migrate-up:
 	migrate -path migrations -database '$(PG_URL)?sslmode=disable' up
 .PHONY: migrate-up
+
+migrate-down:
+	migrate -path migrations -database '$(PG_URL)?sslmode=disable' down
+.PHONY: migrate-down

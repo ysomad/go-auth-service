@@ -14,13 +14,13 @@ import (
 )
 
 // Swagger spec:
-// @title       Go Service Template API
-// @description Using a translation service as an example
+// @title       Golang auth service
+// @description REST API authentication service
 // @version     1.0
-// @host        localhost:8080
+// @host        0.0.0.0:8080
 // @BasePath    /api/v1
 
-func NewRouter(handler *gin.Engine, translationService service.Translation) {
+func NewRouter(handler *gin.Engine, translationService service.Translation, userService service.User) {
 	// Options
 	handler.Use(gin.Logger())
 	handler.Use(gin.Recovery())
@@ -36,5 +36,7 @@ func NewRouter(handler *gin.Engine, translationService service.Translation) {
 	h := handler.Group("/api/v1")
 	{
 		newTranslationRoutes(h, translationService)
+
+		newUserRoutes(h, userService)
 	}
 }

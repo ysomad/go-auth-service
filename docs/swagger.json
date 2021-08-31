@@ -1,12 +1,12 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "Using a translation service as an example",
-        "title": "Go Service Template API",
+        "description": "REST API authentication service",
+        "title": "Golang auth service",
         "contact": {},
         "version": "1.0"
     },
-    "host": "localhost:8080",
+    "host": "0.0.0.0:8080",
     "basePath": "/api/v1",
     "paths": {
         "/translation/do-translate": {
@@ -79,6 +79,47 @@
                     }
                 }
             }
+        },
+        "/users/create": {
+            "post": {
+                "description": "Register a new user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "create"
+                ],
+                "summary": "Create",
+                "operationId": "create",
+                "parameters": [
+                    {
+                        "description": "Register a new user",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/v1.createUserRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/domain.User"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/v1.response"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -100,6 +141,57 @@
                 "translation": {
                     "type": "string",
                     "example": "text for translation"
+                }
+            }
+        },
+        "domain.User": {
+            "type": "object",
+            "required": [
+                "created_at",
+                "email",
+                "password"
+            ],
+            "properties": {
+                "created_at": {
+                    "type": "string",
+                    "example": "2009-11-10 23:00:00"
+                },
+                "email": {
+                    "type": "string",
+                    "example": "email@gmail.com"
+                },
+                "first_name": {
+                    "type": "string",
+                    "example": "Alex"
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "last_name": {
+                    "type": "string",
+                    "example": "Malone"
+                },
+                "password": {
+                    "type": "string",
+                    "example": "secret"
+                }
+            }
+        },
+        "v1.createUserRequest": {
+            "type": "object",
+            "required": [
+                "email",
+                "password"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "user@mail.com"
+                },
+                "password": {
+                    "type": "string",
+                    "example": "secret"
                 }
             }
         },
