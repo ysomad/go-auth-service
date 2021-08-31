@@ -21,7 +21,7 @@ definitions:
         example: "2009-11-10 23:00:00"
         type: string
       email:
-        example: email@gmail.com
+        example: user@mail.com
         type: string
       first_name:
         example: Alex
@@ -30,13 +30,12 @@ definitions:
         example: 1
         type: integer
       last_name:
-        example: Malone
+        example: Malykh
         type: string
       password:
         example: secret
         type: string
     required:
-    - created_at
     - email
     - password
     type: object

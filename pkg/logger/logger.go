@@ -5,7 +5,7 @@ import (
 	"go.uber.org/zap"
 )
 
-var appLogger Logger //nolint:gochecknoglobals // it's ok
+var appLogger Logger
 
 func NewAppLogger(zapLogger *ZapLogger, appName, appVersion string) {
 	fields := []Field{

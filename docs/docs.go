@@ -161,7 +161,6 @@ var doc = `{
         "domain.User": {
             "type": "object",
             "required": [
-                "created_at",
                 "email",
                 "password"
             ],
@@ -172,7 +171,7 @@ var doc = `{
                 },
                 "email": {
                     "type": "string",
-                    "example": "email@gmail.com"
+                    "example": "user@mail.com"
                 },
                 "first_name": {
                     "type": "string",
@@ -184,7 +183,7 @@ var doc = `{
                 },
                 "last_name": {
                     "type": "string",
-                    "example": "Malone"
+                    "example": "Malykh"
                 },
                 "password": {
                     "type": "string",

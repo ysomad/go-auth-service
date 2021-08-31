@@ -147,7 +147,6 @@
         "domain.User": {
             "type": "object",
             "required": [
-                "created_at",
                 "email",
                 "password"
             ],
@@ -158,7 +157,7 @@
                 },
                 "email": {
                     "type": "string",
-                    "example": "email@gmail.com"
+                    "example": "user@mail.com"
                 },
                 "first_name": {
                     "type": "string",
@@ -170,7 +169,7 @@
                 },
                 "last_name": {
                     "type": "string",
-                    "example": "Malone"
+                    "example": "Malykh"
                 },
                 "password": {
                     "type": "string",
