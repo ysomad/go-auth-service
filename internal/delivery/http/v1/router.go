@@ -20,7 +20,7 @@ import (
 // @host        0.0.0.0:8080
 // @BasePath    /api/v1
 
-func NewRouter(handler *gin.Engine, translationService service.Translation, userService service.User) {
+func NewRouter(handler *gin.Engine, userService service.User) {
 	// Options
 	handler.Use(gin.Logger())
 	handler.Use(gin.Recovery())
@@ -30,13 +30,13 @@ func NewRouter(handler *gin.Engine, translationService service.Translation, user
 	handler.GET("/swagger/*any", swaggerHandler)
 
 	// K8s probe
-	handler.GET("/healthz", func(c *gin.Context) { c.Status(http.StatusOK) })
+	handler.GET("/health", func(c *gin.Context) {
+		c.Status(http.StatusOK)
+	})
 
 	// Routers
 	h := handler.Group("/api/v1")
 	{
-		newTranslationRoutes(h, translationService)
-
 		newUserRoutes(h, userService)
 	}
 }

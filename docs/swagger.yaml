@@ -1,44 +1,5 @@
 basePath: /api/v1
 definitions:
-  domain.Translation:
-    properties:
-      destination:
-        example: en
-        type: string
-      original:
-        example: текст для перевода
-        type: string
-      source:
-        example: auto
-        type: string
-      translation:
-        example: text for translation
-        type: string
-    type: object
-  domain.User:
-    properties:
-      created_at:
-        example: "2009-11-10 23:00:00"
-        type: string
-      email:
-        example: user@mail.com
-        type: string
-      first_name:
-        example: Alex
-        type: string
-      id:
-        example: 1
-        type: integer
-      last_name:
-        example: Malykh
-        type: string
-      password:
-        example: secret
-        type: string
-    required:
-    - email
-    - password
-    type: object
   v1.createUserRequest:
     properties:
       email:
@@ -51,34 +12,32 @@ definitions:
     - email
     - password
     type: object
-  v1.doTranslateRequest:
+  v1.createUserResponse:
     properties:
-      destination:
-        example: en
+      created_at:
+        example: "2021-08-31T16:55:18.080768Z"
         type: string
-      original:
-        example: текст для перевода
+      email:
+        example: user@mail.com
         type: string
-      source:
-        example: auto
-        type: string
-    required:
-    - destination
-    - original
-    - source
+      id:
+        type: integer
     type: object
-  v1.historyResponse:
-    properties:
-      history:
-        items:
-          $ref: '#/definitions/domain.Translation'
-        type: array
-    type: object
-  v1.response:
+  v1.messageResponse:
     properties:
       error:
         example: message
         type: string
+    type: object
+  v1.validationErrorResponse:
+    properties:
+      error:
+        additionalProperties:
+          type: string
+        example:
+          email: must be a valid email address
+          password: must be at least 6 characters in length
+        type: object
     type: object
 host: 0.0.0.0:8080
 info:
@@ -87,54 +46,7 @@ info:
   title: Golang auth service
   version: "1.0"
 paths:
-  /translation/do-translate:
-    post:
-      consumes:
-      - application/json
-      description: Translate a text
-      operationId: do-translate
-      parameters:
-      - description: Set up translation
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/v1.doTranslateRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/domain.Translation'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/v1.response'
-      summary: Translate
-      tags:
-      - translation
-  /translation/history:
-    get:
-      consumes:
-      - application/json
-      description: Show all translation history
-      operationId: history
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/v1.historyResponse'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/v1.response'
-      summary: Show history
-      tags:
-      - translation
-  /users/create:
+  /users:
     post:
       consumes:
       - application/json
@@ -153,12 +65,16 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/domain.User'
+            $ref: '#/definitions/v1.createUserResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/v1.response'
+            $ref: '#/definitions/v1.messageResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/v1.validationErrorResponse'
       summary: Create
       tags:
-      - create
+      - Users
 swagger: "2.0"

@@ -12,7 +12,6 @@ import (
 	v1 "github.com/ysomad/go-auth-service/internal/delivery/http/v1"
 	"github.com/ysomad/go-auth-service/internal/service"
 	"github.com/ysomad/go-auth-service/internal/service/repo"
-	"github.com/ysomad/go-auth-service/internal/service/webapi"
 	"github.com/ysomad/go-auth-service/pkg/httpserver"
 	"github.com/ysomad/go-auth-service/pkg/logger"
 	"github.com/ysomad/go-auth-service/pkg/postgres"
@@ -21,23 +20,19 @@ import (
 // Run creates objects via constructors.
 func Run(cfg *config.Config) {
 	// Repository
-	pg, err := postgres.NewPostgres(cfg.PG.URL, postgres.MaxPoolSize(cfg.PG.PoolMax))
+	pg, err := postgres.New(cfg.PG.URL, postgres.MaxPoolSize(cfg.PG.PoolMax))
 	if err != nil {
 		logger.Fatal(err, "app - Run - postgres.NewPostgres")
 	}
 	defer pg.Close()
 
 	// Service
-	translationService := service.NewTranslationService(
-		repo.NewTranslationRepo(pg),
-		webapi.NewTranslationWebAPI(),
-	)
 	userService := service.NewUserService(repo.NewUserRepo(pg))
 
 	// HTTP Server
 	handler := gin.New()
-	v1.NewRouter(handler, translationService, userService)
-	httpServer := httpserver.NewServer(handler, httpserver.Port(cfg.HTTP.Port))
+	v1.NewRouter(handler, userService)
+	httpServer := httpserver.New(handler, httpserver.Port(cfg.HTTP.Port))
 
 	// Waiting signal
 	interrupt := make(chan os.Signal, 1)

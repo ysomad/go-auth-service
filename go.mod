@@ -3,9 +3,10 @@ module github.com/ysomad/go-auth-service
 go 1.17
 
 require (
-	github.com/Conight/go-googletrans v0.0.0-20200929083318-176776d061cb
 	github.com/Masterminds/squirrel v1.5.0
 	github.com/gin-gonic/gin v1.7.4
+	github.com/go-playground/locales v0.14.0
+	github.com/go-playground/universal-translator v0.18.0
 	github.com/go-playground/validator/v10 v10.9.0
 	github.com/golang-migrate/migrate/v4 v4.14.1
 	github.com/ilyakaznacheev/cleanenv v1.2.5
@@ -28,8 +29,6 @@ require (
 	github.com/go-openapi/jsonreference v0.19.5 // indirect
 	github.com/go-openapi/spec v0.20.3 // indirect
 	github.com/go-openapi/swag v0.19.14 // indirect
-	github.com/go-playground/locales v0.14.0 // indirect
-	github.com/go-playground/universal-translator v0.18.0 // indirect
 	github.com/golang/protobuf v1.4.3 // indirect
 	github.com/hashicorp/errwrap v1.0.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.0 // indirect
