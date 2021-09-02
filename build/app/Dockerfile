@@ -7,7 +7,7 @@ RUN go mod download
 # Step 2: Builder
 FROM golang:1.17.0-alpine3.14 as builder
 COPY --from=modules /go/pkg /go/pkg
-COPY . /app
+COPY ../.. /app
 WORKDIR /app
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
     go build -tags migrate -o /bin/app ./cmd/app

@@ -24,11 +24,11 @@ func logError(c *gin.Context, code int, err error, msg string) {
 }
 
 func abortWithError(c *gin.Context, code int, err error) {
-	logError(c, code, err, "http - v1 - errorResponse")
+	logError(c, code, err, "http - v1 - abortWithError")
 	c.AbortWithStatusJSON(code, messageResponse{err.Error()})
 }
 
 func abortWithValidationError(c *gin.Context, code int, err error, errs map[string]string) {
-	logError(c, code, err, "http - v1 - validationErrorResponse")
+	logError(c, code, err, "http - v1 - abortWithValidationError")
 	c.AbortWithStatusJSON(code, validationErrorResponse{errs})
 }

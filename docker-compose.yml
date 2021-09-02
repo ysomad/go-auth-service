@@ -14,7 +14,9 @@ services:
       - "5432:5432"
 
   app:
-    build: .
+    build:
+      context: .
+      dockerfile: './build/app/Dockerfile'
     container_name: app
     image: app
     environment:
