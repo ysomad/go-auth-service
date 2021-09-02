@@ -2,11 +2,11 @@ include .env.example
 export
 
 compose-up:
-	docker-compose up --build -d postgres && docker-compose logs -f
+	docker-compose -f build/docker-compose.yml up --build -d postgres && docker-compose -f build/docker-compose.yml logs -f
 .PHONY: compose-up
 
 compose-down:
-	docker-compose down --remove-orphans
+	docker-compose -f build/docker-compose.yml down --remove-orphans
 .PHONY: compose-down
 
 swag-v1:

@@ -1,5 +1,13 @@
 basePath: /api/v1
 definitions:
+  v1.archiveUserRequest:
+    properties:
+      password:
+        example: secret
+        type: string
+    required:
+    - password
+    type: object
   v1.createUserRequest:
     properties:
       email:
@@ -50,7 +58,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: Register a new user
+      description: Register a new user with email and password
       operationId: create
       parameters:
       - description: Register a new user
@@ -59,6 +67,11 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/v1.createUserRequest'
+      - description: User id
+        in: path
+        name: name
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -75,6 +88,40 @@ paths:
           schema:
             $ref: '#/definitions/v1.validationErrorResponse'
       summary: Create
+      tags:
+      - Users
+  /users/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Archive user if password is correct
+      operationId: archive
+      parameters:
+      - description: Archive user
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/v1.archiveUserRequest'
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ""
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.messageResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/v1.validationErrorResponse'
+      summary: Archive
       tags:
       - Users
 swagger: "2.0"

@@ -25,7 +25,7 @@ var doc = `{
     "paths": {
         "/users": {
             "post": {
-                "description": "Register a new user",
+                "description": "Register a new user with email and password",
                 "consumes": [
                     "application/json"
                 ],
@@ -46,6 +46,13 @@ var doc = `{
                         "schema": {
                             "$ref": "#/definitions/v1.createUserRequest"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "User id",
+                        "name": "name",
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -69,9 +76,72 @@ var doc = `{
                     }
                 }
             }
+        },
+        "/users/{id}": {
+            "delete": {
+                "description": "Archive user if password is correct",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Archive",
+                "operationId": "archive",
+                "parameters": [
+                    {
+                        "description": "Archive user",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/v1.archiveUserRequest"
+                        }
+                    },
+                    {
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/v1.messageResponse"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "$ref": "#/definitions/v1.validationErrorResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
+        "v1.archiveUserRequest": {
+            "type": "object",
+            "required": [
+                "password"
+            ],
+            "properties": {
+                "password": {
+                    "type": "string",
+                    "example": "secret"
+                }
+            }
+        },
         "v1.createUserRequest": {
             "type": "object",
             "required": [

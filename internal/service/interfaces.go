@@ -7,13 +7,13 @@ import (
 
 type (
 	User interface {
-		Create(context.Context, *domain.User) (error, map[string]string)
+		Create(context.Context, *domain.User) error
+		Archive(context.Context, *domain.User) error
 	}
 
 	UserRepo interface {
 		Create(context.Context, *domain.User) error
-	}
-
-	JWTAuthentication interface {
+		GetPassword(context.Context, int) (string, error)
+		Archive(context.Context, int) error
 	}
 )

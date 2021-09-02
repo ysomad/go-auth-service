@@ -20,12 +20,17 @@ type User struct {
 
 func (u *User) Sanitize() {
 	u.Password = ""
+	u.SetEncryptedPassword("")
+}
+
+func (u *User) SetEncryptedPassword(p string) {
+	u.EncryptedPassword = p
 }
 
 // EncryptPassword encrypts user password and write it to EncryptedPassword field of User struct
 func (u *User) EncryptPassword() error {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(u.Password), 14)
-	u.EncryptedPassword = string(bytes)
+	bytes, err := bcrypt.GenerateFromPassword([]byte(u.Password), bcrypt.DefaultCost)
+	u.SetEncryptedPassword(string(bytes))
 	return err
 }
 
