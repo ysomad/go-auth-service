@@ -44,22 +44,15 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/v1.createUserRequest"
+                            "$ref": "#/definitions/domain.CreateUserRequest"
                         }
-                    },
-                    {
-                        "type": "string",
-                        "description": "User id",
-                        "name": "name",
-                        "in": "path",
-                        "required": true
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/v1.createUserResponse"
+                            "$ref": "#/definitions/domain.CreateUserResponse"
                         }
                     },
                     "400": {
@@ -98,7 +91,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/v1.archiveUserRequest"
+                            "$ref": "#/definitions/domain.ArchiveUserRequest"
                         }
                     },
                     {
@@ -130,7 +123,7 @@ var doc = `{
         }
     },
     "definitions": {
-        "v1.archiveUserRequest": {
+        "domain.ArchiveUserRequest": {
             "type": "object",
             "required": [
                 "password"
@@ -142,7 +135,7 @@ var doc = `{
                 }
             }
         },
-        "v1.createUserRequest": {
+        "domain.CreateUserRequest": {
             "type": "object",
             "required": [
                 "email",
@@ -159,7 +152,7 @@ var doc = `{
                 }
             }
         },
-        "v1.createUserResponse": {
+        "domain.CreateUserResponse": {
             "type": "object",
             "properties": {
                 "created_at": {

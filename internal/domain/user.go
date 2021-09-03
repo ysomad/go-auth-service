@@ -18,6 +18,24 @@ type User struct {
 	IsSuperuser       bool      `json:"is_superuser,omitempty" example:"false"`
 }
 
+// Requests and responses
+type (
+	CreateUserRequest struct {
+		Email    string `json:"email"    example:"user@mail.com" binding:"required"`
+		Password string `json:"password" example:"secret"        binding:"required"`
+	}
+
+	CreateUserResponse struct {
+		ID        int       `json:"id"`
+		Email     string    `json:"email"      example:"user@mail.com"`
+		CreatedAt time.Time `json:"created_at" example:"2021-08-31T16:55:18.080768Z"`
+	}
+
+	ArchiveUserRequest struct {
+		Password string `json:"password" example:"secret" binding:"required"`
+	}
+)
+
 func (u *User) Sanitize() {
 	u.Password = ""
 	u.SetEncryptedPassword("")

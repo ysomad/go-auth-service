@@ -2,8 +2,8 @@ POST http://0.0.0.0:8080/api/v1/users/
 Content-Type: application/json
 
 {
-  "email": "testtest.com",
-  "password": "123123"
+  "email": "testes2t.com",
+  "password": "1223"
 }
 
 ###

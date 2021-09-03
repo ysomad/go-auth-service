@@ -8,7 +8,7 @@ import (
 )
 
 type UserService struct {
-	repo     UserRepo
+	repo UserRepo
 }
 
 func NewUserService(r UserRepo) *UserService {

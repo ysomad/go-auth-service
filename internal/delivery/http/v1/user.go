@@ -1,40 +1,19 @@
 package v1
 
 import (
-	"github.com/gin-gonic/gin"
-	"github.com/go-playground/locales/en"
-	ut "github.com/go-playground/universal-translator"
-	"github.com/go-playground/validator/v10"
-	enTranslations "github.com/go-playground/validator/v10/translations/en"
-	"github.com/ysomad/go-auth-service/internal/domain"
-	"github.com/ysomad/go-auth-service/internal/service"
 	"net/http"
 	"strconv"
-	"strings"
-	"time"
+
+	"github.com/gin-gonic/gin"
+
+	"github.com/ysomad/go-auth-service/internal/domain"
+	"github.com/ysomad/go-auth-service/internal/service"
+	"github.com/ysomad/go-auth-service/pkg/validator"
 )
 
 type userRoutes struct {
 	userService service.User
 }
-
-// Requests and responses
-type (
-	createUserRequest struct {
-		Email    string `json:"email"    example:"user@mail.com" binding:"required"`
-		Password string `json:"password" example:"secret"        binding:"required"`
-	}
-
-	createUserResponse struct {
-		ID        int       `json:"id"`
-		Email     string    `json:"email"      example:"user@mail.com"`
-		CreatedAt time.Time `json:"created_at" example:"2021-08-31T16:55:18.080768Z"`
-	}
-
-	archiveUserRequest struct {
-		Password string `json:"password" example:"secret" binding:"required"`
-	}
-)
 
 func newUserRoutes(handler *gin.RouterGroup, us service.User) {
 	r := &userRoutes{us}
@@ -52,14 +31,13 @@ func newUserRoutes(handler *gin.RouterGroup, us service.User) {
 // @Tags  	    Users
 // @Accept      json
 // @Produce     json
-// @Param       request body createUserRequest true "Register a new user"
-// @Param       name path string true "User id"
-// @Success     200 {object} createUserResponse
+// @Param       request body domain.CreateUserRequest true "Register a new user"
+// @Success     200 {object} domain.CreateUserResponse
 // @Failure     400 {object} messageResponse
 // @Failure		422 {object} validationErrorResponse
 // @Router      /users [post].
 func (r *userRoutes) create(c *gin.Context) {
-	var request createUserRequest
+	var request domain.CreateUserRequest
 
 	// Validate request body
 	if err := c.ShouldBindJSON(&request); err != nil {
@@ -74,35 +52,16 @@ func (r *userRoutes) create(c *gin.Context) {
 	}
 
 	// Validate User struct
-	// TODO: refactor struct validation
-	validate := validator.New()
-	if err := validate.Struct(user); err != nil {
-
-		// Init translator
-		eng := en.New()
-		uni := ut.New(eng, eng)
-		trans, _ := uni.GetTranslator("en")
-
-		// Register translations
-		if regErr := enTranslations.RegisterDefaultTranslations(validate, trans);
-		regErr != nil {
-			abortWithError(c, http.StatusBadRequest, err)
+	v := validator.New()
+	if err := v.ValidateStruct(user); err != nil {
+		// Translate validation errors
+		translatedErrs, translateErr := v.TranslateAll(err)
+		if translateErr != nil {
+			abortWithError(c, http.StatusBadRequest, translateErr)
 			return
 		}
 
-		// Get validation errors and translate em
-		validationErrs := err.(validator.ValidationErrors)
-		translatedErrs := validationErrs.Translate(trans)
-
-		// Format translated validation errors
-		formattedErrs := make(validator.ValidationErrorsTranslations, len(translatedErrs))
-		for k, v := range translatedErrs {
-			k = strings.Split(k, ".")[1]
-			words := strings.Fields(v)[1:]
-			formattedErrs[strings.ToLower(k)] = strings.Join(words, " ")
-		}
-
-		abortWithValidationError(c, http.StatusUnprocessableEntity, err, formattedErrs)
+		abortWithValidationError(c, http.StatusUnprocessableEntity, err, v.Fmt(translatedErrs))
 		return
 	}
 
@@ -120,14 +79,14 @@ func (r *userRoutes) create(c *gin.Context) {
 // @Tags  	    Users
 // @Accept      json
 // @Produce     json
-// @Param       request body archiveUserRequest true "Archive user"
+// @Param       request body domain.ArchiveUserRequest true "Archive user"
 // @Param		id path int required "User ID"
 // @Success     200
 // @Failure     400 {object} messageResponse
 // @Failure		422 {object} validationErrorResponse
 // @Router      /users/{id} [delete].
 func (r *userRoutes) archive(c *gin.Context) {
-	var request archiveUserRequest
+	var request domain.ArchiveUserRequest
 
 	// Validate request body
 	if err := c.ShouldBindJSON(&request); err != nil {
@@ -143,7 +102,7 @@ func (r *userRoutes) archive(c *gin.Context) {
 	}
 
 	user := domain.User{
-		ID: id,
+		ID:       id,
 		Password: request.Password,
 	}
 
