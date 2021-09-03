@@ -106,9 +106,6 @@ func (r *userRoutes) archive(c *gin.Context) {
 		Password: request.Password,
 	}
 
-	// Validate struct
-	// TODO: Add struct validation for archive endpoint
-
 	// Archive user
 	if err = r.userService.Archive(c.Request.Context(), &user); err != nil {
 		abortWithError(c, http.StatusBadRequest, err)

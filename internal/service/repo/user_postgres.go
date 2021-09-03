@@ -68,7 +68,7 @@ func (r *UserRepo) Archive(ctx context.Context, id int) error {
 	sql, args, err := r.Builder.
 		Update(table).
 		Set("is_active", false).
-		Where(sq.Eq{"id": id}).
+		Where(sq.Eq{"id": id, "is_active": true}).
 		ToSql()
 	if err != nil {
 		return err
