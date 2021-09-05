@@ -39,7 +39,7 @@ var doc = `{
                 "operationId": "create",
                 "parameters": [
                     {
-                        "description": "Register a new user",
+                        "description": "To register a new user email and password should be provided",
                         "name": "request",
                         "in": "body",
                         "required": true,
@@ -71,8 +71,8 @@ var doc = `{
             }
         },
         "/users/{id}": {
-            "delete": {
-                "description": "Archive user if password is correct",
+            "put": {
+                "description": "Update user data",
                 "consumes": [
                     "application/json"
                 ],
@@ -82,16 +82,16 @@ var doc = `{
                 "tags": [
                     "Users"
                 ],
-                "summary": "Archive",
-                "operationId": "archive",
+                "summary": "Update",
+                "operationId": "update",
                 "parameters": [
                     {
-                        "description": "Archive user",
+                        "description": "All required fields should be provided",
                         "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/domain.ArchiveUserRequest"
+                            "$ref": "#/definitions/domain.UpdateUserRequest"
                         }
                     },
                     {
@@ -120,21 +120,79 @@ var doc = `{
                     }
                 }
             }
+        },
+        "/users/{id}/activation": {
+            "post": {
+                "description": "Activate deactivated user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Activate",
+                "operationId": "activate",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/v1.messageResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Deactivate active user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Deactivate",
+                "operationId": "deactivate",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/v1.messageResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
-        "domain.ArchiveUserRequest": {
-            "type": "object",
-            "required": [
-                "password"
-            ],
-            "properties": {
-                "password": {
-                    "type": "string",
-                    "example": "secret"
-                }
-            }
-        },
         "domain.CreateUserRequest": {
             "type": "object",
             "required": [
@@ -168,6 +226,23 @@ var doc = `{
                 }
             }
         },
+        "domain.UpdateUserRequest": {
+            "type": "object",
+            "properties": {
+                "first_name": {
+                    "type": "string",
+                    "example": "Alex"
+                },
+                "last_name": {
+                    "type": "string",
+                    "example": "Malykh"
+                },
+                "username": {
+                    "type": "string",
+                    "example": "username"
+                }
+            }
+        },
         "v1.messageResponse": {
             "type": "object",
             "properties": {
@@ -186,7 +261,6 @@ var doc = `{
                         "type": "string"
                     },
                     "example": {
-                        "email": "must be a valid email address",
                         "password": "must be at least 6 characters in length"
                     }
                 }

@@ -11,7 +11,7 @@ import (
 
 type Validator struct {
 	validate *v10.Validate
-	trans ut.Translator
+	trans    ut.Translator
 }
 
 func New() *Validator {
@@ -22,6 +22,7 @@ func New() *Validator {
 	return &Validator{v10.New(), trans}
 }
 
+// ValidateStruct is a shortcut for validator.Validate.Struct method
 func (v *Validator) ValidateStruct(s interface{}) error {
 	return v.validate.Struct(s)
 }

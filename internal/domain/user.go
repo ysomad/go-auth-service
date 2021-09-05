@@ -8,11 +8,12 @@ import (
 // User represents user data model
 type User struct {
 	ID                int       `json:"id"                     example:"1"`
-	Email             string    `json:"email"                  example:"user@mail.com" validate:"required,email"`
-	Password          string    `json:"password,omitempty"     example:"secret"        validate:"required,gte=6,lte=128"`
+	Email             string    `json:"email"                  example:"user@mail.com" validate:"email"`
+	Username          string    `json:"username,omitempty"     example:"username"      validate:"omitempty,alpha,gte=4,lte=32"`
+	Password          string    `json:"password,omitempty"     example:"secret"        validate:"gte=6,lte=128"`
 	EncryptedPassword string    `json:"-"`
-	FirstName         string    `json:"first_name,omitempty"   example:"Alex"`
-	LastName          string    `json:"last_name,omitempty"    example:"Malykh"`
+	FirstName         string    `json:"first_name,omitempty"   example:"Alex"          validate:"omitempty,alpha,lte=50"`
+	LastName          string    `json:"last_name,omitempty"    example:"Malykh"        validate:"omitempty,alpha,lte=50"`
 	CreatedAt         time.Time `json:"created_at"             example:"2021-08-31T16:55:18.080768Z"`
 	IsActive          bool      `json:"is_active,omitempty"    example:"true"`
 	IsSuperuser       bool      `json:"is_superuser,omitempty" example:"false"`
@@ -32,28 +33,34 @@ type (
 	}
 
 	ArchiveUserRequest struct {
-		Password string `json:"password" example:"secret" binding:"required"`
+		IsActive bool `json:"is_active" example:"true" binding:"required"`
+	}
+
+	UpdateUserRequest struct {
+		Username  string `json:"username"   example:"username"`
+		FirstName string `json:"first_name" example:"Alex"`
+		LastName  string `json:"last_name"  example:"Malykh"`
 	}
 )
 
 func (u *User) Sanitize() {
 	u.Password = ""
-	u.SetEncryptedPassword("")
+	u.setEncryptedPassword("")
 }
 
-func (u *User) SetEncryptedPassword(p string) {
+func (u *User) setEncryptedPassword(p string) {
 	u.EncryptedPassword = p
 }
 
 // EncryptPassword encrypts user password and write it to EncryptedPassword field of User struct
 func (u *User) EncryptPassword() error {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(u.Password), bcrypt.DefaultCost)
-	u.SetEncryptedPassword(string(bytes))
+	u.setEncryptedPassword(string(bytes))
 	return err
 }
 
 // CompareHashAndPassword compares received password from client with hashed password in db
-func (u *User) CompareHashAndPassword() bool {
-	err := bcrypt.CompareHashAndPassword([]byte(u.EncryptedPassword), []byte(u.Password))
+func (u *User) CompareHashAndPassword(hash string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(u.Password))
 	return err == nil
 }

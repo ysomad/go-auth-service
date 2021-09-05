@@ -2,10 +2,10 @@ package repo
 
 import (
 	"context"
+	"fmt"
+	sq "github.com/Masterminds/squirrel"
 	"github.com/jackc/pgx/v4"
 	"github.com/pkg/errors"
-
-	sq "github.com/Masterminds/squirrel"
 
 	"github.com/ysomad/go-auth-service/internal/domain"
 	"github.com/ysomad/go-auth-service/pkg/postgres"
@@ -64,11 +64,48 @@ func (r *UserRepo) GetPassword(ctx context.Context, id int) (string, error) {
 	return pwd, nil
 }
 
-func (r *UserRepo) Archive(ctx context.Context, id int) error {
+func (r *UserRepo) UpdateState(ctx context.Context, u *domain.User) error {
 	sql, args, err := r.Builder.
 		Update(table).
-		Set("is_active", false).
-		Where(sq.Eq{"id": id, "is_active": true}).
+		Set("is_active", u.IsActive).
+		Where(sq.Eq{"id": u.ID, "is_active": !u.IsActive}).
+		Suffix("RETURNING is_active").
+		ToSql()
+	if err != nil {
+		return err
+	}
+
+	var isActive bool
+
+	if err = r.Pool.QueryRow(ctx, sql, args...).Scan(&isActive); err != nil {
+		if err == pgx.ErrNoRows {
+			var userState string
+
+			switch u.IsActive {
+			case true:
+				userState = "deactivated"
+			case false:
+				userState = "activated"
+			}
+
+			return errors.New(fmt.Sprintf("%s user with given id not found", userState))
+		}
+
+		return err
+	}
+
+	if u.IsActive != isActive {
+		return errors.New("user state did not change")
+	}
+
+	return nil
+}
+
+func (r *UserRepo) Update(ctx context.Context, u *domain.User) error {
+	sql, args, err := r.Builder.Update(table).
+		Set("first_name", u.FirstName).
+		Set("last_name", u.LastName).
+		Where(sq.Eq{"id": u.ID, "email": u.Email}).
 		ToSql()
 	if err != nil {
 		return err

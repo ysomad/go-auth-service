@@ -31,23 +31,41 @@ func (s *UserService) Create(ctx context.Context, u *domain.User) error {
 	return nil
 }
 
-// Archive sets user `is_active` column to `false`
-func (s *UserService) Archive(ctx context.Context, u *domain.User) error {
+func (s *UserService) authenticate(ctx context.Context, u *domain.User) error {
+	// Get encrypted user password
 	encryptedPwd, err := s.repo.GetPassword(ctx, u.ID)
 	if err != nil {
 		return err
 	}
 
 	// Compare password with encrypted password
-	u.SetEncryptedPassword(encryptedPwd)
-	if !u.CompareHashAndPassword() {
+	if !u.CompareHashAndPassword(encryptedPwd) {
 		return errors.New("incorrect password")
 	}
 
-	// Archive user
-	if err = s.repo.Archive(ctx, u.ID); err != nil {
+	return nil
+}
+
+// UpdateState updates User is_active flag
+func (s *UserService) UpdateState(ctx context.Context, u *domain.User) error {
+	if err := s.repo.UpdateState(ctx, u); err != nil {
 		return err
 	}
+
+	return nil
+}
+
+// Update updates User field values with new values if password is correct
+func (s *UserService) Update(ctx context.Context, u *domain.User) error {
+	if err := s.authenticate(ctx, u); err != nil {
+		return err
+	}
+
+	if err := s.repo.Update(ctx, u); err != nil {
+		return err
+	}
+
+	u.Sanitize()
 
 	return nil
 }

@@ -8,7 +8,6 @@ import (
 
 	"github.com/ysomad/go-auth-service/internal/domain"
 	"github.com/ysomad/go-auth-service/internal/service"
-	"github.com/ysomad/go-auth-service/pkg/validator"
 )
 
 type userRoutes struct {
@@ -20,9 +19,31 @@ func newUserRoutes(handler *gin.RouterGroup, us service.User) {
 
 	h := handler.Group("/users")
 	{
+		h.POST(":id/activation", r.activate)
+		h.DELETE(":id/activation", r.deactivate)
+		h.PUT(":id", r.update)
 		h.POST("", r.create)
-		h.DELETE(":id", r.archive)
 	}
+}
+
+func (r *userRoutes) updateState(c *gin.Context, state bool) error {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		abortWithError(c, http.StatusBadRequest, err)
+		return err
+	}
+
+	user := domain.User{
+		ID:       id,
+		IsActive: state,
+	}
+
+	if err = r.userService.UpdateState(c.Request.Context(), &user); err != nil {
+		abortWithError(c, http.StatusBadRequest, err)
+		return err
+	}
+
+	return nil
 }
 
 // @Summary     Create
@@ -31,7 +52,7 @@ func newUserRoutes(handler *gin.RouterGroup, us service.User) {
 // @Tags  	    Users
 // @Accept      json
 // @Produce     json
-// @Param       request body domain.CreateUserRequest true "Register a new user"
+// @Param       request body domain.CreateUserRequest true "To register a new user email and password should be provided"
 // @Success     200 {object} domain.CreateUserResponse
 // @Failure     400 {object} messageResponse
 // @Failure		422 {object} validationErrorResponse
@@ -39,29 +60,17 @@ func newUserRoutes(handler *gin.RouterGroup, us service.User) {
 func (r *userRoutes) create(c *gin.Context) {
 	var request domain.CreateUserRequest
 
-	// Validate request body
 	if err := c.ShouldBindJSON(&request); err != nil {
 		abortWithError(c, http.StatusBadRequest, err)
 		return
 	}
 
-	// Pre-populate User struct
 	user := domain.User{
 		Email:    request.Email,
 		Password: request.Password,
 	}
 
-	// Validate User struct
-	v := validator.New()
-	if err := v.ValidateStruct(user); err != nil {
-		// Translate validation errors
-		translatedErrs, translateErr := v.TranslateAll(err)
-		if translateErr != nil {
-			abortWithError(c, http.StatusBadRequest, translateErr)
-			return
-		}
-
-		abortWithValidationError(c, http.StatusUnprocessableEntity, err, v.Fmt(translatedErrs))
+	if !validStruct(c, user) {
 		return
 	}
 
@@ -73,28 +82,64 @@ func (r *userRoutes) create(c *gin.Context) {
 	c.JSON(http.StatusOK, user)
 }
 
-// @Summary     Archive
-// @Description Archive user if password is correct
-// @ID          archive
+// @Summary     Activate
+// @Description Activate deactivated user
+// @ID          activate
 // @Tags  	    Users
 // @Accept      json
 // @Produce     json
-// @Param       request body domain.ArchiveUserRequest true "Archive user"
+// @Param		id path int required "User ID"
+// @Success     200
+// @Failure     400 {object} messageResponse
+// @Router      /users/{id}/activation [post].
+func (r *userRoutes) activate(c *gin.Context) {
+	if err := r.updateState(c, true); err != nil {
+		return
+	}
+
+	c.AbortWithStatus(http.StatusOK)
+}
+
+// @Summary     Deactivate
+// @Description Deactivate active user
+// @ID          deactivate
+// @Tags  	    Users
+// @Accept      json
+// @Produce     json
+// @Param		id path int required "User ID"
+// @Success     200
+// @Failure     400 {object} messageResponse
+// @Router      /users/{id}/activation [delete].
+func (r *userRoutes) deactivate(c *gin.Context) {
+	if err := r.updateState(c, false); err != nil {
+		return
+	}
+
+	c.AbortWithStatus(http.StatusOK)
+}
+
+// @Summary     Update
+// @Description Update user data
+// @ID          update
+// @Tags  	    Users
+// @Accept      json
+// @Produce     json
+// @Param       request body domain.UpdateUserRequest true "All required fields should be provided"
+// @Failure		422 {object} validationErrorResponse
 // @Param		id path int required "User ID"
 // @Success     200
 // @Failure     400 {object} messageResponse
 // @Failure		422 {object} validationErrorResponse
-// @Router      /users/{id} [delete].
-func (r *userRoutes) archive(c *gin.Context) {
-	var request domain.ArchiveUserRequest
+// @Router      /users/{id} [put].
+func (r *userRoutes) update(c *gin.Context) {
+	// TODO: recreate with PATCH partial update https://play.golang.org/p/IQAHgqfBRh
+	var request domain.UpdateUserRequest
 
-	// Validate request body
 	if err := c.ShouldBindJSON(&request); err != nil {
 		abortWithError(c, http.StatusBadRequest, err)
 		return
 	}
 
-	// Get user id from url param
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		abortWithError(c, http.StatusBadRequest, err)
@@ -102,12 +147,17 @@ func (r *userRoutes) archive(c *gin.Context) {
 	}
 
 	user := domain.User{
-		ID:       id,
-		Password: request.Password,
+		ID:        id,
+		Username:  request.Username,
+		FirstName: request.FirstName,
+		LastName:  request.LastName,
 	}
 
-	// Archive user
-	if err = r.userService.Archive(c.Request.Context(), &user); err != nil {
+	if !validStruct(c, user) {
+		return
+	}
+
+	if err = r.userService.Update(c.Request.Context(), &user); err != nil {
 		abortWithError(c, http.StatusBadRequest, err)
 		return
 	}

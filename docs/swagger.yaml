@@ -1,13 +1,5 @@
 basePath: /api/v1
 definitions:
-  domain.ArchiveUserRequest:
-    properties:
-      password:
-        example: secret
-        type: string
-    required:
-    - password
-    type: object
   domain.CreateUserRequest:
     properties:
       email:
@@ -31,6 +23,18 @@ definitions:
       id:
         type: integer
     type: object
+  domain.UpdateUserRequest:
+    properties:
+      first_name:
+        example: Alex
+        type: string
+      last_name:
+        example: Malykh
+        type: string
+      username:
+        example: username
+        type: string
+    type: object
   v1.messageResponse:
     properties:
       error:
@@ -43,7 +47,6 @@ definitions:
         additionalProperties:
           type: string
         example:
-          email: must be a valid email address
           password: must be at least 6 characters in length
         type: object
     type: object
@@ -61,7 +64,7 @@ paths:
       description: Register a new user with email and password
       operationId: create
       parameters:
-      - description: Register a new user
+      - description: To register a new user email and password should be provided
         in: body
         name: request
         required: true
@@ -86,18 +89,18 @@ paths:
       tags:
       - Users
   /users/{id}:
-    delete:
+    put:
       consumes:
       - application/json
-      description: Archive user if password is correct
-      operationId: archive
+      description: Update user data
+      operationId: update
       parameters:
-      - description: Archive user
+      - description: All required fields should be provided
         in: body
         name: request
         required: true
         schema:
-          $ref: '#/definitions/domain.ArchiveUserRequest'
+          $ref: '#/definitions/domain.UpdateUserRequest'
       - description: User ID
         in: path
         name: id
@@ -116,7 +119,54 @@ paths:
           description: Unprocessable Entity
           schema:
             $ref: '#/definitions/v1.validationErrorResponse'
-      summary: Archive
+      summary: Update
+      tags:
+      - Users
+  /users/{id}/activation:
+    delete:
+      consumes:
+      - application/json
+      description: Deactivate active user
+      operationId: deactivate
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ""
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.messageResponse'
+      summary: Deactivate
+      tags:
+      - Users
+    post:
+      consumes:
+      - application/json
+      description: Activate deactivated user
+      operationId: activate
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ""
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.messageResponse'
+      summary: Activate
       tags:
       - Users
 swagger: "2.0"
