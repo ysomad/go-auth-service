@@ -1,5 +1,13 @@
 basePath: /api/v1
 definitions:
+  domain.ArchiveUserRequest:
+    properties:
+      is_active:
+        example: true
+        type: boolean
+    required:
+    - is_active
+    type: object
   domain.CreateUserRequest:
     properties:
       email:
@@ -122,18 +130,24 @@ paths:
       summary: Update
       tags:
       - Users
-  /users/{id}/activation:
-    delete:
+  /users/{id}/archive:
+    patch:
       consumes:
       - application/json
-      description: Deactivate active user
-      operationId: deactivate
+      description: Update user state
+      operationId: archive
       parameters:
       - description: User ID
         in: path
         name: id
         required: true
         type: integer
+      - description: To change user state is_archive should be provided
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.ArchiveUserRequest'
       produces:
       - application/json
       responses:
@@ -143,30 +157,7 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/v1.messageResponse'
-      summary: Deactivate
-      tags:
-      - Users
-    post:
-      consumes:
-      - application/json
-      description: Activate deactivated user
-      operationId: activate
-      parameters:
-      - description: User ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: ""
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/v1.messageResponse'
-      summary: Activate
+      summary: Archive
       tags:
       - Users
 swagger: "2.0"

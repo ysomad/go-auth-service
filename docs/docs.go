@@ -121,9 +121,9 @@ var doc = `{
                 }
             }
         },
-        "/users/{id}/activation": {
-            "post": {
-                "description": "Activate deactivated user",
+        "/users/{id}/archive": {
+            "patch": {
+                "description": "Update user state",
                 "consumes": [
                     "application/json"
                 ],
@@ -133,8 +133,8 @@ var doc = `{
                 "tags": [
                     "Users"
                 ],
-                "summary": "Activate",
-                "operationId": "activate",
+                "summary": "Archive",
+                "operationId": "archive",
                 "parameters": [
                     {
                         "type": "integer",
@@ -142,40 +142,15 @@ var doc = `{
                         "name": "id",
                         "in": "path",
                         "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": ""
                     },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/v1.messageResponse"
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "description": "Deactivate active user",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Users"
-                ],
-                "summary": "Deactivate",
-                "operationId": "deactivate",
-                "parameters": [
                     {
-                        "type": "integer",
-                        "description": "User ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
+                        "description": "To change user state is_archive should be provided",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/domain.ArchiveUserRequest"
+                        }
                     }
                 ],
                 "responses": {
@@ -193,6 +168,18 @@ var doc = `{
         }
     },
     "definitions": {
+        "domain.ArchiveUserRequest": {
+            "type": "object",
+            "required": [
+                "is_active"
+            ],
+            "properties": {
+                "is_active": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
         "domain.CreateUserRequest": {
             "type": "object",
             "required": [

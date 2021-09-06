@@ -19,31 +19,10 @@ func newUserRoutes(handler *gin.RouterGroup, us service.User) {
 
 	h := handler.Group("/users")
 	{
-		h.POST(":id/activation", r.activate)
-		h.DELETE(":id/activation", r.deactivate)
+		h.PATCH(":id/archive", r.archive)
 		h.PUT(":id", r.update)
 		h.POST("", r.create)
 	}
-}
-
-func (r *userRoutes) updateState(c *gin.Context, state bool) error {
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		abortWithError(c, http.StatusBadRequest, err)
-		return err
-	}
-
-	user := domain.User{
-		ID:       id,
-		IsActive: state,
-	}
-
-	if err = r.userService.UpdateState(c.Request.Context(), &user); err != nil {
-		abortWithError(c, http.StatusBadRequest, err)
-		return err
-	}
-
-	return nil
 }
 
 // @Summary     Create
@@ -82,36 +61,38 @@ func (r *userRoutes) create(c *gin.Context) {
 	c.JSON(http.StatusOK, user)
 }
 
-// @Summary     Activate
-// @Description Activate deactivated user
-// @ID          activate
+// @Summary     Archive
+// @Description Update user state
+// @ID          archive
 // @Tags  	    Users
 // @Accept      json
 // @Produce     json
 // @Param		id path int required "User ID"
+// @Param       request body domain.ArchiveUserRequest true "To change user state is_archive should be provided"
 // @Success     200
 // @Failure     400 {object} messageResponse
-// @Router      /users/{id}/activation [post].
-func (r *userRoutes) activate(c *gin.Context) {
-	if err := r.updateState(c, true); err != nil {
+// @Router      /users/{id}/archive [patch].
+func (r *userRoutes) archive(c *gin.Context) {
+	var request domain.ArchiveUserRequest
+
+	if err := c.ShouldBindJSON(&request); err != nil {
+		abortWithError(c, http.StatusBadRequest, err)
 		return
 	}
 
-	c.AbortWithStatus(http.StatusOK)
-}
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		abortWithError(c, http.StatusBadRequest, err)
+		return
+	}
 
-// @Summary     Deactivate
-// @Description Deactivate active user
-// @ID          deactivate
-// @Tags  	    Users
-// @Accept      json
-// @Produce     json
-// @Param		id path int required "User ID"
-// @Success     200
-// @Failure     400 {object} messageResponse
-// @Router      /users/{id}/activation [delete].
-func (r *userRoutes) deactivate(c *gin.Context) {
-	if err := r.updateState(c, false); err != nil {
+	user := domain.User{
+		ID:       id,
+		IsActive: *request.IsActive,
+	}
+
+	if err = r.userService.UpdateState(c.Request.Context(), &user); err != nil {
+		abortWithError(c, http.StatusBadRequest, err)
 		return
 	}
 

@@ -33,7 +33,7 @@ type (
 	}
 
 	ArchiveUserRequest struct {
-		IsActive bool `json:"is_active" example:"true" binding:"required"`
+		IsActive *bool `json:"is_active" example:"true" binding:"required"`
 	}
 
 	UpdateUserRequest struct {
