@@ -1,13 +1,11 @@
 package v1
 
 import (
-	"net/http"
-	"strconv"
-
 	"github.com/gin-gonic/gin"
-
 	"github.com/ysomad/go-auth-service/internal/domain"
 	"github.com/ysomad/go-auth-service/internal/service"
+	"net/http"
+	"strconv"
 )
 
 type userRoutes struct {
@@ -19,61 +17,53 @@ func newUserRoutes(handler *gin.RouterGroup, us service.User) {
 
 	h := handler.Group("/users")
 	{
-		h.PATCH(":id/archive", r.archive)
+		h.PATCH(":id/state", r.updateState)
 		h.PUT(":id", r.update)
-		h.POST("", r.create)
+		h.POST("", r.signUp)
 	}
 }
 
-// @Summary     Create
+// @Summary     Sign Up
 // @Description Register a new user with email and password
-// @ID          create
+// @ID          signup
 // @Tags  	    Users
 // @Accept      json
 // @Produce     json
 // @Param       request body domain.CreateUserRequest true "To register a new user email and password should be provided"
-// @Success     200 {object} domain.CreateUserResponse
+// @Success     201 {object} domain.CreateUserResponse
 // @Failure     400 {object} messageResponse
+// @Failure     500 {object} messageResponse
 // @Failure		422 {object} validationErrorResponse
 // @Router      /users [post].
-func (r *userRoutes) create(c *gin.Context) {
-	var request domain.CreateUserRequest
+func (r *userRoutes) signUp(c *gin.Context) {
+	var req domain.CreateUserRequest
 
-	if err := c.ShouldBindJSON(&request); err != nil {
+	if !ValidDTO(c, &req) {
+		return
+	}
+
+	resp, err := r.userService.SignUp(c.Request.Context(), &req)
+	if err != nil {
 		abortWithError(c, http.StatusBadRequest, err)
 		return
 	}
 
-	user := domain.User{
-		Email:    request.Email,
-		Password: request.Password,
-	}
-
-	if !validStruct(c, user) {
-		return
-	}
-
-	if err := r.userService.Create(c.Request.Context(), &user); err != nil {
-		abortWithError(c, http.StatusBadRequest, err)
-		return
-	}
-
-	c.JSON(http.StatusOK, user)
+	c.JSON(http.StatusCreated, resp)
 }
 
-// @Summary     Archive
+// @Summary     Update state
 // @Description Update user state
-// @ID          archive
+// @ID          state
 // @Tags  	    Users
 // @Accept      json
 // @Produce     json
 // @Param		id path int required "User ID"
-// @Param       request body domain.ArchiveUserRequest true "To change user state is_archive should be provided"
-// @Success     200
+// @Param       request body domain.UpdateStateUserRequest true "To change user state is_archive should be provided"
+// @Success     204
 // @Failure     400 {object} messageResponse
-// @Router      /users/{id}/archive [patch].
-func (r *userRoutes) archive(c *gin.Context) {
-	var request domain.ArchiveUserRequest
+// @Router      /users/{id}/state [patch].
+func (r *userRoutes) updateState(c *gin.Context) {
+	var request domain.UpdateStateUserRequest
 
 	if err := c.ShouldBindJSON(&request); err != nil {
 		abortWithError(c, http.StatusBadRequest, err)
@@ -96,7 +86,7 @@ func (r *userRoutes) archive(c *gin.Context) {
 		return
 	}
 
-	c.AbortWithStatus(http.StatusOK)
+	c.AbortWithStatus(http.StatusNoContent)
 }
 
 // @Summary     Update
@@ -108,12 +98,11 @@ func (r *userRoutes) archive(c *gin.Context) {
 // @Param       request body domain.UpdateUserRequest true "All required fields should be provided"
 // @Failure		422 {object} validationErrorResponse
 // @Param		id path int required "User ID"
-// @Success     200
+// @Success     204
 // @Failure     400 {object} messageResponse
 // @Failure		422 {object} validationErrorResponse
 // @Router      /users/{id} [put].
 func (r *userRoutes) update(c *gin.Context) {
-	// TODO: recreate with PATCH partial update https://play.golang.org/p/IQAHgqfBRh
 	var request domain.UpdateUserRequest
 
 	if err := c.ShouldBindJSON(&request); err != nil {
@@ -134,14 +123,10 @@ func (r *userRoutes) update(c *gin.Context) {
 		LastName:  request.LastName,
 	}
 
-	if !validStruct(c, user) {
-		return
-	}
-
 	if err = r.userService.Update(c.Request.Context(), &user); err != nil {
 		abortWithError(c, http.StatusBadRequest, err)
 		return
 	}
 
-	c.AbortWithStatus(http.StatusOK)
+	c.AbortWithStatus(http.StatusNoContent)
 }

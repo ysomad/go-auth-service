@@ -35,8 +35,8 @@ var doc = `{
                 "tags": [
                     "Users"
                 ],
-                "summary": "Create",
-                "operationId": "create",
+                "summary": "Sign Up",
+                "operationId": "signup",
                 "parameters": [
                     {
                         "description": "To register a new user email and password should be provided",
@@ -49,8 +49,8 @@ var doc = `{
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK",
+                    "201": {
+                        "description": "Created",
                         "schema": {
                             "$ref": "#/definitions/domain.CreateUserResponse"
                         }
@@ -65,6 +65,12 @@ var doc = `{
                         "description": "Unprocessable Entity",
                         "schema": {
                             "$ref": "#/definitions/v1.validationErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/v1.messageResponse"
                         }
                     }
                 }
@@ -103,7 +109,7 @@ var doc = `{
                     }
                 ],
                 "responses": {
-                    "200": {
+                    "204": {
                         "description": ""
                     },
                     "400": {
@@ -121,7 +127,7 @@ var doc = `{
                 }
             }
         },
-        "/users/{id}/archive": {
+        "/users/{id}/state": {
             "patch": {
                 "description": "Update user state",
                 "consumes": [
@@ -133,8 +139,8 @@ var doc = `{
                 "tags": [
                     "Users"
                 ],
-                "summary": "Archive",
-                "operationId": "archive",
+                "summary": "Update state",
+                "operationId": "state",
                 "parameters": [
                     {
                         "type": "integer",
@@ -149,12 +155,12 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/domain.ArchiveUserRequest"
+                            "$ref": "#/definitions/domain.UpdateStateUserRequest"
                         }
                     }
                 ],
                 "responses": {
-                    "200": {
+                    "204": {
                         "description": ""
                     },
                     "400": {
@@ -168,18 +174,6 @@ var doc = `{
         }
     },
     "definitions": {
-        "domain.ArchiveUserRequest": {
-            "type": "object",
-            "required": [
-                "is_active"
-            ],
-            "properties": {
-                "is_active": {
-                    "type": "boolean",
-                    "example": true
-                }
-            }
-        },
         "domain.CreateUserRequest": {
             "type": "object",
             "required": [
@@ -187,6 +181,10 @@ var doc = `{
                 "password"
             ],
             "properties": {
+                "confirm_password": {
+                    "type": "string",
+                    "example": "secret"
+                },
                 "email": {
                     "type": "string",
                     "example": "user@mail.com"
@@ -213,8 +211,25 @@ var doc = `{
                 }
             }
         },
+        "domain.UpdateStateUserRequest": {
+            "type": "object",
+            "required": [
+                "is_active"
+            ],
+            "properties": {
+                "is_active": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
         "domain.UpdateUserRequest": {
             "type": "object",
+            "required": [
+                "first_name",
+                "last_name",
+                "username"
+            ],
             "properties": {
                 "first_name": {
                     "type": "string",
@@ -248,7 +263,7 @@ var doc = `{
                         "type": "string"
                     },
                     "example": {
-                        "password": "must be at least 6 characters in length"
+                        "CreateUserRequest.ConfirmPassword": "must be equal to Password"
                     }
                 }
             }

@@ -7,13 +7,13 @@ import (
 
 type (
 	User interface {
-		Create(context.Context, *domain.User) error
+		SignUp(context.Context, *domain.CreateUserRequest) (*domain.CreateUserResponse, error)
 		UpdateState(context.Context, *domain.User) error
 		Update(context.Context, *domain.User) error
 	}
 
 	UserRepo interface {
-		Create(context.Context, *domain.User) error
+		Insert(context.Context, *domain.CreateUserRequest) (*domain.CreateUserResponse, error)
 		GetPassword(context.Context, int) (string, error)
 		UpdateState(context.Context, *domain.User) error
 		Update(context.Context, *domain.User) error

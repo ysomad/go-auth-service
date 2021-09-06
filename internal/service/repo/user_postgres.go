@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	sq "github.com/Masterminds/squirrel"
+	"github.com/jackc/pgconn"
+	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v4"
 	"github.com/pkg/errors"
 
@@ -21,8 +23,8 @@ func NewUserRepo(pg *postgres.Postgres) *UserRepo {
 	return &UserRepo{pg}
 }
 
-// Create creates new user with email and password
-func (r *UserRepo) Create(ctx context.Context, u *domain.User) error {
+// Insert creates new user with email and password
+func (r *UserRepo) Insert(ctx context.Context, u *domain.CreateUserRequest) (*domain.CreateUserResponse, error) {
 	sql, args, err := r.Builder.
 		Insert(table).
 		Columns("email", "password").
@@ -30,14 +32,29 @@ func (r *UserRepo) Create(ctx context.Context, u *domain.User) error {
 		Suffix("RETURNING id, created_at").
 		ToSql()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	if err = r.Pool.QueryRow(ctx, sql, args...).Scan(&u.ID, &u.CreatedAt); err != nil {
-		return err
+	resp := domain.CreateUserResponse{Email: u.Email}
+
+	if err = r.Pool.QueryRow(ctx, sql, args...).Scan(&resp.ID, &resp.CreatedAt); err != nil {
+		var pgErr *pgconn.PgError
+
+		if errors.As(err, &pgErr) {
+
+			// SQL err handling by code
+			if pgErr.Code == pgerrcode.UniqueViolation {
+				return nil, errors.New(fmt.Sprintf("user with email %s already exists", u.Email))
+			}
+
+			// Return more detailed error message
+			return nil, errors.New(pgErr.Detail)
+		}
+
+		return nil, err
 	}
 
-	return nil
+	return &resp, nil
 }
 
 // GetPassword returns user password by id
@@ -55,7 +72,7 @@ func (r *UserRepo) GetPassword(ctx context.Context, id int) (string, error) {
 
 	if err = r.Pool.QueryRow(ctx, sql, args...).Scan(&pwd); err != nil {
 		if err == pgx.ErrNoRows {
-			return "", errors.New("user with given id not found")
+			return "", errors.New(fmt.Sprintf("user with id %d not found", id))
 		}
 
 		return "", err
@@ -88,14 +105,14 @@ func (r *UserRepo) UpdateState(ctx context.Context, u *domain.User) error {
 				userState = "activated"
 			}
 
-			return errors.New(fmt.Sprintf("%s user with given id not found", userState))
+			return errors.New(fmt.Sprintf("%s user with id %d not found", userState, u.ID))
 		}
 
 		return err
 	}
 
 	if u.IsActive != isActive {
-		return errors.New("user state did not change")
+		return errors.New("user state has not been changed")
 	}
 
 	return nil
@@ -105,15 +122,32 @@ func (r *UserRepo) Update(ctx context.Context, u *domain.User) error {
 	sql, args, err := r.Builder.Update(table).
 		Set("first_name", u.FirstName).
 		Set("last_name", u.LastName).
-		Where(sq.Eq{"id": u.ID, "email": u.Email}).
+		Set("username", u.Username).
+		Where(sq.Eq{"id": u.ID}).
 		ToSql()
 	if err != nil {
 		return err
 	}
 
-	_, err = r.Pool.Exec(ctx, sql, args...)
+	ct, err := r.Pool.Exec(ctx, sql, args...)
 	if err != nil {
+		var pgErr *pgconn.PgError
+
+		if errors.As(err, &pgErr) {
+
+			// SQL err handling by code
+			if pgErr.Code == pgerrcode.UniqueViolation {
+				return errors.New(fmt.Sprintf("user with username %s already exists", u.Username))
+			}
+
+			// Return more detailed error message
+			return errors.New(pgErr.Detail)
+		}
+
 		return err
+	}
+	if ct.RowsAffected() == 0 {
+		return errors.New(fmt.Sprintf("user with id %d not found", u.ID))
 	}
 
 	return nil
