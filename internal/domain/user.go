@@ -29,13 +29,20 @@ type (
 	}
 
 	CreateUserResponse struct {
-		ID        int       `json:"id"`
+		ID        int       `json:"id"         example:"1"`
 		Email     string    `json:"email"      example:"user@mail.com"`
 		CreatedAt time.Time `json:"created_at" example:"2021-08-31T16:55:18.080768Z"`
 	}
 
 	UpdateStateUserRequest struct {
-		IsActive *bool `json:"is_active" example:"true" binding:"required"`
+		ID       int   `json:"-" example:"1" binding:"numeric,omitempty"`
+		IsActive *bool `json:"is_active" example:"false" binding:"required"`
+	}
+
+	UpdateStateUserResponse struct {
+		ID        int       `json:"id" example:"1"`
+		IsActive  bool      `json:"is_active" example:"false"`
+		UpdatedAt time.Time `json:"updated_at" example:"2021-08-31T16:55:18.080768Z"`
 	}
 
 	UpdateUserRequest struct {

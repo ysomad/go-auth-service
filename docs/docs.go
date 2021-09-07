@@ -160,8 +160,11 @@ var doc = `{
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": ""
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/domain.UpdateStateUserResponse"
+                        }
                     },
                     "400": {
                         "description": "Bad Request",
@@ -207,7 +210,8 @@ var doc = `{
                     "example": "user@mail.com"
                 },
                 "id": {
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 1
                 }
             }
         },
@@ -219,7 +223,24 @@ var doc = `{
             "properties": {
                 "is_active": {
                     "type": "boolean",
-                    "example": true
+                    "example": false
+                }
+            }
+        },
+        "domain.UpdateStateUserResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "is_active": {
+                    "type": "boolean",
+                    "example": false
+                },
+                "updated_at": {
+                    "type": "string",
+                    "example": "2021-08-31T16:55:18.080768Z"
                 }
             }
         },

@@ -8,7 +8,6 @@ import (
 	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v4"
 	"github.com/pkg/errors"
-
 	"github.com/ysomad/go-auth-service/internal/domain"
 	"github.com/ysomad/go-auth-service/pkg/postgres"
 )
@@ -81,38 +80,33 @@ func (r *UserRepo) GetPassword(ctx context.Context, id int) (string, error) {
 	return pwd, nil
 }
 
-func (r *UserRepo) UpdateState(ctx context.Context, u *domain.User) error {
+func (r *UserRepo) UpdateState(ctx context.Context, resp *domain.UpdateStateUserResponse) error {
 	sql, args, err := r.Builder.
 		Update(table).
-		Set("is_active", u.IsActive).
-		Where(sq.Eq{"id": u.ID, "is_active": !u.IsActive}).
+		Set("is_active", resp.IsActive).
+		Set("updated_at", resp.UpdatedAt).
+		Where(sq.Eq{"id": resp.ID, "is_active": !resp.IsActive}).
 		Suffix("RETURNING is_active").
 		ToSql()
 	if err != nil {
 		return err
 	}
 
-	var isActive bool
-
-	if err = r.Pool.QueryRow(ctx, sql, args...).Scan(&isActive); err != nil {
+	if err = r.Pool.QueryRow(ctx, sql, args...).Scan(&resp.IsActive); err != nil {
+		// Create error message if activated/deactivated user not found
 		if err == pgx.ErrNoRows {
 			var userState string
 
-			switch u.IsActive {
-			case true:
+			if resp.IsActive {
 				userState = "deactivated"
-			case false:
+			} else {
 				userState = "activated"
 			}
 
-			return errors.New(fmt.Sprintf("%s user with id %d not found", userState, u.ID))
+			return errors.New(fmt.Sprintf("%s user with id %d not found", userState, resp.ID))
 		}
 
 		return err
-	}
-
-	if u.IsActive != isActive {
-		return errors.New("user state has not been changed")
 	}
 
 	return nil

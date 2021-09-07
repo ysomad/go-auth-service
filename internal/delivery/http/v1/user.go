@@ -59,16 +59,11 @@ func (r *userRoutes) signUp(c *gin.Context) {
 // @Produce     json
 // @Param		id path int required "User ID"
 // @Param       request body domain.UpdateStateUserRequest true "To change user state is_archive should be provided"
-// @Success     204
+// @Success     200 {object} domain.UpdateStateUserResponse
 // @Failure     400 {object} messageResponse
 // @Router      /users/{id}/state [patch].
 func (r *userRoutes) updateState(c *gin.Context) {
-	var request domain.UpdateStateUserRequest
-
-	if err := c.ShouldBindJSON(&request); err != nil {
-		abortWithError(c, http.StatusBadRequest, err)
-		return
-	}
+	var req domain.UpdateStateUserRequest
 
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -76,17 +71,19 @@ func (r *userRoutes) updateState(c *gin.Context) {
 		return
 	}
 
-	user := domain.User{
-		ID:       id,
-		IsActive: *request.IsActive,
+	req.ID = id
+
+	if !ValidDTO(c, &req) {
+		return
 	}
 
-	if err = r.userService.UpdateState(c.Request.Context(), &user); err != nil {
+	resp, err := r.userService.UpdateState(c.Request.Context(), &req)
+	if err != nil {
 		abortWithError(c, http.StatusBadRequest, err)
 		return
 	}
 
-	c.AbortWithStatus(http.StatusNoContent)
+	c.JSON(http.StatusOK, resp)
 }
 
 // @Summary     Update

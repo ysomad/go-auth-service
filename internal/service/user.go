@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"github.com/ysomad/go-auth-service/internal/domain"
+	"time"
 )
 
 type UserService struct {
@@ -29,12 +30,18 @@ func (s *UserService) SignUp(ctx context.Context, u *domain.CreateUserRequest) (
 }
 
 // UpdateState updates User is_active flag
-func (s *UserService) UpdateState(ctx context.Context, u *domain.User) error {
-	if err := s.repo.UpdateState(ctx, u); err != nil {
-		return err
+func (s *UserService) UpdateState(ctx context.Context, u *domain.UpdateStateUserRequest) (*domain.UpdateStateUserResponse, error) {
+	resp := domain.UpdateStateUserResponse{
+		ID: u.ID,
+		IsActive: *u.IsActive,
+		UpdatedAt: time.Now(),
 	}
 
-	return nil
+	if err := s.repo.UpdateState(ctx, &resp); err != nil {
+		return nil, err
+	}
+
+	return &resp, nil
 }
 
 // Update updates User field values with new values if password is correct
