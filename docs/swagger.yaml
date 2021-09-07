@@ -8,18 +8,6 @@ definitions:
     required:
     - is_archive
     type: object
-  domain.ArchiveUserResponse:
-    properties:
-      id:
-        example: 1
-        type: integer
-      is_archive:
-        example: false
-        type: boolean
-      updated_at:
-        example: "2021-08-31T16:55:18.080768Z"
-        type: string
-    type: object
   domain.CreateUserRequest:
     properties:
       confirm_password:
@@ -32,20 +20,9 @@ definitions:
         example: secret
         type: string
     required:
+    - confirm_password
     - email
     - password
-    type: object
-  domain.CreateUserResponse:
-    properties:
-      created_at:
-        example: "2021-08-31T16:55:18.080768Z"
-        type: string
-      email:
-        example: user@mail.com
-        type: string
-      id:
-        example: 1
-        type: integer
     type: object
   domain.UpdateUserRequest:
     properties:
@@ -58,10 +35,36 @@ definitions:
       username:
         example: username
         type: string
-    required:
-    - first_name
-    - last_name
-    - username
+    type: object
+  domain.User:
+    properties:
+      created_at:
+        example: "2021-08-31T16:55:18.080768Z"
+        type: string
+      email:
+        example: user@mail.com
+        type: string
+      first_name:
+        example: Alex
+        type: string
+      id:
+        example: 1
+        type: integer
+      is_active:
+        example: true
+        type: boolean
+      is_archive:
+        example: false
+        type: boolean
+      last_name:
+        example: Malykh
+        type: string
+      updated_at:
+        example: "2021-08-31T16:55:18.080768Z"
+        type: string
+      username:
+        example: username
+        type: string
     type: object
   v1.messageResponse:
     properties:
@@ -75,7 +78,7 @@ definitions:
         additionalProperties:
           type: string
         example:
-          CreateUserRequest.ConfirmPassword: must be equal to Password
+          ModelName.FieldName: validation error message
         type: object
     type: object
 host: 0.0.0.0:8080
@@ -101,10 +104,10 @@ paths:
       produces:
       - application/json
       responses:
-        "201":
-          description: Created
+        "200":
+          description: OK
           schema:
-            $ref: '#/definitions/domain.CreateUserResponse'
+            $ref: '#/definitions/domain.User'
         "400":
           description: Bad Request
           schema:
@@ -124,10 +127,10 @@ paths:
     patch:
       consumes:
       - application/json
-      description: Update user data, at least one field should be provided
-      operationId: partial update
+      description: Update user data partially
+      operationId: partialUpdate
       parameters:
-      - description: All required fields should be provided
+      - description: Provide at least one user field to update user data
         in: body
         name: request
         required: true
@@ -141,8 +144,10 @@ paths:
       produces:
       - application/json
       responses:
-        "204":
-          description: ""
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.User'
         "400":
           description: Bad Request
           schema:
@@ -151,7 +156,7 @@ paths:
           description: Unprocessable Entity
           schema:
             $ref: '#/definitions/v1.validationErrorResponse'
-      summary: Partial update
+      summary: Partial Update
       tags:
       - Users
   /users/{id}/archive:
@@ -175,14 +180,16 @@ paths:
       produces:
       - application/json
       responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/domain.ArchiveUserResponse'
+        "204":
+          description: ""
         "400":
           description: Bad Request
           schema:
             $ref: '#/definitions/v1.messageResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/v1.validationErrorResponse'
       summary: Archive user
       tags:
       - Users

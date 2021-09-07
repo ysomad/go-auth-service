@@ -49,10 +49,10 @@ var doc = `{
                     }
                 ],
                 "responses": {
-                    "201": {
-                        "description": "Created",
+                    "200": {
+                        "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/domain.CreateUserResponse"
+                            "$ref": "#/definitions/domain.User"
                         }
                     },
                     "400": {
@@ -78,7 +78,7 @@ var doc = `{
         },
         "/users/{id}": {
             "patch": {
-                "description": "Update user data, at least one field should be provided",
+                "description": "Update user data partially",
                 "consumes": [
                     "application/json"
                 ],
@@ -88,11 +88,11 @@ var doc = `{
                 "tags": [
                     "Users"
                 ],
-                "summary": "Partial update",
-                "operationId": "partial update",
+                "summary": "Partial Update",
+                "operationId": "partialUpdate",
                 "parameters": [
                     {
-                        "description": "All required fields should be provided",
+                        "description": "Provide at least one user field to update user data",
                         "name": "request",
                         "in": "body",
                         "required": true,
@@ -109,8 +109,11 @@ var doc = `{
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": ""
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/domain.User"
+                        }
                     },
                     "400": {
                         "description": "Bad Request",
@@ -160,16 +163,19 @@ var doc = `{
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/domain.ArchiveUserResponse"
-                        }
+                    "204": {
+                        "description": ""
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
                             "$ref": "#/definitions/v1.messageResponse"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "$ref": "#/definitions/v1.validationErrorResponse"
                         }
                     }
                 }
@@ -189,26 +195,10 @@ var doc = `{
                 }
             }
         },
-        "domain.ArchiveUserResponse": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "integer",
-                    "example": 1
-                },
-                "is_archive": {
-                    "type": "boolean",
-                    "example": false
-                },
-                "updated_at": {
-                    "type": "string",
-                    "example": "2021-08-31T16:55:18.080768Z"
-                }
-            }
-        },
         "domain.CreateUserRequest": {
             "type": "object",
             "required": [
+                "confirm_password",
                 "email",
                 "password"
             ],
@@ -227,7 +217,24 @@ var doc = `{
                 }
             }
         },
-        "domain.CreateUserResponse": {
+        "domain.UpdateUserRequest": {
+            "type": "object",
+            "properties": {
+                "first_name": {
+                    "type": "string",
+                    "example": "Alex"
+                },
+                "last_name": {
+                    "type": "string",
+                    "example": "Malykh"
+                },
+                "username": {
+                    "type": "string",
+                    "example": "username"
+                }
+            }
+        },
+        "domain.User": {
             "type": "object",
             "properties": {
                 "created_at": {
@@ -238,27 +245,29 @@ var doc = `{
                     "type": "string",
                     "example": "user@mail.com"
                 },
-                "id": {
-                    "type": "integer",
-                    "example": 1
-                }
-            }
-        },
-        "domain.UpdateUserRequest": {
-            "type": "object",
-            "required": [
-                "first_name",
-                "last_name",
-                "username"
-            ],
-            "properties": {
                 "first_name": {
                     "type": "string",
                     "example": "Alex"
                 },
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "is_active": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "is_archive": {
+                    "type": "boolean",
+                    "example": false
+                },
                 "last_name": {
                     "type": "string",
                     "example": "Malykh"
+                },
+                "updated_at": {
+                    "type": "string",
+                    "example": "2021-08-31T16:55:18.080768Z"
                 },
                 "username": {
                     "type": "string",
@@ -284,7 +293,7 @@ var doc = `{
                         "type": "string"
                     },
                     "example": {
-                        "CreateUserRequest.ConfirmPassword": "must be equal to Password"
+                        "ModelName.FieldName": "validation error message"
                     }
                 }
             }

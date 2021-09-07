@@ -7,15 +7,14 @@ import (
 
 type (
 	User interface {
-		SignUp(context.Context, *domain.CreateUserRequest) (*domain.CreateUserResponse, error)
-		Archive(context.Context, *domain.ArchiveUserRequest) (*domain.ArchiveUserResponse, error)
-		PartialUpdate(context.Context) error // TODO: implement PartialUpdate
+		SignUp(context.Context, *domain.CreateUserRequest) (*domain.User, error)
+		Archive(context.Context, *domain.ArchiveUserRequest) error
+		Update(context.Context, *domain.UpdateUserRequest) (*domain.User, error)
 	}
 
 	UserRepo interface {
-		Insert(context.Context, *domain.CreateUserRequest) (*domain.CreateUserResponse, error)
-		GetPassword(context.Context, int) (string, error)
-		Archive(context.Context, *domain.ArchiveUserResponse) error
-		PartialUpdate(context.Context) error // TODO: implement PartialUpdate
+		Create(context.Context, *domain.User) error
+		Archive(context.Context, *domain.ArchiveUserRequest) error
+		Update(context.Context, *domain.User) error
 	}
 )

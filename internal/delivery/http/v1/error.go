@@ -11,7 +11,7 @@ type messageResponse struct {
 }
 
 type validationErrorResponse struct {
-	Errors map[string]string `json:"error" example:"CreateUserRequest.ConfirmPassword:must be equal to Password"`
+	Errors map[string]string `json:"error" example:"ModelName.FieldName:validation error message"`
 }
 
 func logError(c *gin.Context, code int, err error, msg string) {
