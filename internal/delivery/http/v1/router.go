@@ -15,7 +15,7 @@ import (
 
 // Swagger spec:
 // @title       Golang auth service
-// @description REST API authentication service
+// @description REST API authentication and user management service
 // @version     1.0
 // @host        0.0.0.0:8080
 // @BasePath    /api/v1

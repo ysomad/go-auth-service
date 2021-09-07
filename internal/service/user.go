@@ -58,3 +58,14 @@ func (s *UserService) Update(ctx context.Context, req *domain.UpdateUserRequest)
 
 	return &u, nil
 }
+
+// GetByID gets user data by ID
+func (s *UserService) GetByID(ctx context.Context, id int) (*domain.User, error) {
+	u := domain.User{ID: id}
+
+	if err := s.repo.GetByID(ctx, &u); err != nil {
+		return nil, err
+	}
+
+	return &u, nil
+}

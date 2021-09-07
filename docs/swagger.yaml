@@ -84,7 +84,7 @@ definitions:
 host: 0.0.0.0:8080
 info:
   contact: {}
-  description: REST API authentication service
+  description: REST API authentication and user management service
   title: Golang auth service
   version: "1.0"
 paths:
@@ -124,11 +124,36 @@ paths:
       tags:
       - Users
   /users/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Receive user data
+      operationId: get
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.User'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.messageResponse'
+      summary: Get by ID
+      tags:
+      - Users
     patch:
       consumes:
       - application/json
       description: Update user data partially
-      operationId: partialUpdate
+      operationId: update
       parameters:
       - description: Provide at least one user field to update user data
         in: body
@@ -190,7 +215,7 @@ paths:
           description: Unprocessable Entity
           schema:
             $ref: '#/definitions/v1.validationErrorResponse'
-      summary: Archive user
+      summary: Archive User
       tags:
       - Users
 swagger: "2.0"

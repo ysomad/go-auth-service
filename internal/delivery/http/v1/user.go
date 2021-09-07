@@ -1,11 +1,13 @@
 package v1
 
 import (
-	"github.com/gin-gonic/gin"
-	"github.com/ysomad/go-auth-service/internal/domain"
-	"github.com/ysomad/go-auth-service/internal/service"
 	"net/http"
 	"strconv"
+
+	"github.com/gin-gonic/gin"
+
+	"github.com/ysomad/go-auth-service/internal/domain"
+	"github.com/ysomad/go-auth-service/internal/service"
 )
 
 type userRoutes struct {
@@ -18,6 +20,7 @@ func newUserRoutes(handler *gin.RouterGroup, us service.User) {
 	h := handler.Group("/users")
 	{
 		h.PATCH(":id/archive", r.archive)
+		h.GET(":id", r.getByID)
 		h.PATCH(":id", r.update)
 		h.POST("", r.signUp)
 	}
@@ -51,7 +54,7 @@ func (r *userRoutes) signUp(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
-// @Summary     Archive user
+// @Summary     Archive User
 // @Description Archive/restore user
 // @ID          archive
 // @Tags  	    Users
@@ -88,7 +91,7 @@ func (r *userRoutes) archive(c *gin.Context) {
 
 // @Summary     Partial Update
 // @Description Update user data partially
-// @ID          partialUpdate
+// @ID         	update
 // @Tags  	    Users
 // @Accept      json
 // @Produce     json
@@ -115,6 +118,32 @@ func (r *userRoutes) update(c *gin.Context) {
 	}
 
 	user, err := r.userService.Update(c.Request.Context(), &req)
+	if err != nil {
+		abortWithError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, user)
+}
+
+// @Summary     Get by ID
+// @Description Receive user data
+// @ID          get
+// @Tags  	    Users
+// @Accept      json
+// @Produce     json
+// @Param		id path int required "User ID"
+// @Success     200 {object} domain.User
+// @Failure     400 {object} messageResponse
+// @Router      /users/{id} [get].
+func (r *userRoutes) getByID(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		abortWithError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	user, err := r.userService.GetByID(c.Request.Context(), id)
 	if err != nil {
 		abortWithError(c, http.StatusBadRequest, err)
 		return

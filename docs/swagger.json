@@ -1,7 +1,7 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "REST API authentication service",
+        "description": "REST API authentication and user management service",
         "title": "Golang auth service",
         "contact": {},
         "version": "1.0"
@@ -63,6 +63,43 @@
             }
         },
         "/users/{id}": {
+            "get": {
+                "description": "Receive user data",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Get by ID",
+                "operationId": "get",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/domain.User"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/v1.messageResponse"
+                        }
+                    }
+                }
+            },
             "patch": {
                 "description": "Update user data partially",
                 "consumes": [
@@ -75,7 +112,7 @@
                     "Users"
                 ],
                 "summary": "Partial Update",
-                "operationId": "partialUpdate",
+                "operationId": "update",
                 "parameters": [
                     {
                         "description": "Provide at least one user field to update user data",
@@ -128,7 +165,7 @@
                 "tags": [
                     "Users"
                 ],
-                "summary": "Archive user",
+                "summary": "Archive User",
                 "operationId": "archive",
                 "parameters": [
                     {

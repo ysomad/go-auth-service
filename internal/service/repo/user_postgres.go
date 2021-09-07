@@ -3,14 +3,16 @@ package repo
 import (
 	"context"
 	"fmt"
+	"time"
+
 	sq "github.com/Masterminds/squirrel"
 	"github.com/jackc/pgconn"
 	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v4"
 	"github.com/pkg/errors"
+
 	"github.com/ysomad/go-auth-service/internal/domain"
 	"github.com/ysomad/go-auth-service/pkg/postgres"
-	"time"
 )
 
 const (
@@ -73,7 +75,7 @@ func (r *UserRepo) Archive(ctx context.Context, req *domain.ArchiveUserRequest) 
 	if err != nil {
 		return err
 	}
-	// Create error message if activated/deactivated user not found
+	// Create error message if archived/not archived user not found
 	if commandTag.RowsAffected() == 0 {
 		var state string
 
@@ -89,23 +91,6 @@ func (r *UserRepo) Archive(ctx context.Context, req *domain.ArchiveUserRequest) 
 	return nil
 }
 
-// stripNilValues removes empty strings and nil values from map https://github.com/Masterminds/squirrel/issues/66
-func stripNilValues(in map[string]interface{}) (map[string]interface{}, error) {
-	out := make(map[string]interface{})
-
-	for k, v := range in {
-		if v != nil && v != "" {
-			out[k] = v
-		}
-	}
-
-	if len(out) == 0 {
-		return nil, errors.New("provide at least one field to update user data")
-	}
-
-	return out, nil
-}
-
 func (r *UserRepo) Update(ctx context.Context, u *domain.User) error {
 	userMap, err := stripNilValues(map[string]interface{}{
 		"username":   *u.Username,
@@ -119,7 +104,7 @@ func (r *UserRepo) Update(ctx context.Context, u *domain.User) error {
 	sql, args, err := r.Builder.
 		Update(table).
 		SetMap(userMap).
-		Set("created_at", u.CreatedAt).
+		Set("updated_at", u.UpdatedAt).
 		Where(sq.Eq{"id": u.ID}).
 		Suffix("RETURNING username, first_name, last_name, email, created_at, is_active, is_archive").
 		ToSql()
@@ -151,6 +136,36 @@ func (r *UserRepo) Update(ctx context.Context, u *domain.User) error {
 			}
 
 			return errors.New(pgErr.Detail)
+		}
+
+		return err
+	}
+
+	return nil
+}
+
+func (r *UserRepo) GetByID(ctx context.Context, u *domain.User) error {
+	sql, args, err := r.Builder.
+		Select("email, username, first_name, last_name, created_at, updated_at, is_active, is_archive").
+		From(table).
+		Where(sq.Eq{"id": u.ID}).
+		ToSql()
+	if err != nil {
+		return err
+	}
+
+	if err = r.Pool.QueryRow(ctx, sql, args...).Scan(
+		&u.Email,
+		&u.Username,
+		&u.FirstName,
+		&u.LastName,
+		&u.CreatedAt,
+		&u.UpdatedAt,
+		&u.IsActive,
+		&u.IsArchive,
+	); err != nil {
+		if err == pgx.ErrNoRows {
+			return errors.New(fmt.Sprintf("user with id %d not found", u.ID))
 		}
 
 		return err

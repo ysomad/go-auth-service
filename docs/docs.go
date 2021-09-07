@@ -77,6 +77,43 @@ var doc = `{
             }
         },
         "/users/{id}": {
+            "get": {
+                "description": "Receive user data",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Get by ID",
+                "operationId": "get",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/domain.User"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/v1.messageResponse"
+                        }
+                    }
+                }
+            },
             "patch": {
                 "description": "Update user data partially",
                 "consumes": [
@@ -89,7 +126,7 @@ var doc = `{
                     "Users"
                 ],
                 "summary": "Partial Update",
-                "operationId": "partialUpdate",
+                "operationId": "update",
                 "parameters": [
                     {
                         "description": "Provide at least one user field to update user data",
@@ -142,7 +179,7 @@ var doc = `{
                 "tags": [
                     "Users"
                 ],
-                "summary": "Archive user",
+                "summary": "Archive User",
                 "operationId": "archive",
                 "parameters": [
                     {
@@ -317,7 +354,7 @@ var SwaggerInfo = swaggerInfo{
 	BasePath:    "/api/v1",
 	Schemes:     []string{},
 	Title:       "Golang auth service",
-	Description: "REST API authentication service",
+	Description: "REST API authentication and user management service",
 }
 
 type s struct{}
