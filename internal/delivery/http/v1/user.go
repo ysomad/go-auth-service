@@ -17,8 +17,8 @@ func newUserRoutes(handler *gin.RouterGroup, us service.User) {
 
 	h := handler.Group("/users")
 	{
-		h.PATCH(":id/state", r.updateState)
-		h.PUT(":id", r.update)
+		h.PATCH(":id/archive", r.archive)
+		h.PATCH(":id", r.partialUpdate)
 		h.POST("", r.signUp)
 	}
 }
@@ -51,19 +51,19 @@ func (r *userRoutes) signUp(c *gin.Context) {
 	c.JSON(http.StatusCreated, resp)
 }
 
-// @Summary     Update state
-// @Description Update user state
-// @ID          state
+// @Summary     Archive user
+// @Description Archive/restore user
+// @ID          archive
 // @Tags  	    Users
 // @Accept      json
 // @Produce     json
 // @Param		id path int required "User ID"
-// @Param       request body domain.UpdateStateUserRequest true "To change user state is_archive should be provided"
-// @Success     200 {object} domain.UpdateStateUserResponse
+// @Param       request body domain.ArchiveUserRequest true "To archive/restore user is_archive boolean should be provided"
+// @Success     200 {object} domain.ArchiveUserResponse
 // @Failure     400 {object} messageResponse
-// @Router      /users/{id}/state [patch].
-func (r *userRoutes) updateState(c *gin.Context) {
-	var req domain.UpdateStateUserRequest
+// @Router      /users/{id}/archive [patch].
+func (r *userRoutes) archive(c *gin.Context) {
+	var req domain.ArchiveUserRequest
 
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -77,7 +77,7 @@ func (r *userRoutes) updateState(c *gin.Context) {
 		return
 	}
 
-	resp, err := r.userService.UpdateState(c.Request.Context(), &req)
+	resp, err := r.userService.Archive(c.Request.Context(), &req)
 	if err != nil {
 		abortWithError(c, http.StatusBadRequest, err)
 		return
@@ -86,9 +86,9 @@ func (r *userRoutes) updateState(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
-// @Summary     Update
-// @Description Update user data
-// @ID          update
+// @Summary     Partial update
+// @Description Update user data, at least one field should be provided
+// @ID          partial update
 // @Tags  	    Users
 // @Accept      json
 // @Produce     json
@@ -98,32 +98,8 @@ func (r *userRoutes) updateState(c *gin.Context) {
 // @Success     204
 // @Failure     400 {object} messageResponse
 // @Failure		422 {object} validationErrorResponse
-// @Router      /users/{id} [put].
-func (r *userRoutes) update(c *gin.Context) {
-	var request domain.UpdateUserRequest
-
-	if err := c.ShouldBindJSON(&request); err != nil {
-		abortWithError(c, http.StatusBadRequest, err)
-		return
-	}
-
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		abortWithError(c, http.StatusBadRequest, err)
-		return
-	}
-
-	user := domain.User{
-		ID:        id,
-		Username:  request.Username,
-		FirstName: request.FirstName,
-		LastName:  request.LastName,
-	}
-
-	if err = r.userService.Update(c.Request.Context(), &user); err != nil {
-		abortWithError(c, http.StatusBadRequest, err)
-		return
-	}
+// @Router      /users/{id} [patch].
+func (r *userRoutes) partialUpdate(c *gin.Context) {
 
 	c.AbortWithStatus(http.StatusNoContent)
 }

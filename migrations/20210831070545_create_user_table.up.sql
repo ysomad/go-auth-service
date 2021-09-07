@@ -8,5 +8,6 @@ create table if not exists users (
     created_at timestamp default current_timestamp not null,
     updated_at timestamp default current_timestamp not null,
     is_active boolean default true not null,
+    is_archive boolean default false not null,
     is_superuser boolean default false not null
 );

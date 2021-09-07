@@ -34,14 +34,14 @@ type (
 		CreatedAt time.Time `json:"created_at" example:"2021-08-31T16:55:18.080768Z"`
 	}
 
-	UpdateStateUserRequest struct {
-		ID       int   `json:"-" example:"1" binding:"numeric,omitempty"`
-		IsActive *bool `json:"is_active" example:"false" binding:"required"`
+	ArchiveUserRequest struct {
+		ID        int   `json:"-" example:"1" binding:"numeric,omitempty"`
+		IsArchive *bool `json:"is_archive" example:"false" binding:"required"`
 	}
 
-	UpdateStateUserResponse struct {
+	ArchiveUserResponse struct {
 		ID        int       `json:"id" example:"1"`
-		IsActive  bool      `json:"is_active" example:"false"`
+		IsArchive bool      `json:"is_archive" example:"false"`
 		UpdatedAt time.Time `json:"updated_at" example:"2021-08-31T16:55:18.080768Z"`
 	}
 

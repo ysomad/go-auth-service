@@ -63,8 +63,8 @@
             }
         },
         "/users/{id}": {
-            "put": {
-                "description": "Update user data",
+            "patch": {
+                "description": "Update user data, at least one field should be provided",
                 "consumes": [
                     "application/json"
                 ],
@@ -74,8 +74,8 @@
                 "tags": [
                     "Users"
                 ],
-                "summary": "Update",
-                "operationId": "update",
+                "summary": "Partial update",
+                "operationId": "partial update",
                 "parameters": [
                     {
                         "description": "All required fields should be provided",
@@ -113,9 +113,9 @@
                 }
             }
         },
-        "/users/{id}/state": {
+        "/users/{id}/archive": {
             "patch": {
-                "description": "Update user state",
+                "description": "Archive/restore user",
                 "consumes": [
                     "application/json"
                 ],
@@ -125,8 +125,8 @@
                 "tags": [
                     "Users"
                 ],
-                "summary": "Update state",
-                "operationId": "state",
+                "summary": "Archive user",
+                "operationId": "archive",
                 "parameters": [
                     {
                         "type": "integer",
@@ -136,12 +136,12 @@
                         "required": true
                     },
                     {
-                        "description": "To change user state is_archive should be provided",
+                        "description": "To archive/restore user is_archive boolean should be provided",
                         "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/domain.UpdateStateUserRequest"
+                            "$ref": "#/definitions/domain.ArchiveUserRequest"
                         }
                     }
                 ],
@@ -149,7 +149,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/domain.UpdateStateUserResponse"
+                            "$ref": "#/definitions/domain.ArchiveUserResponse"
                         }
                     },
                     "400": {
@@ -163,6 +163,35 @@
         }
     },
     "definitions": {
+        "domain.ArchiveUserRequest": {
+            "type": "object",
+            "required": [
+                "is_archive"
+            ],
+            "properties": {
+                "is_archive": {
+                    "type": "boolean",
+                    "example": false
+                }
+            }
+        },
+        "domain.ArchiveUserResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "is_archive": {
+                    "type": "boolean",
+                    "example": false
+                },
+                "updated_at": {
+                    "type": "string",
+                    "example": "2021-08-31T16:55:18.080768Z"
+                }
+            }
+        },
         "domain.CreateUserRequest": {
             "type": "object",
             "required": [
@@ -198,35 +227,6 @@
                 "id": {
                     "type": "integer",
                     "example": 1
-                }
-            }
-        },
-        "domain.UpdateStateUserRequest": {
-            "type": "object",
-            "required": [
-                "is_active"
-            ],
-            "properties": {
-                "is_active": {
-                    "type": "boolean",
-                    "example": false
-                }
-            }
-        },
-        "domain.UpdateStateUserResponse": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "integer",
-                    "example": 1
-                },
-                "is_active": {
-                    "type": "boolean",
-                    "example": false
-                },
-                "updated_at": {
-                    "type": "string",
-                    "example": "2021-08-31T16:55:18.080768Z"
                 }
             }
         },

@@ -1,5 +1,25 @@
 basePath: /api/v1
 definitions:
+  domain.ArchiveUserRequest:
+    properties:
+      is_archive:
+        example: false
+        type: boolean
+    required:
+    - is_archive
+    type: object
+  domain.ArchiveUserResponse:
+    properties:
+      id:
+        example: 1
+        type: integer
+      is_archive:
+        example: false
+        type: boolean
+      updated_at:
+        example: "2021-08-31T16:55:18.080768Z"
+        type: string
+    type: object
   domain.CreateUserRequest:
     properties:
       confirm_password:
@@ -26,26 +46,6 @@ definitions:
       id:
         example: 1
         type: integer
-    type: object
-  domain.UpdateStateUserRequest:
-    properties:
-      is_active:
-        example: false
-        type: boolean
-    required:
-    - is_active
-    type: object
-  domain.UpdateStateUserResponse:
-    properties:
-      id:
-        example: 1
-        type: integer
-      is_active:
-        example: false
-        type: boolean
-      updated_at:
-        example: "2021-08-31T16:55:18.080768Z"
-        type: string
     type: object
   domain.UpdateUserRequest:
     properties:
@@ -121,11 +121,11 @@ paths:
       tags:
       - Users
   /users/{id}:
-    put:
+    patch:
       consumes:
       - application/json
-      description: Update user data
-      operationId: update
+      description: Update user data, at least one field should be provided
+      operationId: partial update
       parameters:
       - description: All required fields should be provided
         in: body
@@ -151,39 +151,39 @@ paths:
           description: Unprocessable Entity
           schema:
             $ref: '#/definitions/v1.validationErrorResponse'
-      summary: Update
+      summary: Partial update
       tags:
       - Users
-  /users/{id}/state:
+  /users/{id}/archive:
     patch:
       consumes:
       - application/json
-      description: Update user state
-      operationId: state
+      description: Archive/restore user
+      operationId: archive
       parameters:
       - description: User ID
         in: path
         name: id
         required: true
         type: integer
-      - description: To change user state is_archive should be provided
+      - description: To archive/restore user is_archive boolean should be provided
         in: body
         name: request
         required: true
         schema:
-          $ref: '#/definitions/domain.UpdateStateUserRequest'
+          $ref: '#/definitions/domain.ArchiveUserRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/domain.UpdateStateUserResponse'
+            $ref: '#/definitions/domain.ArchiveUserResponse'
         "400":
           description: Bad Request
           schema:
             $ref: '#/definitions/v1.messageResponse'
-      summary: Update state
+      summary: Archive user
       tags:
       - Users
 swagger: "2.0"

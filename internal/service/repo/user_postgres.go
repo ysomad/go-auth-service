@@ -80,30 +80,30 @@ func (r *UserRepo) GetPassword(ctx context.Context, id int) (string, error) {
 	return pwd, nil
 }
 
-func (r *UserRepo) UpdateState(ctx context.Context, resp *domain.UpdateStateUserResponse) error {
+func (r *UserRepo) Archive(ctx context.Context, resp *domain.ArchiveUserResponse) error {
 	sql, args, err := r.Builder.
 		Update(table).
-		Set("is_active", resp.IsActive).
+		Set("is_archive", resp.IsArchive).
 		Set("updated_at", resp.UpdatedAt).
-		Where(sq.Eq{"id": resp.ID, "is_active": !resp.IsActive}).
-		Suffix("RETURNING is_active").
+		Where(sq.Eq{"id": resp.ID, "is_archive": !resp.IsArchive}).
+		Suffix("RETURNING is_archive").
 		ToSql()
 	if err != nil {
 		return err
 	}
 
-	if err = r.Pool.QueryRow(ctx, sql, args...).Scan(&resp.IsActive); err != nil {
+	if err = r.Pool.QueryRow(ctx, sql, args...).Scan(&resp.IsArchive); err != nil {
 		// Create error message if activated/deactivated user not found
 		if err == pgx.ErrNoRows {
-			var userState string
+			var state string
 
-			if resp.IsActive {
-				userState = "deactivated"
+			if resp.IsArchive {
+				state = "archived"
 			} else {
-				userState = "activated"
+				state = "not archived"
 			}
 
-			return errors.New(fmt.Sprintf("%s user with id %d not found", userState, resp.ID))
+			return errors.New(fmt.Sprintf("%s user with id %d not found", state, resp.ID))
 		}
 
 		return err
@@ -112,37 +112,7 @@ func (r *UserRepo) UpdateState(ctx context.Context, resp *domain.UpdateStateUser
 	return nil
 }
 
-func (r *UserRepo) Update(ctx context.Context, u *domain.User) error {
-	sql, args, err := r.Builder.Update(table).
-		Set("first_name", u.FirstName).
-		Set("last_name", u.LastName).
-		Set("username", u.Username).
-		Where(sq.Eq{"id": u.ID}).
-		ToSql()
-	if err != nil {
-		return err
-	}
-
-	ct, err := r.Pool.Exec(ctx, sql, args...)
-	if err != nil {
-		var pgErr *pgconn.PgError
-
-		if errors.As(err, &pgErr) {
-
-			// SQL err handling by code
-			if pgErr.Code == pgerrcode.UniqueViolation {
-				return errors.New(fmt.Sprintf("user with username %s already exists", u.Username))
-			}
-
-			// Return more detailed error message
-			return errors.New(pgErr.Detail)
-		}
-
-		return err
-	}
-	if ct.RowsAffected() == 0 {
-		return errors.New(fmt.Sprintf("user with id %d not found", u.ID))
-	}
+func (r *UserRepo) PartialUpdate(ctx context.Context) error {
 
 	return nil
 }

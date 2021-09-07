@@ -8,14 +8,14 @@ import (
 type (
 	User interface {
 		SignUp(context.Context, *domain.CreateUserRequest) (*domain.CreateUserResponse, error)
-		UpdateState(context.Context, *domain.UpdateStateUserRequest) (*domain.UpdateStateUserResponse, error) // TODO: implement UpdateState service
-		Update(context.Context, *domain.User) error
+		Archive(context.Context, *domain.ArchiveUserRequest) (*domain.ArchiveUserResponse, error)
+		PartialUpdate(context.Context) error // TODO: implement PartialUpdate
 	}
 
 	UserRepo interface {
 		Insert(context.Context, *domain.CreateUserRequest) (*domain.CreateUserResponse, error)
 		GetPassword(context.Context, int) (string, error)
-		UpdateState(context.Context, *domain.UpdateStateUserResponse) error // TODO: implement UpdateState reposotiry
-		Update(context.Context, *domain.User) error
+		Archive(context.Context, *domain.ArchiveUserResponse) error
+		PartialUpdate(context.Context) error // TODO: implement PartialUpdate
 	}
 )

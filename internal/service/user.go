@@ -29,26 +29,21 @@ func (s *UserService) SignUp(ctx context.Context, u *domain.CreateUserRequest) (
 	return resp, nil
 }
 
-// UpdateState updates User is_active flag
-func (s *UserService) UpdateState(ctx context.Context, u *domain.UpdateStateUserRequest) (*domain.UpdateStateUserResponse, error) {
-	resp := domain.UpdateStateUserResponse{
-		ID: u.ID,
-		IsActive: *u.IsActive,
+// Archive updates is_archive field for user
+func (s *UserService) Archive(ctx context.Context, req *domain.ArchiveUserRequest) (*domain.ArchiveUserResponse, error) {
+	resp := domain.ArchiveUserResponse{
+		ID: req.ID,
+		IsArchive: *req.IsArchive,
 		UpdatedAt: time.Now(),
 	}
 
-	if err := s.repo.UpdateState(ctx, &resp); err != nil {
+	if err := s.repo.Archive(ctx, &resp); err != nil {
 		return nil, err
 	}
 
 	return &resp, nil
 }
 
-// Update updates User field values with new values if password is correct
-func (s *UserService) Update(ctx context.Context, u *domain.User) error {
-	if err := s.repo.Update(ctx, u); err != nil {
-		return err
-	}
-
+func (s *UserService) PartialUpdate(ctx context.Context) error {
 	return nil
 }

@@ -77,8 +77,8 @@ var doc = `{
             }
         },
         "/users/{id}": {
-            "put": {
-                "description": "Update user data",
+            "patch": {
+                "description": "Update user data, at least one field should be provided",
                 "consumes": [
                     "application/json"
                 ],
@@ -88,8 +88,8 @@ var doc = `{
                 "tags": [
                     "Users"
                 ],
-                "summary": "Update",
-                "operationId": "update",
+                "summary": "Partial update",
+                "operationId": "partial update",
                 "parameters": [
                     {
                         "description": "All required fields should be provided",
@@ -127,9 +127,9 @@ var doc = `{
                 }
             }
         },
-        "/users/{id}/state": {
+        "/users/{id}/archive": {
             "patch": {
-                "description": "Update user state",
+                "description": "Archive/restore user",
                 "consumes": [
                     "application/json"
                 ],
@@ -139,8 +139,8 @@ var doc = `{
                 "tags": [
                     "Users"
                 ],
-                "summary": "Update state",
-                "operationId": "state",
+                "summary": "Archive user",
+                "operationId": "archive",
                 "parameters": [
                     {
                         "type": "integer",
@@ -150,12 +150,12 @@ var doc = `{
                         "required": true
                     },
                     {
-                        "description": "To change user state is_archive should be provided",
+                        "description": "To archive/restore user is_archive boolean should be provided",
                         "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/domain.UpdateStateUserRequest"
+                            "$ref": "#/definitions/domain.ArchiveUserRequest"
                         }
                     }
                 ],
@@ -163,7 +163,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/domain.UpdateStateUserResponse"
+                            "$ref": "#/definitions/domain.ArchiveUserResponse"
                         }
                     },
                     "400": {
@@ -177,6 +177,35 @@ var doc = `{
         }
     },
     "definitions": {
+        "domain.ArchiveUserRequest": {
+            "type": "object",
+            "required": [
+                "is_archive"
+            ],
+            "properties": {
+                "is_archive": {
+                    "type": "boolean",
+                    "example": false
+                }
+            }
+        },
+        "domain.ArchiveUserResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "is_archive": {
+                    "type": "boolean",
+                    "example": false
+                },
+                "updated_at": {
+                    "type": "string",
+                    "example": "2021-08-31T16:55:18.080768Z"
+                }
+            }
+        },
         "domain.CreateUserRequest": {
             "type": "object",
             "required": [
@@ -212,35 +241,6 @@ var doc = `{
                 "id": {
                     "type": "integer",
                     "example": 1
-                }
-            }
-        },
-        "domain.UpdateStateUserRequest": {
-            "type": "object",
-            "required": [
-                "is_active"
-            ],
-            "properties": {
-                "is_active": {
-                    "type": "boolean",
-                    "example": false
-                }
-            }
-        },
-        "domain.UpdateStateUserResponse": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "integer",
-                    "example": 1
-                },
-                "is_active": {
-                    "type": "boolean",
-                    "example": false
-                },
-                "updated_at": {
-                    "type": "string",
-                    "example": "2021-08-31T16:55:18.080768Z"
                 }
             }
         },
