@@ -25,7 +25,7 @@ var doc = `{
     "paths": {
         "/users": {
             "post": {
-                "description": "Register a new user with email and password",
+                "description": "Create a new user with email and password",
                 "consumes": [
                     "application/json"
                 ],
@@ -35,11 +35,11 @@ var doc = `{
                 "tags": [
                     "Users"
                 ],
-                "summary": "Sign Up",
+                "summary": "Sign up",
                 "operationId": "signup",
                 "parameters": [
                     {
-                        "description": "To register a new user email and password should be provided",
+                        "description": "To create a new user email and password should be provided",
                         "name": "request",
                         "in": "body",
                         "required": true,
@@ -88,7 +88,7 @@ var doc = `{
                 "tags": [
                     "Users"
                 ],
-                "summary": "Get by ID",
+                "summary": "Get by id",
                 "operationId": "get",
                 "parameters": [
                     {
@@ -125,7 +125,7 @@ var doc = `{
                 "tags": [
                     "Users"
                 ],
-                "summary": "Partial Update",
+                "summary": "Partial update",
                 "operationId": "update",
                 "parameters": [
                     {
@@ -169,7 +169,7 @@ var doc = `{
         },
         "/users/{id}/archive": {
             "patch": {
-                "description": "Archive/restore user",
+                "description": "Archive or restore User",
                 "consumes": [
                     "application/json"
                 ],
@@ -179,7 +179,7 @@ var doc = `{
                 "tags": [
                     "Users"
                 ],
-                "summary": "Archive User",
+                "summary": "Archive or restore User",
                 "operationId": "archive",
                 "parameters": [
                     {
@@ -190,7 +190,7 @@ var doc = `{
                         "required": true
                     },
                     {
-                        "description": "To archive/restore user is_archive boolean should be provided",
+                        "description": "To archive or restore a user is_archive should be provided",
                         "name": "request",
                         "in": "body",
                         "required": true,

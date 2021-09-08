@@ -26,13 +26,13 @@ func newUserRoutes(handler *gin.RouterGroup, us service.User) {
 	}
 }
 
-// @Summary     Sign Up
-// @Description Register a new user with email and password
+// @Summary     Sign up
+// @Description Create a new user with email and password
 // @ID          signup
 // @Tags  	    Users
 // @Accept      json
 // @Produce     json
-// @Param       request body domain.CreateUserRequest true "To register a new user email and password should be provided"
+// @Param       request body domain.CreateUserRequest true "To create a new user email and password should be provided"
 // @Success     200 {object} domain.User
 // @Failure     400 {object} messageResponse
 // @Failure     500 {object} messageResponse
@@ -54,14 +54,14 @@ func (r *userRoutes) signUp(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
-// @Summary     Archive User
-// @Description Archive/restore user
+// @Summary     Archive or restore User
+// @Description Archive or restore User
 // @ID          archive
 // @Tags  	    Users
 // @Accept      json
 // @Produce     json
 // @Param		id path int required "User ID"
-// @Param       request body domain.ArchiveUserRequest true "To archive/restore user is_archive boolean should be provided"
+// @Param       request body domain.ArchiveUserRequest true "To archive or restore a user is_archive should be provided"
 // @Success     204
 // @Failure     400 {object} messageResponse
 // @Failure		422 {object} validationErrorResponse
@@ -89,7 +89,7 @@ func (r *userRoutes) archive(c *gin.Context) {
 	c.AbortWithStatus(http.StatusNoContent)
 }
 
-// @Summary     Partial Update
+// @Summary     Partial update
 // @Description Update user data partially
 // @ID         	update
 // @Tags  	    Users
@@ -126,7 +126,7 @@ func (r *userRoutes) update(c *gin.Context) {
 	c.JSON(http.StatusOK, user)
 }
 
-// @Summary     Get by ID
+// @Summary     Get by id
 // @Description Receive user data
 // @ID          get
 // @Tags  	    Users

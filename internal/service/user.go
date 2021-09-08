@@ -14,6 +14,8 @@ func NewUserService(r UserRepo) *UserService {
 	return &UserService{r}
 }
 
+// TODO: написать тесты с моками
+
 func (s *UserService) SignUp(ctx context.Context, req *domain.CreateUserRequest) (*domain.User, error) {
 	u := domain.User{
 		Email:    req.Email,

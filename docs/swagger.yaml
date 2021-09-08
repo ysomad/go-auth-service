@@ -92,10 +92,10 @@ paths:
     post:
       consumes:
       - application/json
-      description: Register a new user with email and password
+      description: Create a new user with email and password
       operationId: signup
       parameters:
-      - description: To register a new user email and password should be provided
+      - description: To create a new user email and password should be provided
         in: body
         name: request
         required: true
@@ -120,7 +120,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/v1.messageResponse'
-      summary: Sign Up
+      summary: Sign up
       tags:
       - Users
   /users/{id}:
@@ -146,7 +146,7 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/v1.messageResponse'
-      summary: Get by ID
+      summary: Get by id
       tags:
       - Users
     patch:
@@ -181,14 +181,14 @@ paths:
           description: Unprocessable Entity
           schema:
             $ref: '#/definitions/v1.validationErrorResponse'
-      summary: Partial Update
+      summary: Partial update
       tags:
       - Users
   /users/{id}/archive:
     patch:
       consumes:
       - application/json
-      description: Archive/restore user
+      description: Archive or restore User
       operationId: archive
       parameters:
       - description: User ID
@@ -196,7 +196,7 @@ paths:
         name: id
         required: true
         type: integer
-      - description: To archive/restore user is_archive boolean should be provided
+      - description: To archive or restore a user is_archive should be provided
         in: body
         name: request
         required: true
@@ -215,7 +215,7 @@ paths:
           description: Unprocessable Entity
           schema:
             $ref: '#/definitions/v1.validationErrorResponse'
-      summary: Archive User
+      summary: Archive or restore User
       tags:
       - Users
 swagger: "2.0"
