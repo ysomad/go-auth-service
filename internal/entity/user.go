@@ -32,12 +32,6 @@ type (
 		IsArchive *bool `json:"is_archive" example:"false" binding:"required"`
 	}
 
-	ArchiveUserResponse struct {
-		ID        int       `json:"id" example:"1"`
-		IsArchive bool      `json:"is_archive" example:"false"`
-		UpdatedAt time.Time `json:"updated_at" example:"2021-08-31T16:55:18.080768Z"`
-	}
-
 	UpdateUserRequest struct {
 		ID        int    `json:"-" example:"1" binding:"required,numeric"`
 		Username  string `json:"username" example:"username" binding:"omitempty,alphanum,gte=4,lte=32"`
