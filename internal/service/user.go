@@ -8,35 +8,30 @@ import (
 )
 
 type UserService struct {
-	r UserRepo
+	repo UserRepo
 }
 
 func NewUserService(r UserRepo) *UserService {
 	return &UserService{r}
 }
 
-func (s *UserService) Create(ctx context.Context, req *entity.CreateUserRequest) (*entity.User, error) {
-	u := entity.User{
-		Email:    req.Email,
-		Password: req.Password,
-	}
-
-	if err := u.EncryptPassword(); err != nil {
+func (s *UserService) Create(ctx context.Context, req entity.CreateUserRequest) (*entity.User, error) {
+	p, err := entity.EncryptPassword(req.Password)
+	if err != nil {
 		return nil, err
 	}
 
-	if err := s.r.Create(ctx, &u); err != nil {
+	u, err := s.repo.Create(ctx, req.Email, p)
+	if err != nil {
 		return nil, err
 	}
 
-	u.Sanitize()
-
-	return &u, nil
+	return u, nil
 }
 
 // Archive updates is_archive field for user
 func (s *UserService) Archive(ctx context.Context, req *entity.ArchiveUserRequest) error {
-	if err := s.r.Archive(ctx, req); err != nil {
+	if err := s.repo.Archive(ctx, req); err != nil {
 		return err
 	}
 
@@ -53,7 +48,7 @@ func (s *UserService) Update(ctx context.Context, req *entity.UpdateUserRequest)
 		UpdatedAt: time.Now(),
 	}
 
-	if err := s.r.Update(ctx, &u); err != nil {
+	if err := s.repo.Update(ctx, &u); err != nil {
 		return nil, err
 	}
 
@@ -64,7 +59,7 @@ func (s *UserService) Update(ctx context.Context, req *entity.UpdateUserRequest)
 func (s *UserService) GetByID(ctx context.Context, id int) (*entity.User, error) {
 	u := entity.User{ID: id}
 
-	if err := s.r.GetByID(ctx, &u); err != nil {
+	if err := s.repo.GetByID(ctx, &u); err != nil {
 		return nil, err
 	}
 

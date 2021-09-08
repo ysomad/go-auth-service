@@ -28,36 +28,42 @@ func NewUserRepo(pg *postgres.Postgres) *UserRepo {
 }
 
 // Create creates new user with email and password
-func (r *UserRepo) Create(ctx context.Context, u *entity.User) error {
+func (r *UserRepo) Create(ctx context.Context, email string, password string) (*entity.User, error) {
 	sql, args, err := r.Builder.
 		Insert(table).
 		Columns("email", "password").
-		Values(u.Email, u.EncryptedPassword).
+		Values(email, password).
 		Suffix("RETURNING id, created_at, updated_at, is_active, is_archive").
 		ToSql()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	if err = r.Pool.
-		QueryRow(ctx, sql, args...).
-		Scan(&u.ID, &u.CreatedAt, &u.UpdatedAt, &u.IsActive, &u.IsArchive); err != nil {
+	u := entity.User{Email: email}
+
+	if err = r.Pool.QueryRow(ctx, sql, args...).Scan(
+		&u.ID,
+		&u.CreatedAt,
+		&u.UpdatedAt,
+		&u.IsActive,
+		&u.IsArchive,
+	); err != nil {
 		var pgErr *pgconn.PgError
 
 		if errors.As(err, &pgErr) {
 			// SQL err handling by code
 			if pgErr.Code == pgerrcode.UniqueViolation {
-				return errors.New(fmt.Sprintf("user with email %s already exists", u.Email))
+				return nil, errors.New(fmt.Sprintf("user with email %s already exists", u.Email))
 			}
 
 			// Return more detailed error message
-			return errors.New(pgErr.Detail)
+			return nil, errors.New(pgErr.Detail)
 		}
 
-		return err
+		return nil, err
 	}
 
-	return nil
+	return &u, nil
 }
 
 func (r *UserRepo) Archive(ctx context.Context, req *entity.ArchiveUserRequest) error {

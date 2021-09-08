@@ -11,7 +11,6 @@ type User struct {
 	Email             string    `json:"email" example:"user@mail.com" binding:"email"`
 	Username          *string   `json:"username,omitempty" example:"username" binding:"alphanum,gte=4,lte=32"`
 	Password          string    `json:"-" example:"secret" binding:"gte=6,lte=128"`
-	EncryptedPassword string    `json:"-"`
 	FirstName         *string   `json:"first_name,omitempty" example:"Alex" binding:"alpha,lte=50"`
 	LastName          *string   `json:"last_name,omitempty" example:"Malykh" binding:"alpha,lte=50"`
 	CreatedAt         time.Time `json:"created_at" example:"2021-08-31T16:55:18.080768Z"`
@@ -48,20 +47,10 @@ type (
 	}
 )
 
-func (u *User) Sanitize() {
-	u.Password = ""
-	u.SetEncryptedPassword("")
-}
-
-func (u *User) SetEncryptedPassword(p string) {
-	u.EncryptedPassword = p
-}
-
-// EncryptPassword encrypts user password and write it to EncryptedPassword field of User struct
-func (u *User) EncryptPassword() error {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(u.Password), bcrypt.DefaultCost)
-	u.SetEncryptedPassword(string(bytes))
-	return err
+// EncryptPassword ...
+func EncryptPassword(pwd string) (string, error) {
+	bytes, err := bcrypt.GenerateFromPassword([]byte(pwd), bcrypt.DefaultCost)
+	return string(bytes), err
 }
 
 // CompareHashAndPassword compares received password from client with hashed password in db

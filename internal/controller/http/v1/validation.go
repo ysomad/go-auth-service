@@ -13,7 +13,7 @@ import (
 
 type RequestValidator struct {
 	validate *validator.Validate
-	trans ut.Translator
+	trans    ut.Translator
 }
 
 func NewRequestValidator() (*RequestValidator, error) {
@@ -24,7 +24,7 @@ func NewRequestValidator() (*RequestValidator, error) {
 
 	return &RequestValidator{
 		validate: binding.Validator.Engine().(*validator.Validate),
-		trans: trans,
+		trans:    trans,
 	}, nil
 }
 
