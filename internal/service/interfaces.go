@@ -11,14 +11,14 @@ type (
 	User interface {
 		Create(ctx context.Context, email string, password string) (*entity.User, error)
 		Archive(ctx context.Context, id int, isArchive bool) error
-		PartialUpdate(ctx context.Context, id int, req entity.UpdateUserRequest) (*entity.User, error)
-		GetByID(context.Context, int) (*entity.User, error)
+		PartialUpdate(ctx context.Context, id int, cols map[string]interface{}) (*entity.User, error)
+		GetByID(ctx context.Context, id int) (*entity.User, error)
 	}
 
 	UserRepo interface {
 		Create(ctx context.Context, email string, password string) (*entity.User, error)
 		Archive(ctx context.Context, id int, isArchive bool) error
-		PartialUpdate(ctx context.Context, id int, req entity.UpdateUserRequest) (*entity.User, error)
-		GetByID(context.Context, *entity.User) error
+		PartialUpdate(ctx context.Context, id int, cols map[string]interface{}) (*entity.User, error)
+		GetByID(ctx context.Context, id int) (*entity.User, error)
 	}
 )

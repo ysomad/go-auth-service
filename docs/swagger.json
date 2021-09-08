@@ -64,7 +64,7 @@
         },
         "/users/{id}": {
             "get": {
-                "description": "Receive user data",
+                "description": "Receive user data by id",
                 "consumes": [
                     "application/json"
                 ],
@@ -74,7 +74,7 @@
                 "tags": [
                     "Users"
                 ],
-                "summary": "Get by id",
+                "summary": "Get",
                 "operationId": "get",
                 "parameters": [
                     {
@@ -120,7 +120,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/entity.UpdateUserRequest"
+                            "$ref": "#/definitions/entity.PartialUpdateRequest"
                         }
                     },
                     {
@@ -240,7 +240,7 @@
                 }
             }
         },
-        "entity.UpdateUserRequest": {
+        "entity.PartialUpdateRequest": {
             "type": "object",
             "properties": {
                 "first_name": {

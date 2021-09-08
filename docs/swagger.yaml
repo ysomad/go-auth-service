@@ -24,7 +24,7 @@ definitions:
     - email
     - password
     type: object
-  entity.UpdateUserRequest:
+  entity.PartialUpdateRequest:
     properties:
       first_name:
         example: Alex
@@ -127,7 +127,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: Receive user data
+      description: Receive user data by id
       operationId: get
       parameters:
       - description: User ID
@@ -146,7 +146,7 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/v1.messageResponse'
-      summary: Get by id
+      summary: Get
       tags:
       - Users
     patch:
@@ -160,7 +160,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/entity.UpdateUserRequest'
+          $ref: '#/definitions/entity.PartialUpdateRequest'
       - description: User ID
         in: path
         name: id

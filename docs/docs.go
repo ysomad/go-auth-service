@@ -78,7 +78,7 @@ var doc = `{
         },
         "/users/{id}": {
             "get": {
-                "description": "Receive user data",
+                "description": "Receive user data by id",
                 "consumes": [
                     "application/json"
                 ],
@@ -88,7 +88,7 @@ var doc = `{
                 "tags": [
                     "Users"
                 ],
-                "summary": "Get by id",
+                "summary": "Get",
                 "operationId": "get",
                 "parameters": [
                     {
@@ -134,7 +134,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/entity.UpdateUserRequest"
+                            "$ref": "#/definitions/entity.PartialUpdateRequest"
                         }
                     },
                     {
@@ -254,7 +254,7 @@ var doc = `{
                 }
             }
         },
-        "entity.UpdateUserRequest": {
+        "entity.PartialUpdateRequest": {
             "type": "object",
             "properties": {
                 "first_name": {
