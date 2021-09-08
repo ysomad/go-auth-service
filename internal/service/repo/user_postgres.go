@@ -99,7 +99,6 @@ func (r *UserRepo) Archive(ctx context.Context, id int, isArchive bool) error {
 // PartialUpdate update User column values with values presented in cols
 func (r *UserRepo) PartialUpdate(ctx context.Context, id int, cols map[string]interface{}) (*entity.User, error) {
 
-
 	u := entity.User{
 		ID:        id,
 		UpdatedAt: time.Now(),

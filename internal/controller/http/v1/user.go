@@ -123,13 +123,13 @@ func (r *userRoutes) partialUpdate(c *gin.Context) {
 		return
 	}
 
-	colsToUpdate, err := stripNilValues(map[string]interface{} {
-		"username": req.Username,
+	colsToUpdate, err := stripNilValues(map[string]interface{}{
+		"username":   req.Username,
 		"first_name": req.FirstName,
-		"last_name": req.LastName,
+		"last_name":  req.LastName,
 	})
 	if err != nil {
-		r.l.Error("http - v1 - partialUpdate - stripNilValues")
+		r.l.Error(err, "http - v1 - partialUpdate - stripNilValues")
 		abortWithError(c, http.StatusBadRequest, err)
 
 		return
