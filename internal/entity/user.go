@@ -19,3 +19,18 @@ type User struct {
 	IsSuperuser bool      `json:"-"`
 }
 
+type CreateUserRequest struct {
+	Email           string `json:"email" example:"user@mail.com" binding:"required,email,lte=255"`
+	Password        string `json:"password" example:"secret" binding:"required,gte=6,lte=128"`
+	ConfirmPassword string `json:"confirmPassword" example:"secret" binding:"required,eqfield=Password"`
+}
+
+type ArchiveUserRequest struct {
+	IsArchive *bool `json:"isArchive" example:"false" binding:"required"`
+}
+
+type PartialUpdateRequest struct {
+	Username  string `json:"username" example:"username" binding:"omitempty,alphanum,gte=4,lte=32"`
+	FirstName string `json:"firstName" example:"Alex"  binding:"omitempty,alpha,lte=50"`
+	LastName  string `json:"lastName" example:"Malykh" binding:"omitempty,alpha,lte=50"`
+}

@@ -1,17 +1,18 @@
 package v1
 
 import (
-	"github.com/ysomad/go-auth-service/pkg/logger"
+	"github.com/ysomad/go-auth-service/internal/entity"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 
 	"github.com/ysomad/go-auth-service/internal/service"
+	"github.com/ysomad/go-auth-service/pkg/logger"
 )
 
 type userRoutes struct {
-	log logger.Interface
+	log         logger.Interface
 	userService service.User
 }
 
@@ -27,26 +28,20 @@ func newUserRoutes(handler *gin.RouterGroup, l logger.Interface, u service.User)
 	}
 }
 
-type createUserRequest struct {
-	Email           string `json:"email" example:"user@mail.com" binding:"required,email,lte=255"`
-	Password        string `json:"password" example:"secret" binding:"required,gte=6,lte=128"`
-	ConfirmPassword string `json:"confirmPassword" example:"secret" binding:"required,eqfield=Password"`
-}
-
 // @Summary     Sign up
 // @Description Create a new user with email and password
 // @ID          signup
 // @Tags  	    Users
 // @Accept      json
 // @Produce     json
-// @Param       request body createUserRequest true "To create a new user email and password should be provided"
+// @Param       request body entity.CreateUserRequest true "To create a new user email and password should be provided"
 // @Success     200 {object} entity.User
 // @Failure     400 {object} messageResponse
 // @Failure     500 {object} messageResponse
 // @Failure		422 {object} validationErrorResponse
 // @Router      /users [post]
 func (r *userRoutes) signUp(c *gin.Context) {
-	var req createUserRequest
+	var req entity.CreateUserRequest
 
 	if !ValidRequest(c, &req) {
 		return
@@ -63,10 +58,6 @@ func (r *userRoutes) signUp(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
-type archiveUserRequest struct {
-	IsArchive *bool `json:"isArchive" example:"false" binding:"required"`
-}
-
 // @Summary     Archive or restore User
 // @Description Archive or restore User
 // @ID          archive
@@ -74,13 +65,13 @@ type archiveUserRequest struct {
 // @Accept      json
 // @Produce     json
 // @Param		id path int required "User ID"
-// @Param       request body archiveUserRequest true "To archive or restore a user is_archive should be provided"
+// @Param       request body entity.ArchiveUserRequest true "To archive or restore a user is_archive should be provided"
 // @Success     204
 // @Failure     400 {object} messageResponse
 // @Failure		422 {object} validationErrorResponse
 // @Router      /users/{id}/archive [patch]
 func (r *userRoutes) archive(c *gin.Context) {
-	var req archiveUserRequest
+	var req entity.ArchiveUserRequest
 
 	if !ValidRequest(c, &req) {
 		return
@@ -104,19 +95,13 @@ func (r *userRoutes) archive(c *gin.Context) {
 	c.AbortWithStatus(http.StatusNoContent)
 }
 
-type partialUpdateRequest struct {
-	Username  string `json:"username" example:"username" binding:"omitempty,alphanum,gte=4,lte=32"`
-	FirstName string `json:"firstName" example:"Alex"  binding:"omitempty,alpha,lte=50"`
-	LastName  string `json:"lastName" example:"Malykh" binding:"omitempty,alpha,lte=50"`
-}
-
 // @Summary     Partial update
 // @Description Update user data partially
 // @ID         	update
 // @Tags  	    Users
 // @Accept      json
 // @Produce     json
-// @Param       request body partialUpdateRequest true "Provide at least one user field to update user data"
+// @Param       request body entity.PartialUpdateRequest true "Provide at least one user field to update user data"
 // @Failure		422 {object} validationErrorResponse
 // @Param		id path int required "User ID"
 // @Success     200 {object} entity.User
@@ -124,7 +109,7 @@ type partialUpdateRequest struct {
 // @Failure		422 {object} validationErrorResponse
 // @Router      /users/{id} [patch]
 func (r *userRoutes) partialUpdate(c *gin.Context) {
-	var req partialUpdateRequest
+	var req entity.PartialUpdateRequest
 
 	if !ValidRequest(c, &req) {
 		return
@@ -138,19 +123,7 @@ func (r *userRoutes) partialUpdate(c *gin.Context) {
 		return
 	}
 
-	colsToUpdate, err := stripNilValues(map[string]interface{}{
-		"username":   req.Username,
-		"first_name": req.FirstName,
-		"last_name":  req.LastName,
-	})
-	if err != nil {
-		r.log.Error(err, "http - v1 - partialUpdate - stripNilValues")
-		abortWithError(c, http.StatusBadRequest, err)
-
-		return
-	}
-
-	user, err := r.userService.PartialUpdate(c.Request.Context(), id, colsToUpdate)
+	user, err := r.userService.PartialUpdate(c.Request.Context(), id, req)
 	if err != nil {
 		r.log.Error(err, "http - v1 - partialUpdate - r.u.PartialUpdate")
 		abortWithError(c, http.StatusBadRequest, err)

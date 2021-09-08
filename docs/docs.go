@@ -44,7 +44,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/v1.createUserRequest"
+                            "$ref": "#/definitions/entity.CreateUserRequest"
                         }
                     }
                 ],
@@ -134,7 +134,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/v1.partialUpdateRequest"
+                            "$ref": "#/definitions/entity.PartialUpdateRequest"
                         }
                     },
                     {
@@ -195,7 +195,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/v1.archiveUserRequest"
+                            "$ref": "#/definitions/entity.ArchiveUserRequest"
                         }
                     }
                 ],
@@ -220,6 +220,57 @@ var doc = `{
         }
     },
     "definitions": {
+        "entity.ArchiveUserRequest": {
+            "type": "object",
+            "required": [
+                "isArchive"
+            ],
+            "properties": {
+                "isArchive": {
+                    "type": "boolean",
+                    "example": false
+                }
+            }
+        },
+        "entity.CreateUserRequest": {
+            "type": "object",
+            "required": [
+                "confirmPassword",
+                "email",
+                "password"
+            ],
+            "properties": {
+                "confirmPassword": {
+                    "type": "string",
+                    "example": "secret"
+                },
+                "email": {
+                    "type": "string",
+                    "example": "user@mail.com"
+                },
+                "password": {
+                    "type": "string",
+                    "example": "secret"
+                }
+            }
+        },
+        "entity.PartialUpdateRequest": {
+            "type": "object",
+            "properties": {
+                "firstName": {
+                    "type": "string",
+                    "example": "Alex"
+                },
+                "lastName": {
+                    "type": "string",
+                    "example": "Malykh"
+                },
+                "username": {
+                    "type": "string",
+                    "example": "username"
+                }
+            }
+        },
         "entity.User": {
             "type": "object",
             "properties": {
@@ -261,63 +312,12 @@ var doc = `{
                 }
             }
         },
-        "v1.archiveUserRequest": {
-            "type": "object",
-            "required": [
-                "isArchive"
-            ],
-            "properties": {
-                "isArchive": {
-                    "type": "boolean",
-                    "example": false
-                }
-            }
-        },
-        "v1.createUserRequest": {
-            "type": "object",
-            "required": [
-                "confirmPassword",
-                "email",
-                "password"
-            ],
-            "properties": {
-                "confirmPassword": {
-                    "type": "string",
-                    "example": "secret"
-                },
-                "email": {
-                    "type": "string",
-                    "example": "user@mail.com"
-                },
-                "password": {
-                    "type": "string",
-                    "example": "secret"
-                }
-            }
-        },
         "v1.messageResponse": {
             "type": "object",
             "properties": {
                 "error": {
                     "type": "string",
                     "example": "message"
-                }
-            }
-        },
-        "v1.partialUpdateRequest": {
-            "type": "object",
-            "properties": {
-                "firstName": {
-                    "type": "string",
-                    "example": "Alex"
-                },
-                "lastName": {
-                    "type": "string",
-                    "example": "Malykh"
-                },
-                "username": {
-                    "type": "string",
-                    "example": "username"
                 }
             }
         },

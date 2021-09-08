@@ -2,6 +2,8 @@ package service
 
 import (
 	"context"
+	"errors"
+
 	"github.com/ysomad/go-auth-service/internal/entity"
 	"github.com/ysomad/go-auth-service/pkg/crypto"
 )
@@ -39,7 +41,23 @@ func (s *UserService) Archive(ctx context.Context, id int, isArchive bool) error
 }
 
 // PartialUpdate updates all updatable user columns
-func (s *UserService) PartialUpdate(ctx context.Context, id int, cols map[string]interface{}) (*entity.User, error) {
+func (s *UserService) PartialUpdate(ctx context.Context, id int, req entity.PartialUpdateRequest) (*entity.User, error) {
+	cols := map[string]interface{}{
+		"username":   req.Username,
+		"first_name": req.FirstName,
+		"last_name":  req.LastName,
+	}
+
+	for k, v := range cols {
+		if v == nil || v == "" {
+			delete(cols, k)
+		}
+	}
+
+	if len(cols) == 0 {
+		return nil, errors.New("provide at least one field to update resource partially")
+	}
+
 	u, err := s.repo.PartialUpdate(ctx, id, cols)
 	if err != nil {
 		return nil, err
