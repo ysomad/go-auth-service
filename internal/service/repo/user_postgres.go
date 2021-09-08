@@ -66,12 +66,12 @@ func (r *UserRepo) Create(ctx context.Context, email string, password string) (*
 	return &u, nil
 }
 
-func (r *UserRepo) Archive(ctx context.Context, req *entity.ArchiveUserRequest) error {
+func (r *UserRepo) Archive(ctx context.Context, id int, isArchive bool) error {
 	sql, args, err := r.Builder.
 		Update(table).
-		Set("is_archive", req.IsArchive).
+		Set("is_archive", isArchive).
 		Set("updated_at", time.Now()).
-		Where(sq.Eq{"id": req.ID, "is_archive": !*req.IsArchive}).
+		Where(sq.Eq{"id": id, "is_archive": !isArchive}).
 		ToSql()
 	if err != nil {
 		return err
@@ -85,13 +85,13 @@ func (r *UserRepo) Archive(ctx context.Context, req *entity.ArchiveUserRequest) 
 	if commandTag.RowsAffected() == 0 {
 		var state string
 
-		if !*req.IsArchive {
+		if !isArchive {
 			state = "archived"
 		} else {
 			state = "not archived"
 		}
 
-		return errors.New(fmt.Sprintf("%s user with id %d not found", state, req.ID))
+		return errors.New(fmt.Sprintf("%s user with id %d not found", state, id))
 	}
 
 	return nil

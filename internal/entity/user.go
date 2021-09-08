@@ -29,7 +29,6 @@ type (
 	}
 
 	ArchiveUserRequest struct {
-		ID        int   `json:"-" example:"1" binding:"numeric"`
 		IsArchive *bool `json:"is_archive" example:"false" binding:"required"`
 	}
 

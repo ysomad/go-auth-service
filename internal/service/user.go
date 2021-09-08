@@ -15,13 +15,13 @@ func NewUserService(r UserRepo) *UserService {
 	return &UserService{r}
 }
 
-func (s *UserService) Create(ctx context.Context, req entity.CreateUserRequest) (*entity.User, error) {
-	p, err := entity.EncryptPassword(req.Password)
+func (s *UserService) Create(ctx context.Context, email string, password string) (*entity.User, error) {
+	p, err := entity.EncryptPassword(password)
 	if err != nil {
 		return nil, err
 	}
 
-	u, err := s.repo.Create(ctx, req.Email, p)
+	u, err := s.repo.Create(ctx, email, p)
 	if err != nil {
 		return nil, err
 	}
@@ -29,9 +29,9 @@ func (s *UserService) Create(ctx context.Context, req entity.CreateUserRequest) 
 	return u, nil
 }
 
-// Archive updates is_archive field for user
-func (s *UserService) Archive(ctx context.Context, req *entity.ArchiveUserRequest) error {
-	if err := s.repo.Archive(ctx, req); err != nil {
+// Archive updates is_archive field
+func (s *UserService) Archive(ctx context.Context, id int, isArchive bool) error {
+	if err := s.repo.Archive(ctx, id, isArchive); err != nil {
 		return err
 	}
 
