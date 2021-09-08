@@ -2,8 +2,6 @@ package service
 
 import (
 	"context"
-	"time"
-
 	"github.com/ysomad/go-auth-service/internal/entity"
 )
 
@@ -38,21 +36,14 @@ func (s *UserService) Archive(ctx context.Context, id int, isArchive bool) error
 	return nil
 }
 
-// Update updates all updatable user columns
-func (s *UserService) Update(ctx context.Context, req *entity.UpdateUserRequest) (*entity.User, error) {
-	u := entity.User{
-		ID:        req.ID,
-		Username:  &req.Username,
-		FirstName: &req.FirstName,
-		LastName:  &req.LastName,
-		UpdatedAt: time.Now(),
-	}
-
-	if err := s.repo.Update(ctx, &u); err != nil {
+// PartialUpdate updates all updatable user columns
+func (s *UserService) PartialUpdate(ctx context.Context, id int, req entity.UpdateUserRequest) (*entity.User, error) {
+	u, err := s.repo.PartialUpdate(ctx, id, req)
+	if err != nil {
 		return nil, err
 	}
 
-	return &u, nil
+	return u, nil
 }
 
 // GetByID gets user data by ID

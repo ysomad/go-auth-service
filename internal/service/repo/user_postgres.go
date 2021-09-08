@@ -97,57 +97,59 @@ func (r *UserRepo) Archive(ctx context.Context, id int, isArchive bool) error {
 	return nil
 }
 
-func (r *UserRepo) Update(ctx context.Context, u *entity.User) error {
-	userMap, err := stripNilValues(map[string]interface{}{
-		"username":   *u.Username,
-		"first_name": *u.FirstName,
-		"last_name":  *u.LastName,
+func (r *UserRepo) PartialUpdate(ctx context.Context, id int, req entity.UpdateUserRequest) (*entity.User, error) {
+	m, err := stripNilValues(map[string]interface{}{
+		"username":   req.Username,
+		"first_name": req.FirstName,
+		"last_name":  req.LastName,
 	})
 	if err != nil {
-		return err
+		return nil, err
+	}
+
+	u := entity.User{
+		ID: id,
+		UpdatedAt: time.Now(),
 	}
 
 	sql, args, err := r.Builder.
 		Update(table).
-		SetMap(userMap).
+		SetMap(m).
 		Set("updated_at", u.UpdatedAt).
-		Where(sq.Eq{"id": u.ID}).
+		Where(sq.Eq{"id": u.ID, "is_archive": false}).
 		Suffix("RETURNING username, first_name, last_name, email, created_at, is_active, is_archive").
 		ToSql()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if err = r.Pool.QueryRow(ctx, sql, args...).Scan(
-		// Nullable values
 		&u.Username,
 		&u.FirstName,
 		&u.LastName,
-
-		// Not null values
 		&u.Email,
 		&u.CreatedAt,
 		&u.IsActive,
 		&u.IsArchive,
 	); err != nil {
 		if err == pgx.ErrNoRows {
-			return errors.New(fmt.Sprintf("user with id %d not found", u.ID))
+			return nil, errors.New(fmt.Sprintf("user with id %d not found", u.ID))
 		}
 
 		var pgErr *pgconn.PgError
 
 		if errors.As(err, &pgErr) {
 			if pgErr.Code == pgerrcode.UniqueViolation {
-				return errors.New(fmt.Sprintf("user with username %s already exists", *u.Username))
+				return nil, errors.New(fmt.Sprintf("user with username %s already exists", *u.Username))
 			}
 
-			return errors.New(pgErr.Detail)
+			return nil, errors.New(pgErr.Detail)
 		}
 
-		return err
+		return nil, err
 	}
 
-	return nil
+	return &u, nil
 }
 
 func (r *UserRepo) GetByID(ctx context.Context, u *entity.User) error {
