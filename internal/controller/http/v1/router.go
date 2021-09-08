@@ -2,6 +2,7 @@
 package v1
 
 import (
+	"github.com/ysomad/go-auth-service/pkg/logger"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -18,9 +19,9 @@ import (
 // @description REST API authentication and user management service
 // @version     1.0
 // @host        0.0.0.0:8080
-// @BasePath    /api/v1
+// @BasePath    /v1
 
-func NewRouter(handler *gin.Engine, userService service.User) {
+func NewRouter(handler *gin.Engine, l logger.Interface, u service.User) {
 	// Options
 	handler.Use(gin.Logger())
 	handler.Use(gin.Recovery())
@@ -30,13 +31,11 @@ func NewRouter(handler *gin.Engine, userService service.User) {
 	handler.GET("/swagger/*any", swaggerHandler)
 
 	// K8s probe
-	handler.GET("/health", func(c *gin.Context) {
-		c.Status(http.StatusOK)
-	})
+	handler.GET("/healthz", func(c *gin.Context) { c.Status(http.StatusOK) })
 
 	// Routers
-	h := handler.Group("/api/v1")
+	h := handler.Group("/v1")
 	{
-		newUserRoutes(h, userService)
+		newUserRoutes(h, l, u)
 	}
 }

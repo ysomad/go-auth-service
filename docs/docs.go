@@ -44,7 +44,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/domain.CreateUserRequest"
+                            "$ref": "#/definitions/entity.CreateUserRequest"
                         }
                     }
                 ],
@@ -52,7 +52,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/domain.User"
+                            "$ref": "#/definitions/entity.User"
                         }
                     },
                     "400": {
@@ -103,7 +103,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/domain.User"
+                            "$ref": "#/definitions/entity.User"
                         }
                     },
                     "400": {
@@ -134,7 +134,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/domain.UpdateUserRequest"
+                            "$ref": "#/definitions/entity.UpdateUserRequest"
                         }
                     },
                     {
@@ -149,7 +149,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/domain.User"
+                            "$ref": "#/definitions/entity.User"
                         }
                     },
                     "400": {
@@ -195,7 +195,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/domain.ArchiveUserRequest"
+                            "$ref": "#/definitions/entity.ArchiveUserRequest"
                         }
                     }
                 ],
@@ -220,7 +220,7 @@ var doc = `{
         }
     },
     "definitions": {
-        "domain.ArchiveUserRequest": {
+        "entity.ArchiveUserRequest": {
             "type": "object",
             "required": [
                 "is_archive"
@@ -232,7 +232,7 @@ var doc = `{
                 }
             }
         },
-        "domain.CreateUserRequest": {
+        "entity.CreateUserRequest": {
             "type": "object",
             "required": [
                 "confirm_password",
@@ -254,7 +254,7 @@ var doc = `{
                 }
             }
         },
-        "domain.UpdateUserRequest": {
+        "entity.UpdateUserRequest": {
             "type": "object",
             "properties": {
                 "first_name": {
@@ -271,7 +271,7 @@ var doc = `{
                 }
             }
         },
-        "domain.User": {
+        "entity.User": {
             "type": "object",
             "properties": {
                 "created_at": {

@@ -11,7 +11,7 @@ import (
 	"github.com/jackc/pgx/v4"
 	"github.com/pkg/errors"
 
-	"github.com/ysomad/go-auth-service/internal/domain"
+	"github.com/ysomad/go-auth-service/internal/entity"
 	"github.com/ysomad/go-auth-service/pkg/postgres"
 )
 
@@ -28,7 +28,7 @@ func NewUserRepo(pg *postgres.Postgres) *UserRepo {
 }
 
 // Create creates new user with email and password
-func (r *UserRepo) Create(ctx context.Context, u *domain.User) error {
+func (r *UserRepo) Create(ctx context.Context, u *entity.User) error {
 	sql, args, err := r.Builder.
 		Insert(table).
 		Columns("email", "password").
@@ -60,7 +60,7 @@ func (r *UserRepo) Create(ctx context.Context, u *domain.User) error {
 	return nil
 }
 
-func (r *UserRepo) Archive(ctx context.Context, req *domain.ArchiveUserRequest) error {
+func (r *UserRepo) Archive(ctx context.Context, req *entity.ArchiveUserRequest) error {
 	sql, args, err := r.Builder.
 		Update(table).
 		Set("is_archive", req.IsArchive).
@@ -91,7 +91,7 @@ func (r *UserRepo) Archive(ctx context.Context, req *domain.ArchiveUserRequest) 
 	return nil
 }
 
-func (r *UserRepo) Update(ctx context.Context, u *domain.User) error {
+func (r *UserRepo) Update(ctx context.Context, u *entity.User) error {
 	userMap, err := stripNilValues(map[string]interface{}{
 		"username":   *u.Username,
 		"first_name": *u.FirstName,
@@ -144,7 +144,7 @@ func (r *UserRepo) Update(ctx context.Context, u *domain.User) error {
 	return nil
 }
 
-func (r *UserRepo) GetByID(ctx context.Context, u *domain.User) error {
+func (r *UserRepo) GetByID(ctx context.Context, u *entity.User) error {
 	sql, args, err := r.Builder.
 		Select("email, username, first_name, last_name, created_at, updated_at, is_active, is_archive").
 		From(table).
