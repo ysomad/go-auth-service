@@ -2,12 +2,13 @@ package service
 
 import (
 	"context"
-	"github.com/ysomad/go-auth-service/internal/entity"
 	"time"
+
+	"github.com/ysomad/go-auth-service/internal/entity"
 )
 
 type UserService struct {
-	repo UserRepo
+	r UserRepo
 }
 
 func NewUserService(r UserRepo) *UserService {
@@ -24,7 +25,7 @@ func (s *UserService) SignUp(ctx context.Context, req *entity.CreateUserRequest)
 		return nil, err
 	}
 
-	if err := s.repo.Create(ctx, &u); err != nil {
+	if err := s.r.Create(ctx, &u); err != nil {
 		return nil, err
 	}
 
@@ -35,7 +36,7 @@ func (s *UserService) SignUp(ctx context.Context, req *entity.CreateUserRequest)
 
 // Archive updates is_archive field for user
 func (s *UserService) Archive(ctx context.Context, req *entity.ArchiveUserRequest) error {
-	if err := s.repo.Archive(ctx, req); err != nil {
+	if err := s.r.Archive(ctx, req); err != nil {
 		return err
 	}
 
@@ -52,7 +53,7 @@ func (s *UserService) Update(ctx context.Context, req *entity.UpdateUserRequest)
 		UpdatedAt: time.Now(),
 	}
 
-	if err := s.repo.Update(ctx, &u); err != nil {
+	if err := s.r.Update(ctx, &u); err != nil {
 		return nil, err
 	}
 
@@ -63,7 +64,7 @@ func (s *UserService) Update(ctx context.Context, req *entity.UpdateUserRequest)
 func (s *UserService) GetByID(ctx context.Context, id int) (*entity.User, error) {
 	u := entity.User{ID: id}
 
-	if err := s.repo.GetByID(ctx, &u); err != nil {
+	if err := s.r.GetByID(ctx, &u); err != nil {
 		return nil, err
 	}
 

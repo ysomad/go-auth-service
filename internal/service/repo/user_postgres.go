@@ -2,6 +2,7 @@ package repo
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -9,7 +10,6 @@ import (
 	"github.com/jackc/pgconn"
 	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v4"
-	"github.com/pkg/errors"
 
 	"github.com/ysomad/go-auth-service/internal/entity"
 	"github.com/ysomad/go-auth-service/pkg/postgres"

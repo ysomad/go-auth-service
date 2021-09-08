@@ -68,9 +68,9 @@ func (l *Logger) Warn(message string, args ...interface{}) {
 func (l *Logger) Error(message interface{}, args ...interface{}) {
 	if l.logger.GetLevel() == zerolog.DebugLevel {
 		l.Debug(message, args...)
+	} else {
+		l.msg("error", message, args...)
 	}
-
-	l.msg("error", message, args...)
 }
 
 // Fatal -.
