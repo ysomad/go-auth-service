@@ -33,7 +33,6 @@ type (
 	}
 
 	UpdateUserRequest struct {
-		ID        int    `json:"-" example:"1" binding:"required,numeric"`
 		Username  string `json:"username" example:"username" binding:"omitempty,alphanum,gte=4,lte=32"`
 		FirstName string `json:"first_name" example:"Alex"  binding:"omitempty,alpha,lte=50"`
 		LastName  string `json:"last_name" example:"Malykh" binding:"omitempty,alpha,lte=50"`

@@ -23,7 +23,7 @@ func newUserRoutes(handler *gin.RouterGroup, l logger.Interface, u service.User)
 	{
 		h.PATCH(":id/archive", r.archive)
 		h.GET(":id", r.getByID)
-		h.PATCH(":id", r.update)
+		h.PATCH(":id", r.partialUpdate)
 		h.POST("", r.signUp)
 	}
 }
@@ -108,8 +108,12 @@ func (r *userRoutes) archive(c *gin.Context) {
 // @Failure     400 {object} messageResponse
 // @Failure		422 {object} validationErrorResponse
 // @Router      /users/{id} [patch]
-func (r *userRoutes) update(c *gin.Context) {
+func (r *userRoutes) partialUpdate(c *gin.Context) {
 	var req entity.UpdateUserRequest
+
+	if !ValidRequest(c, &req) {
+		return
+	}
 
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -119,13 +123,7 @@ func (r *userRoutes) update(c *gin.Context) {
 		return
 	}
 
-	req.ID = id
-
-	if !ValidRequest(c, &req) {
-		return
-	}
-
-	user, err := r.u.Update(c.Request.Context(), &req)
+	user, err := r.u.PartialUpdate(c.Request.Context(), id, req)
 	if err != nil {
 		r.l.Error(err, "http - v1 - update")
 		abortWithError(c, http.StatusBadRequest, err)
