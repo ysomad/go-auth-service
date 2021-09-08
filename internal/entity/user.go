@@ -7,17 +7,17 @@ import (
 
 // User represents user data model
 type User struct {
-	ID                int       `json:"id" example:"1" binding:"numeric"`
-	Email             string    `json:"email" example:"user@mail.com" binding:"email"`
-	Username          *string   `json:"username,omitempty" example:"username" binding:"alphanum,gte=4,lte=32"`
-	Password          string    `json:"-" example:"secret" binding:"gte=6,lte=128"`
-	FirstName         *string   `json:"first_name,omitempty" example:"Alex" binding:"alpha,lte=50"`
-	LastName          *string   `json:"last_name,omitempty" example:"Malykh" binding:"alpha,lte=50"`
-	CreatedAt         time.Time `json:"created_at" example:"2021-08-31T16:55:18.080768Z"`
-	UpdatedAt         time.Time `json:"updated_at" example:"2021-08-31T16:55:18.080768Z"`
-	IsActive          bool      `json:"is_active" example:"true"`
-	IsArchive         bool      `json:"is_archive" example:"false"`
-	IsSuperuser       bool      `json:"-"`
+	ID          int       `json:"id" example:"1" binding:"numeric"`
+	Email       string    `json:"email" example:"user@mail.com" binding:"email"`
+	Username    *string   `json:"username,omitempty" example:"username" binding:"alphanum,gte=4,lte=32"`
+	Password    string    `json:"-" example:"secret" binding:"gte=6,lte=128"`
+	FirstName   *string   `json:"first_name,omitempty" example:"Alex" binding:"alpha,lte=50"`
+	LastName    *string   `json:"last_name,omitempty" example:"Malykh" binding:"alpha,lte=50"`
+	CreatedAt   time.Time `json:"created_at" example:"2021-08-31T16:55:18.080768Z"`
+	UpdatedAt   time.Time `json:"updated_at" example:"2021-08-31T16:55:18.080768Z"`
+	IsActive    bool      `json:"is_active" example:"true"`
+	IsArchive   bool      `json:"is_archive" example:"false"`
+	IsSuperuser bool      `json:"-"`
 }
 
 // Data transfer objects (DTO)
@@ -32,7 +32,7 @@ type (
 		IsArchive *bool `json:"is_archive" example:"false" binding:"required"`
 	}
 
-	UpdateUserRequest struct {
+	PartialUpdateRequest struct {
 		Username  string `json:"username" example:"username" binding:"omitempty,alphanum,gte=4,lte=32"`
 		FirstName string `json:"first_name" example:"Alex"  binding:"omitempty,alpha,lte=50"`
 		LastName  string `json:"last_name" example:"Malykh" binding:"omitempty,alpha,lte=50"`

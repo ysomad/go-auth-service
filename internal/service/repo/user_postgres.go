@@ -15,9 +15,7 @@ import (
 	"github.com/ysomad/go-auth-service/pkg/postgres"
 )
 
-const (
-	table = "users"
-)
+const table = "users"
 
 type UserRepo struct {
 	*postgres.Postgres
@@ -66,6 +64,7 @@ func (r *UserRepo) Create(ctx context.Context, email string, password string) (*
 	return &u, nil
 }
 
+// Archive sets is_archive to isArchive for user with id
 func (r *UserRepo) Archive(ctx context.Context, id int, isArchive bool) error {
 	sql, args, err := r.Builder.
 		Update(table).
@@ -97,24 +96,18 @@ func (r *UserRepo) Archive(ctx context.Context, id int, isArchive bool) error {
 	return nil
 }
 
-func (r *UserRepo) PartialUpdate(ctx context.Context, id int, req entity.UpdateUserRequest) (*entity.User, error) {
-	m, err := stripNilValues(map[string]interface{}{
-		"username":   req.Username,
-		"first_name": req.FirstName,
-		"last_name":  req.LastName,
-	})
-	if err != nil {
-		return nil, err
-	}
+// PartialUpdate update User column values with values presented in cols
+func (r *UserRepo) PartialUpdate(ctx context.Context, id int, cols map[string]interface{}) (*entity.User, error) {
+
 
 	u := entity.User{
-		ID: id,
+		ID:        id,
 		UpdatedAt: time.Now(),
 	}
 
 	sql, args, err := r.Builder.
 		Update(table).
-		SetMap(m).
+		SetMap(cols).
 		Set("updated_at", u.UpdatedAt).
 		Where(sq.Eq{"id": u.ID, "is_archive": false}).
 		Suffix("RETURNING username, first_name, last_name, email, created_at, is_active, is_archive").
@@ -152,14 +145,17 @@ func (r *UserRepo) PartialUpdate(ctx context.Context, id int, req entity.UpdateU
 	return &u, nil
 }
 
-func (r *UserRepo) GetByID(ctx context.Context, u *entity.User) error {
+// GetByID returns user data by its id
+func (r *UserRepo) GetByID(ctx context.Context, id int) (*entity.User, error) {
+	u := entity.User{ID: id}
+
 	sql, args, err := r.Builder.
 		Select("email, username, first_name, last_name, created_at, updated_at, is_active, is_archive").
 		From(table).
 		Where(sq.Eq{"id": u.ID}).
 		ToSql()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if err = r.Pool.QueryRow(ctx, sql, args...).Scan(
@@ -173,11 +169,11 @@ func (r *UserRepo) GetByID(ctx context.Context, u *entity.User) error {
 		&u.IsArchive,
 	); err != nil {
 		if err == pgx.ErrNoRows {
-			return errors.New(fmt.Sprintf("user with id %d not found", u.ID))
+			return nil, errors.New(fmt.Sprintf("user with id %d not found", u.ID))
 		}
 
-		return err
+		return nil, err
 	}
 
-	return nil
+	return &u, nil
 }

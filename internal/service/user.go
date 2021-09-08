@@ -13,6 +13,7 @@ func NewUserService(r UserRepo) *UserService {
 	return &UserService{r}
 }
 
+// Create creates new user with email and encrypted password
 func (s *UserService) Create(ctx context.Context, email string, password string) (*entity.User, error) {
 	p, err := entity.EncryptPassword(password)
 	if err != nil {
@@ -37,8 +38,8 @@ func (s *UserService) Archive(ctx context.Context, id int, isArchive bool) error
 }
 
 // PartialUpdate updates all updatable user columns
-func (s *UserService) PartialUpdate(ctx context.Context, id int, req entity.UpdateUserRequest) (*entity.User, error) {
-	u, err := s.repo.PartialUpdate(ctx, id, req)
+func (s *UserService) PartialUpdate(ctx context.Context, id int, cols map[string]interface{}) (*entity.User, error) {
+	u, err := s.repo.PartialUpdate(ctx, id, cols)
 	if err != nil {
 		return nil, err
 	}
@@ -48,11 +49,10 @@ func (s *UserService) PartialUpdate(ctx context.Context, id int, req entity.Upda
 
 // GetByID gets user data by ID
 func (s *UserService) GetByID(ctx context.Context, id int) (*entity.User, error) {
-	u := entity.User{ID: id}
-
-	if err := s.repo.GetByID(ctx, &u); err != nil {
+	u, err := s.repo.GetByID(ctx, id)
+	if err != nil {
 		return nil, err
 	}
 
-	return &u, nil
+	return u, nil
 }

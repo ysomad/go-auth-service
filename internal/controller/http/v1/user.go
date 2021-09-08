@@ -101,7 +101,7 @@ func (r *userRoutes) archive(c *gin.Context) {
 // @Tags  	    Users
 // @Accept      json
 // @Produce     json
-// @Param       request body entity.UpdateUserRequest true "Provide at least one user field to update user data"
+// @Param       request body entity.PartialUpdateRequest true "Provide at least one user field to update user data"
 // @Failure		422 {object} validationErrorResponse
 // @Param		id path int required "User ID"
 // @Success     200 {object} entity.User
@@ -109,7 +109,7 @@ func (r *userRoutes) archive(c *gin.Context) {
 // @Failure		422 {object} validationErrorResponse
 // @Router      /users/{id} [patch]
 func (r *userRoutes) partialUpdate(c *gin.Context) {
-	var req entity.UpdateUserRequest
+	var req entity.PartialUpdateRequest
 
 	if !ValidRequest(c, &req) {
 		return
@@ -117,15 +117,27 @@ func (r *userRoutes) partialUpdate(c *gin.Context) {
 
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		r.l.Error(err, "http - v1 - update")
+		r.l.Error(err, "http - v1 - partialUpdate - strconv.Atoi")
 		abortWithError(c, http.StatusBadRequest, err)
 
 		return
 	}
 
-	user, err := r.u.PartialUpdate(c.Request.Context(), id, req)
+	colsToUpdate, err := stripNilValues(map[string]interface{} {
+		"username": req.Username,
+		"first_name": req.FirstName,
+		"last_name": req.LastName,
+	})
 	if err != nil {
-		r.l.Error(err, "http - v1 - update")
+		r.l.Error("http - v1 - partialUpdate - stripNilValues")
+		abortWithError(c, http.StatusBadRequest, err)
+
+		return
+	}
+
+	user, err := r.u.PartialUpdate(c.Request.Context(), id, colsToUpdate)
+	if err != nil {
+		r.l.Error(err, "http - v1 - partialUpdate - r.u.PartialUpdate")
 		abortWithError(c, http.StatusBadRequest, err)
 
 		return
@@ -134,8 +146,8 @@ func (r *userRoutes) partialUpdate(c *gin.Context) {
 	c.JSON(http.StatusOK, user)
 }
 
-// @Summary     Get by id
-// @Description Receive user data
+// @Summary     Get
+// @Description Receive user data by id
 // @ID          get
 // @Tags  	    Users
 // @Accept      json
