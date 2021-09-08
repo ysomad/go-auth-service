@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"github.com/ysomad/go-auth-service/internal/entity"
+	"github.com/ysomad/go-auth-service/pkg/crypto"
 )
 
 type UserService struct {
@@ -15,7 +16,7 @@ func NewUserService(r UserRepo) *UserService {
 
 // Create creates new user with email and encrypted password
 func (s *UserService) Create(ctx context.Context, email string, password string) (*entity.User, error) {
-	p, err := entity.EncryptPassword(password)
+	p, err := crypto.EncryptPassword(password, 11)
 	if err != nil {
 		return nil, err
 	}
@@ -28,7 +29,7 @@ func (s *UserService) Create(ctx context.Context, email string, password string)
 	return u, nil
 }
 
-// Archive updates is_archive field
+// Archive sets user is_archive
 func (s *UserService) Archive(ctx context.Context, id int, isArchive bool) error {
 	if err := s.repo.Archive(ctx, id, isArchive); err != nil {
 		return err

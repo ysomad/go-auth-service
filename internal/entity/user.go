@@ -1,7 +1,6 @@
 package entity
 
 import (
-	"golang.org/x/crypto/bcrypt"
 	"time"
 )
 
@@ -20,14 +19,3 @@ type User struct {
 	IsSuperuser bool      `json:"-"`
 }
 
-// EncryptPassword ...
-func EncryptPassword(pwd string) (string, error) {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(pwd), bcrypt.DefaultCost)
-	return string(bytes), err
-}
-
-// CompareHashAndPassword compares received password from client with hashed password in db
-func (u *User) CompareHashAndPassword(hash string) bool {
-	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(u.Password))
-	return err == nil
-}
