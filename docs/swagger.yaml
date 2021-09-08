@@ -30,17 +30,17 @@ definitions:
         example: username
         type: string
     type: object
-  v1.ArchiveUserRequest:
+  v1.archiveUserRequest:
     properties:
-      is_archive:
+      isArchive:
         example: false
         type: boolean
     required:
-    - is_archive
+    - isArchive
     type: object
-  v1.CreateUserRequest:
+  v1.createUserRequest:
     properties:
-      confirm_password:
+      confirmPassword:
         example: secret
         type: string
       email:
@@ -50,26 +50,26 @@ definitions:
         example: secret
         type: string
     required:
-    - confirm_password
+    - confirmPassword
     - email
     - password
-    type: object
-  v1.PartialUpdateRequest:
-    properties:
-      first_name:
-        example: Alex
-        type: string
-      last_name:
-        example: Malykh
-        type: string
-      username:
-        example: username
-        type: string
     type: object
   v1.messageResponse:
     properties:
       error:
         example: message
+        type: string
+    type: object
+  v1.partialUpdateRequest:
+    properties:
+      firstName:
+        example: Alex
+        type: string
+      lastName:
+        example: Malykh
+        type: string
+      username:
+        example: username
         type: string
     type: object
   v1.validationErrorResponse:
@@ -100,7 +100,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/v1.CreateUserRequest'
+          $ref: '#/definitions/v1.createUserRequest'
       produces:
       - application/json
       responses:
@@ -160,7 +160,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/v1.PartialUpdateRequest'
+          $ref: '#/definitions/v1.partialUpdateRequest'
       - description: User ID
         in: path
         name: id
@@ -201,7 +201,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/v1.ArchiveUserRequest'
+          $ref: '#/definitions/v1.archiveUserRequest'
       produces:
       - application/json
       responses:

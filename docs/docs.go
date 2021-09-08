@@ -44,7 +44,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/v1.CreateUserRequest"
+                            "$ref": "#/definitions/v1.createUserRequest"
                         }
                     }
                 ],
@@ -134,7 +134,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/v1.PartialUpdateRequest"
+                            "$ref": "#/definitions/v1.partialUpdateRequest"
                         }
                     },
                     {
@@ -195,7 +195,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/v1.ArchiveUserRequest"
+                            "$ref": "#/definitions/v1.archiveUserRequest"
                         }
                     }
                 ],
@@ -261,27 +261,27 @@ var doc = `{
                 }
             }
         },
-        "v1.ArchiveUserRequest": {
+        "v1.archiveUserRequest": {
             "type": "object",
             "required": [
-                "is_archive"
+                "isArchive"
             ],
             "properties": {
-                "is_archive": {
+                "isArchive": {
                     "type": "boolean",
                     "example": false
                 }
             }
         },
-        "v1.CreateUserRequest": {
+        "v1.createUserRequest": {
             "type": "object",
             "required": [
-                "confirm_password",
+                "confirmPassword",
                 "email",
                 "password"
             ],
             "properties": {
-                "confirm_password": {
+                "confirmPassword": {
                     "type": "string",
                     "example": "secret"
                 },
@@ -295,29 +295,29 @@ var doc = `{
                 }
             }
         },
-        "v1.PartialUpdateRequest": {
-            "type": "object",
-            "properties": {
-                "first_name": {
-                    "type": "string",
-                    "example": "Alex"
-                },
-                "last_name": {
-                    "type": "string",
-                    "example": "Malykh"
-                },
-                "username": {
-                    "type": "string",
-                    "example": "username"
-                }
-            }
-        },
         "v1.messageResponse": {
             "type": "object",
             "properties": {
                 "error": {
                     "type": "string",
                     "example": "message"
+                }
+            }
+        },
+        "v1.partialUpdateRequest": {
+            "type": "object",
+            "properties": {
+                "firstName": {
+                    "type": "string",
+                    "example": "Alex"
+                },
+                "lastName": {
+                    "type": "string",
+                    "example": "Malykh"
+                },
+                "username": {
+                    "type": "string",
+                    "example": "username"
                 }
             }
         },
