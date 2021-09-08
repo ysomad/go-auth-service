@@ -115,7 +115,9 @@ func (r *userRoutes) update(c *gin.Context) {
 
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
+		r.l.Error(err, "http - v1 - update")
 		abortWithError(c, http.StatusBadRequest, err)
+
 		return
 	}
 
@@ -127,7 +129,9 @@ func (r *userRoutes) update(c *gin.Context) {
 
 	user, err := r.u.Update(c.Request.Context(), &req)
 	if err != nil {
+		r.l.Error(err, "http - v1 - update")
 		abortWithError(c, http.StatusBadRequest, err)
+
 		return
 	}
 
@@ -147,13 +151,17 @@ func (r *userRoutes) update(c *gin.Context) {
 func (r *userRoutes) getByID(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
+		r.l.Error(err, "http - v1 - getByID")
 		abortWithError(c, http.StatusBadRequest, err)
+
 		return
 	}
 
 	user, err := r.u.GetByID(c.Request.Context(), id)
 	if err != nil {
+		r.l.Error(err, "http - v1 - getByID")
 		abortWithError(c, http.StatusBadRequest, err)
+
 		return
 	}
 

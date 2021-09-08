@@ -1,6 +1,6 @@
-basePath: /api/v1
+basePath: /v1
 definitions:
-  domain.ArchiveUserRequest:
+  entity.ArchiveUserRequest:
     properties:
       is_archive:
         example: false
@@ -8,7 +8,7 @@ definitions:
     required:
     - is_archive
     type: object
-  domain.CreateUserRequest:
+  entity.CreateUserRequest:
     properties:
       confirm_password:
         example: secret
@@ -24,7 +24,7 @@ definitions:
     - email
     - password
     type: object
-  domain.UpdateUserRequest:
+  entity.UpdateUserRequest:
     properties:
       first_name:
         example: Alex
@@ -36,7 +36,7 @@ definitions:
         example: username
         type: string
     type: object
-  domain.User:
+  entity.User:
     properties:
       created_at:
         example: "2021-08-31T16:55:18.080768Z"
@@ -100,14 +100,14 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/domain.CreateUserRequest'
+          $ref: '#/definitions/entity.CreateUserRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/domain.User'
+            $ref: '#/definitions/entity.User'
         "400":
           description: Bad Request
           schema:
@@ -141,7 +141,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/domain.User'
+            $ref: '#/definitions/entity.User'
         "400":
           description: Bad Request
           schema:
@@ -160,7 +160,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/domain.UpdateUserRequest'
+          $ref: '#/definitions/entity.UpdateUserRequest'
       - description: User ID
         in: path
         name: id
@@ -172,7 +172,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/domain.User'
+            $ref: '#/definitions/entity.User'
         "400":
           description: Bad Request
           schema:
@@ -201,7 +201,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/domain.ArchiveUserRequest'
+          $ref: '#/definitions/entity.ArchiveUserRequest'
       produces:
       - application/json
       responses:

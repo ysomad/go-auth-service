@@ -351,7 +351,7 @@ type swaggerInfo struct {
 var SwaggerInfo = swaggerInfo{
 	Version:     "1.0",
 	Host:        "0.0.0.0:8080",
-	BasePath:    "/api/v1",
+	BasePath:    "/v1",
 	Schemes:     []string{},
 	Title:       "Golang auth service",
 	Description: "REST API authentication and user management service",
