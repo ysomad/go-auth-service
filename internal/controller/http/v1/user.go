@@ -7,7 +7,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/ysomad/go-auth-service/internal/entity"
 	"github.com/ysomad/go-auth-service/internal/service"
 )
 
@@ -28,20 +27,26 @@ func newUserRoutes(handler *gin.RouterGroup, l logger.Interface, u service.User)
 	}
 }
 
+type CreateUserRequest struct {
+	Email           string `json:"email" example:"user@mail.com" binding:"required,email,lte=255"`
+	Password        string `json:"password" example:"secret" binding:"required,gte=6,lte=128"`
+	ConfirmPassword string `json:"confirm_password" example:"secret" binding:"required,eqfield=Password"`
+}
+
 // @Summary     Sign up
 // @Description Create a new user with email and password
 // @ID          signup
 // @Tags  	    Users
 // @Accept      json
 // @Produce     json
-// @Param       request body entity.CreateUserRequest true "To create a new user email and password should be provided"
+// @Param       request body CreateUserRequest true "To create a new user email and password should be provided"
 // @Success     200 {object} entity.User
 // @Failure     400 {object} messageResponse
 // @Failure     500 {object} messageResponse
 // @Failure		422 {object} validationErrorResponse
 // @Router      /users [post]
 func (r *userRoutes) signUp(c *gin.Context) {
-	var req entity.CreateUserRequest
+	var req CreateUserRequest
 
 	if !ValidRequest(c, &req) {
 		return
@@ -58,6 +63,10 @@ func (r *userRoutes) signUp(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
+type ArchiveUserRequest struct {
+	IsArchive *bool `json:"is_archive" example:"false" binding:"required"`
+}
+
 // @Summary     Archive or restore User
 // @Description Archive or restore User
 // @ID          archive
@@ -65,13 +74,13 @@ func (r *userRoutes) signUp(c *gin.Context) {
 // @Accept      json
 // @Produce     json
 // @Param		id path int required "User ID"
-// @Param       request body entity.ArchiveUserRequest true "To archive or restore a user is_archive should be provided"
+// @Param       request body ArchiveUserRequest true "To archive or restore a user is_archive should be provided"
 // @Success     204
 // @Failure     400 {object} messageResponse
 // @Failure		422 {object} validationErrorResponse
 // @Router      /users/{id}/archive [patch]
 func (r *userRoutes) archive(c *gin.Context) {
-	var req entity.ArchiveUserRequest
+	var req ArchiveUserRequest
 
 	if !ValidRequest(c, &req) {
 		return
@@ -95,13 +104,19 @@ func (r *userRoutes) archive(c *gin.Context) {
 	c.AbortWithStatus(http.StatusNoContent)
 }
 
+type PartialUpdateRequest struct {
+	Username  string `json:"username" example:"username" binding:"omitempty,alphanum,gte=4,lte=32"`
+	FirstName string `json:"first_name" example:"Alex"  binding:"omitempty,alpha,lte=50"`
+	LastName  string `json:"last_name" example:"Malykh" binding:"omitempty,alpha,lte=50"`
+}
+
 // @Summary     Partial update
 // @Description Update user data partially
 // @ID         	update
 // @Tags  	    Users
 // @Accept      json
 // @Produce     json
-// @Param       request body entity.PartialUpdateRequest true "Provide at least one user field to update user data"
+// @Param       request body PartialUpdateRequest true "Provide at least one user field to update user data"
 // @Failure		422 {object} validationErrorResponse
 // @Param		id path int required "User ID"
 // @Success     200 {object} entity.User
@@ -109,7 +124,7 @@ func (r *userRoutes) archive(c *gin.Context) {
 // @Failure		422 {object} validationErrorResponse
 // @Router      /users/{id} [patch]
 func (r *userRoutes) partialUpdate(c *gin.Context) {
-	var req entity.PartialUpdateRequest
+	var req PartialUpdateRequest
 
 	if !ValidRequest(c, &req) {
 		return

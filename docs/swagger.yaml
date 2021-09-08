@@ -1,6 +1,36 @@
 basePath: /v1
 definitions:
-  entity.ArchiveUserRequest:
+  entity.User:
+    properties:
+      createdAt:
+        example: "2021-08-31T16:55:18.080768Z"
+        type: string
+      email:
+        example: user@mail.com
+        type: string
+      firstName:
+        example: Alex
+        type: string
+      id:
+        example: 1
+        type: integer
+      isActive:
+        example: true
+        type: boolean
+      isArchive:
+        example: false
+        type: boolean
+      lastName:
+        example: Malykh
+        type: string
+      updatedAt:
+        example: "2021-08-31T16:55:18.080768Z"
+        type: string
+      username:
+        example: username
+        type: string
+    type: object
+  v1.ArchiveUserRequest:
     properties:
       is_archive:
         example: false
@@ -8,7 +38,7 @@ definitions:
     required:
     - is_archive
     type: object
-  entity.CreateUserRequest:
+  v1.CreateUserRequest:
     properties:
       confirm_password:
         example: secret
@@ -24,43 +54,13 @@ definitions:
     - email
     - password
     type: object
-  entity.PartialUpdateRequest:
+  v1.PartialUpdateRequest:
     properties:
       first_name:
         example: Alex
         type: string
       last_name:
         example: Malykh
-        type: string
-      username:
-        example: username
-        type: string
-    type: object
-  entity.User:
-    properties:
-      created_at:
-        example: "2021-08-31T16:55:18.080768Z"
-        type: string
-      email:
-        example: user@mail.com
-        type: string
-      first_name:
-        example: Alex
-        type: string
-      id:
-        example: 1
-        type: integer
-      is_active:
-        example: true
-        type: boolean
-      is_archive:
-        example: false
-        type: boolean
-      last_name:
-        example: Malykh
-        type: string
-      updated_at:
-        example: "2021-08-31T16:55:18.080768Z"
         type: string
       username:
         example: username
@@ -100,7 +100,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/entity.CreateUserRequest'
+          $ref: '#/definitions/v1.CreateUserRequest'
       produces:
       - application/json
       responses:
@@ -160,7 +160,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/entity.PartialUpdateRequest'
+          $ref: '#/definitions/v1.PartialUpdateRequest'
       - description: User ID
         in: path
         name: id
@@ -201,7 +201,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/entity.ArchiveUserRequest'
+          $ref: '#/definitions/v1.ArchiveUserRequest'
       produces:
       - application/json
       responses:

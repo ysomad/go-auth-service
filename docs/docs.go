@@ -44,7 +44,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/entity.CreateUserRequest"
+                            "$ref": "#/definitions/v1.CreateUserRequest"
                         }
                     }
                 ],
@@ -134,7 +134,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/entity.PartialUpdateRequest"
+                            "$ref": "#/definitions/v1.PartialUpdateRequest"
                         }
                     },
                     {
@@ -195,7 +195,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/entity.ArchiveUserRequest"
+                            "$ref": "#/definitions/v1.ArchiveUserRequest"
                         }
                     }
                 ],
@@ -220,7 +220,48 @@ var doc = `{
         }
     },
     "definitions": {
-        "entity.ArchiveUserRequest": {
+        "entity.User": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string",
+                    "example": "2021-08-31T16:55:18.080768Z"
+                },
+                "email": {
+                    "type": "string",
+                    "example": "user@mail.com"
+                },
+                "firstName": {
+                    "type": "string",
+                    "example": "Alex"
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "isActive": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "isArchive": {
+                    "type": "boolean",
+                    "example": false
+                },
+                "lastName": {
+                    "type": "string",
+                    "example": "Malykh"
+                },
+                "updatedAt": {
+                    "type": "string",
+                    "example": "2021-08-31T16:55:18.080768Z"
+                },
+                "username": {
+                    "type": "string",
+                    "example": "username"
+                }
+            }
+        },
+        "v1.ArchiveUserRequest": {
             "type": "object",
             "required": [
                 "is_archive"
@@ -232,7 +273,7 @@ var doc = `{
                 }
             }
         },
-        "entity.CreateUserRequest": {
+        "v1.CreateUserRequest": {
             "type": "object",
             "required": [
                 "confirm_password",
@@ -254,7 +295,7 @@ var doc = `{
                 }
             }
         },
-        "entity.PartialUpdateRequest": {
+        "v1.PartialUpdateRequest": {
             "type": "object",
             "properties": {
                 "first_name": {
@@ -264,47 +305,6 @@ var doc = `{
                 "last_name": {
                     "type": "string",
                     "example": "Malykh"
-                },
-                "username": {
-                    "type": "string",
-                    "example": "username"
-                }
-            }
-        },
-        "entity.User": {
-            "type": "object",
-            "properties": {
-                "created_at": {
-                    "type": "string",
-                    "example": "2021-08-31T16:55:18.080768Z"
-                },
-                "email": {
-                    "type": "string",
-                    "example": "user@mail.com"
-                },
-                "first_name": {
-                    "type": "string",
-                    "example": "Alex"
-                },
-                "id": {
-                    "type": "integer",
-                    "example": 1
-                },
-                "is_active": {
-                    "type": "boolean",
-                    "example": true
-                },
-                "is_archive": {
-                    "type": "boolean",
-                    "example": false
-                },
-                "last_name": {
-                    "type": "string",
-                    "example": "Malykh"
-                },
-                "updated_at": {
-                    "type": "string",
-                    "example": "2021-08-31T16:55:18.080768Z"
                 },
                 "username": {
                     "type": "string",
