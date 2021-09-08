@@ -2,31 +2,29 @@ package v1
 
 import (
 	"errors"
-	"net/http"
-	"strings"
-
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/locales/en"
 	ut "github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
 	enTranslations "github.com/go-playground/validator/v10/translations/en"
+	"net/http"
 )
 
-type DTOValidator struct {
-	v *validator.Validate
-	t ut.Translator
+type RequestValidator struct {
+	validate *validator.Validate
+	trans ut.Translator
 }
 
-func New() (*DTOValidator, error) {
+func NewRequestValidator() (*RequestValidator, error) {
 	trans, err := getTranslator()
 	if err != nil {
 		return nil, err
 	}
 
-	return &DTOValidator{
-		v: binding.Validator.Engine().(*validator.Validate),
-		t: trans,
+	return &RequestValidator{
+		validate: binding.Validator.Engine().(*validator.Validate),
+		trans: trans,
 	}, nil
 }
 
@@ -46,47 +44,46 @@ func getTranslator() (ut.Translator, error) {
 func fmtValidationErrs(errs map[string]string) map[string]string {
 	fmtErrs := make(map[string]string, len(errs))
 	for k, v := range errs {
-		//k = strings.Split(k, ".")[1]
-		words := strings.Fields(v)[1:]
-		fmtErrs[k] = strings.Join(words, " ")
+		fmtErrs[k] = v
 	}
 
 	return fmtErrs
 }
 
-func (dtov *DTOValidator) registerTranslations() error {
-	if err := enTranslations.RegisterDefaultTranslations(dtov.v, dtov.t); err != nil {
+func (v *RequestValidator) registerTranslations() error {
+	if err := enTranslations.RegisterDefaultTranslations(v.validate, v.trans); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (dtov *DTOValidator) translateAll(err error) map[string]string {
-	return err.(validator.ValidationErrors).Translate(dtov.t)
+func (v *RequestValidator) translateAll(err error) map[string]string {
+	return err.(validator.ValidationErrors).Translate(v.trans)
 }
 
-// ValidDTO validates DTO and if it's not valid return translated validation errors to client
-func ValidDTO(c *gin.Context, dto interface{}) bool {
-	if validationErr := c.ShouldBindJSON(dto); validationErr != nil {
+func ValidRequest(c *gin.Context, req interface{}) bool {
+	if validationErr := c.ShouldBindJSON(req); validationErr != nil {
 
-		dtov, err := New()
+		v, err := NewRequestValidator()
 		if err != nil {
 			abortWithError(c, http.StatusInternalServerError, err)
+
 			return false
 		}
 
-		if regErr := dtov.registerTranslations(); regErr != nil {
+		if regErr := v.registerTranslations(); regErr != nil {
 			abortWithError(c, http.StatusInternalServerError, regErr)
+
 			return false
 		}
 
 		abortWithValidationError(
 			c,
 			http.StatusUnprocessableEntity,
-			validationErr,
-			fmtValidationErrs(dtov.translateAll(validationErr)),
+			fmtValidationErrs(v.translateAll(validationErr)),
 		)
+
 		return false
 	}
 

@@ -43,13 +43,13 @@ func newUserRoutes(handler *gin.RouterGroup, l logger.Interface, u service.User)
 func (r *userRoutes) signUp(c *gin.Context) {
 	var req entity.CreateUserRequest
 
-	if !ValidDTO(c, &req) {
+	if !ValidRequest(c, &req) {
 		return
 	}
 
 	resp, err := r.u.Create(c.Request.Context(), &req)
 	if err != nil {
-		r.l.Error(err, "http - v1 - signUp")
+		r.l.Error(err, "http - v1 - signUp - r.u.Create")
 		abortWithError(c, http.StatusBadRequest, err)
 
 		return
@@ -83,7 +83,7 @@ func (r *userRoutes) archive(c *gin.Context) {
 
 	req.ID = id
 
-	if !ValidDTO(c, &req) {
+	if !ValidRequest(c, &req) {
 		return
 	}
 
@@ -123,7 +123,7 @@ func (r *userRoutes) update(c *gin.Context) {
 
 	req.ID = id
 
-	if !ValidDTO(c, &req) {
+	if !ValidRequest(c, &req) {
 		return
 	}
 
