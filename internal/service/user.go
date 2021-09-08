@@ -15,7 +15,7 @@ func NewUserService(r UserRepo) *UserService {
 	return &UserService{r}
 }
 
-func (s *UserService) SignUp(ctx context.Context, req *entity.CreateUserRequest) (*entity.User, error) {
+func (s *UserService) Create(ctx context.Context, req *entity.CreateUserRequest) (*entity.User, error) {
 	u := entity.User{
 		Email:    req.Email,
 		Password: req.Password,

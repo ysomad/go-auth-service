@@ -47,7 +47,7 @@ func (r *userRoutes) signUp(c *gin.Context) {
 		return
 	}
 
-	resp, err := r.u.SignUp(c.Request.Context(), &req)
+	resp, err := r.u.Create(c.Request.Context(), &req)
 	if err != nil {
 		r.l.Error(err, "http - v1 - signUp")
 		abortWithError(c, http.StatusBadRequest, err)
