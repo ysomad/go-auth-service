@@ -2,6 +2,7 @@
 package app
 
 import (
+	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
@@ -9,7 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/ysomad/go-auth-service/config"
-	v1 "github.com/ysomad/go-auth-service/internal/delivery/http/v1"
+	v1 "github.com/ysomad/go-auth-service/internal/controller/http/v1"
 	"github.com/ysomad/go-auth-service/internal/service"
 	"github.com/ysomad/go-auth-service/internal/service/repo"
 	"github.com/ysomad/go-auth-service/pkg/httpserver"
@@ -19,10 +20,12 @@ import (
 
 // Run creates objects via constructors.
 func Run(cfg *config.Config) {
+	l := logger.New(cfg.Log.Level)
+
 	// Repository
 	pg, err := postgres.New(cfg.PG.URL, postgres.MaxPoolSize(cfg.PG.PoolMax))
 	if err != nil {
-		logger.Fatal(err, "app - Run - postgres.NewPostgres")
+		l.Fatal(fmt.Errorf("app - Run - postgres.New: %w", err))
 	}
 	defer pg.Close()
 
@@ -31,7 +34,7 @@ func Run(cfg *config.Config) {
 
 	// HTTP Server
 	handler := gin.New()
-	v1.NewRouter(handler, userService)
+	v1.NewRouter(handler, l, userService)
 	httpServer := httpserver.New(handler, httpserver.Port(cfg.HTTP.Port))
 
 	// Waiting signal
@@ -40,14 +43,14 @@ func Run(cfg *config.Config) {
 
 	select {
 	case s := <-interrupt:
-		logger.Info("app - Run - signal: " + s.String())
+		l.Info("app - Run - signal: " + s.String())
 	case err = <-httpServer.Notify():
-		logger.Error(err, "app - Run - httpServer.Notify")
+		l.Error(fmt.Errorf("app - Run - httpServer.Notify: %w", err))
 	}
 
 	// Shutdown
 	err = httpServer.Shutdown()
 	if err != nil {
-		logger.Error(err, "app - Run - httpServer.Shutdown")
+		l.Error(fmt.Errorf("app - Run - httpServer.Shutdown: %w", err))
 	}
 }

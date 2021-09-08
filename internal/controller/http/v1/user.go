@@ -1,21 +1,23 @@
 package v1
 
 import (
+	"github.com/ysomad/go-auth-service/pkg/logger"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/ysomad/go-auth-service/internal/domain"
+	"github.com/ysomad/go-auth-service/internal/entity"
 	"github.com/ysomad/go-auth-service/internal/service"
 )
 
 type userRoutes struct {
-	userService service.User
+	l logger.Interface
+	u service.User
 }
 
-func newUserRoutes(handler *gin.RouterGroup, us service.User) {
-	r := &userRoutes{us}
+func newUserRoutes(handler *gin.RouterGroup, l logger.Interface, u service.User) {
+	r := &userRoutes{l, u}
 
 	h := handler.Group("/users")
 	{
@@ -32,22 +34,24 @@ func newUserRoutes(handler *gin.RouterGroup, us service.User) {
 // @Tags  	    Users
 // @Accept      json
 // @Produce     json
-// @Param       request body domain.CreateUserRequest true "To create a new user email and password should be provided"
-// @Success     200 {object} domain.User
+// @Param       request body entity.CreateUserRequest true "To create a new user email and password should be provided"
+// @Success     200 {object} entity.User
 // @Failure     400 {object} messageResponse
 // @Failure     500 {object} messageResponse
 // @Failure		422 {object} validationErrorResponse
-// @Router      /users [post].
+// @Router      /users [post]
 func (r *userRoutes) signUp(c *gin.Context) {
-	var req domain.CreateUserRequest
+	var req entity.CreateUserRequest
 
 	if !ValidDTO(c, &req) {
 		return
 	}
 
-	resp, err := r.userService.SignUp(c.Request.Context(), &req)
+	resp, err := r.u.SignUp(c.Request.Context(), &req)
 	if err != nil {
+		r.l.Error(err, "http - v1 - signUp")
 		abortWithError(c, http.StatusBadRequest, err)
+
 		return
 	}
 
@@ -61,17 +65,19 @@ func (r *userRoutes) signUp(c *gin.Context) {
 // @Accept      json
 // @Produce     json
 // @Param		id path int required "User ID"
-// @Param       request body domain.ArchiveUserRequest true "To archive or restore a user is_archive should be provided"
+// @Param       request body entity.ArchiveUserRequest true "To archive or restore a user is_archive should be provided"
 // @Success     204
 // @Failure     400 {object} messageResponse
 // @Failure		422 {object} validationErrorResponse
-// @Router      /users/{id}/archive [patch].
+// @Router      /users/{id}/archive [patch]
 func (r *userRoutes) archive(c *gin.Context) {
-	var req domain.ArchiveUserRequest
+	var req entity.ArchiveUserRequest
 
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
+		r.l.Error(err, "http - v1 - archive")
 		abortWithError(c, http.StatusBadRequest, err)
+
 		return
 	}
 
@@ -81,8 +87,10 @@ func (r *userRoutes) archive(c *gin.Context) {
 		return
 	}
 
-	if err = r.userService.Archive(c.Request.Context(), &req); err != nil {
+	if err = r.u.Archive(c.Request.Context(), &req); err != nil {
+		r.l.Error(err, "http - v1 - archive")
 		abortWithError(c, http.StatusBadRequest, err)
+
 		return
 	}
 
@@ -95,15 +103,15 @@ func (r *userRoutes) archive(c *gin.Context) {
 // @Tags  	    Users
 // @Accept      json
 // @Produce     json
-// @Param       request body domain.UpdateUserRequest true "Provide at least one user field to update user data"
+// @Param       request body entity.UpdateUserRequest true "Provide at least one user field to update user data"
 // @Failure		422 {object} validationErrorResponse
 // @Param		id path int required "User ID"
-// @Success     200 {object} domain.User
+// @Success     200 {object} entity.User
 // @Failure     400 {object} messageResponse
 // @Failure		422 {object} validationErrorResponse
-// @Router      /users/{id} [patch].
+// @Router      /users/{id} [patch]
 func (r *userRoutes) update(c *gin.Context) {
-	var req domain.UpdateUserRequest
+	var req entity.UpdateUserRequest
 
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -117,7 +125,7 @@ func (r *userRoutes) update(c *gin.Context) {
 		return
 	}
 
-	user, err := r.userService.Update(c.Request.Context(), &req)
+	user, err := r.u.Update(c.Request.Context(), &req)
 	if err != nil {
 		abortWithError(c, http.StatusBadRequest, err)
 		return
@@ -133,9 +141,9 @@ func (r *userRoutes) update(c *gin.Context) {
 // @Accept      json
 // @Produce     json
 // @Param		id path int required "User ID"
-// @Success     200 {object} domain.User
+// @Success     200 {object} entity.User
 // @Failure     400 {object} messageResponse
-// @Router      /users/{id} [get].
+// @Router      /users/{id} [get]
 func (r *userRoutes) getByID(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -143,7 +151,7 @@ func (r *userRoutes) getByID(c *gin.Context) {
 		return
 	}
 
-	user, err := r.userService.GetByID(c.Request.Context(), id)
+	user, err := r.u.GetByID(c.Request.Context(), id)
 	if err != nil {
 		abortWithError(c, http.StatusBadRequest, err)
 		return

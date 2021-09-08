@@ -2,21 +2,21 @@ package service
 
 import (
 	"context"
-	"github.com/ysomad/go-auth-service/internal/domain"
+	"github.com/ysomad/go-auth-service/internal/entity"
 )
 
 type (
 	User interface {
-		SignUp(context.Context, *domain.CreateUserRequest) (*domain.User, error)
-		Archive(context.Context, *domain.ArchiveUserRequest) error // TODO: return domain.User
-		Update(context.Context, *domain.UpdateUserRequest) (*domain.User, error)
-		GetByID(context.Context, int) (*domain.User, error)
+		SignUp(context.Context, *entity.CreateUserRequest) (*entity.User, error)
+		Archive(context.Context, *entity.ArchiveUserRequest) error // TODO: return entity.User
+		Update(context.Context, *entity.UpdateUserRequest) (*entity.User, error)
+		GetByID(context.Context, int) (*entity.User, error)
 	}
 
 	UserRepo interface {
-		Create(context.Context, *domain.User) error
-		Archive(context.Context, *domain.ArchiveUserRequest) error // TODO: work with domain.User model
-		Update(context.Context, *domain.User) error
-		GetByID(context.Context, *domain.User) error
+		Create(context.Context, *entity.User) error
+		Archive(context.Context, *entity.ArchiveUserRequest) error // TODO: work with entity.User model
+		Update(context.Context, *entity.User) error
+		GetByID(context.Context, *entity.User) error
 	}
 )

@@ -2,7 +2,7 @@ package service
 
 import (
 	"context"
-	"github.com/ysomad/go-auth-service/internal/domain"
+	"github.com/ysomad/go-auth-service/internal/entity"
 	"time"
 )
 
@@ -16,8 +16,8 @@ func NewUserService(r UserRepo) *UserService {
 
 // TODO: написать тесты с моками
 
-func (s *UserService) SignUp(ctx context.Context, req *domain.CreateUserRequest) (*domain.User, error) {
-	u := domain.User{
+func (s *UserService) SignUp(ctx context.Context, req *entity.CreateUserRequest) (*entity.User, error) {
+	u := entity.User{
 		Email:    req.Email,
 		Password: req.Password,
 	}
@@ -36,7 +36,7 @@ func (s *UserService) SignUp(ctx context.Context, req *domain.CreateUserRequest)
 }
 
 // Archive updates is_archive field for user
-func (s *UserService) Archive(ctx context.Context, req *domain.ArchiveUserRequest) error {
+func (s *UserService) Archive(ctx context.Context, req *entity.ArchiveUserRequest) error {
 	if err := s.repo.Archive(ctx, req); err != nil {
 		return err
 	}
@@ -45,8 +45,8 @@ func (s *UserService) Archive(ctx context.Context, req *domain.ArchiveUserReques
 }
 
 // Update updates all updatable user columns
-func (s *UserService) Update(ctx context.Context, req *domain.UpdateUserRequest) (*domain.User, error) {
-	u := domain.User{
+func (s *UserService) Update(ctx context.Context, req *entity.UpdateUserRequest) (*entity.User, error) {
+	u := entity.User{
 		ID:        req.ID,
 		Username:  &req.Username,
 		FirstName: &req.FirstName,
@@ -62,8 +62,8 @@ func (s *UserService) Update(ctx context.Context, req *domain.UpdateUserRequest)
 }
 
 // GetByID gets user data by ID
-func (s *UserService) GetByID(ctx context.Context, id int) (*domain.User, error) {
-	u := domain.User{ID: id}
+func (s *UserService) GetByID(ctx context.Context, id int) (*entity.User, error) {
+	u := entity.User{ID: id}
 
 	if err := s.repo.GetByID(ctx, &u); err != nil {
 		return nil, err

@@ -3,20 +3,21 @@ package postgres
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"time"
 
 	"github.com/Masterminds/squirrel"
 	"github.com/jackc/pgx/v4/pgxpool"
-	"github.com/pkg/errors"
 )
 
 const (
-	defaultMaxPoolSize  = 1
-	defaultConnAttempts = 10
-	defaultConnTimeout  = time.Second
+	_defaultMaxPoolSize  = 1
+	_defaultConnAttempts = 10
+	_defaultConnTimeout  = time.Second
 )
 
+// Postgres -.
 type Postgres struct {
 	maxPoolSize  int
 	connAttempts int
@@ -26,11 +27,12 @@ type Postgres struct {
 	Pool    *pgxpool.Pool
 }
 
+// New -.
 func New(url string, opts ...Option) (*Postgres, error) {
 	pg := &Postgres{
-		maxPoolSize:  defaultMaxPoolSize,
-		connAttempts: defaultConnAttempts,
-		connTimeout:  defaultConnTimeout,
+		maxPoolSize:  _defaultMaxPoolSize,
+		connAttempts: _defaultConnAttempts,
+		connTimeout:  _defaultConnTimeout,
 	}
 
 	// Custom options
@@ -42,7 +44,7 @@ func New(url string, opts ...Option) (*Postgres, error) {
 
 	poolConfig, err := pgxpool.ParseConfig(url)
 	if err != nil {
-		return nil, errors.Wrap(err, "postgres - New - pgxpool.ParseConfig")
+		return nil, fmt.Errorf("postgres - NewPostgres - pgxpool.ParseConfig: %w", err)
 	}
 
 	poolConfig.MaxConns = int32(pg.maxPoolSize)
@@ -61,12 +63,13 @@ func New(url string, opts ...Option) (*Postgres, error) {
 	}
 
 	if err != nil {
-		return nil, errors.Wrap(err, "postgres - New - connAttempts == 0")
+		return nil, fmt.Errorf("postgres - NewPostgres - connAttempts == 0: %w", err)
 	}
 
 	return pg, nil
 }
 
+// Close -.
 func (p *Postgres) Close() {
 	if p.Pool != nil {
 		p.Pool.Close()
