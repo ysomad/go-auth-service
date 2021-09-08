@@ -47,7 +47,7 @@ func (r *userRoutes) signUp(c *gin.Context) {
 		return
 	}
 
-	resp, err := r.u.Create(c.Request.Context(), req)
+	resp, err := r.u.Create(c.Request.Context(), req.Email, req.Password)
 	if err != nil {
 		r.l.Error(err, "http - v1 - signUp - r.u.Create")
 		abortWithError(c, http.StatusBadRequest, err)
@@ -73,6 +73,10 @@ func (r *userRoutes) signUp(c *gin.Context) {
 func (r *userRoutes) archive(c *gin.Context) {
 	var req entity.ArchiveUserRequest
 
+	if !ValidRequest(c, &req) {
+		return
+	}
+
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		r.l.Error(err, "http - v1 - archive")
@@ -81,13 +85,7 @@ func (r *userRoutes) archive(c *gin.Context) {
 		return
 	}
 
-	req.ID = id
-
-	if !ValidRequest(c, &req) {
-		return
-	}
-
-	if err = r.u.Archive(c.Request.Context(), &req); err != nil {
+	if err = r.u.Archive(c.Request.Context(), id, *req.IsArchive); err != nil {
 		r.l.Error(err, "http - v1 - archive")
 		abortWithError(c, http.StatusBadRequest, err)
 

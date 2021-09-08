@@ -9,15 +9,15 @@ import (
 
 type (
 	User interface {
-		Create(ctx context.Context, req entity.CreateUserRequest) (*entity.User, error)
-		Archive(context.Context, *entity.ArchiveUserRequest) error
+		Create(ctx context.Context, email string, password string) (*entity.User, error)
+		Archive(ctx context.Context, id int, isArchive bool) error
 		Update(context.Context, *entity.UpdateUserRequest) (*entity.User, error)
 		GetByID(context.Context, int) (*entity.User, error)
 	}
 
 	UserRepo interface {
 		Create(ctx context.Context, email string, password string) (*entity.User, error)
-		Archive(context.Context, *entity.ArchiveUserRequest) error
+		Archive(ctx context.Context, id int, isArchive bool) error
 		Update(context.Context, *entity.User) error
 		GetByID(context.Context, *entity.User) error
 	}
