@@ -1,6 +1,6 @@
 package repo
 
-import "github.com/pkg/errors"
+import "errors"
 
 // stripNilValues removes empty strings and nil values from map https://github.com/Masterminds/squirrel/issues/66
 func stripNilValues(in map[string]interface{}) (map[string]interface{}, error) {

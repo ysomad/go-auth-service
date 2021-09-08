@@ -7,7 +7,7 @@
         "version": "1.0"
     },
     "host": "0.0.0.0:8080",
-    "basePath": "/api/v1",
+    "basePath": "/v1",
     "paths": {
         "/users": {
             "post": {
@@ -30,7 +30,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/domain.CreateUserRequest"
+                            "$ref": "#/definitions/entity.CreateUserRequest"
                         }
                     }
                 ],
@@ -38,7 +38,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/domain.User"
+                            "$ref": "#/definitions/entity.User"
                         }
                     },
                     "400": {
@@ -89,7 +89,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/domain.User"
+                            "$ref": "#/definitions/entity.User"
                         }
                     },
                     "400": {
@@ -120,7 +120,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/domain.UpdateUserRequest"
+                            "$ref": "#/definitions/entity.UpdateUserRequest"
                         }
                     },
                     {
@@ -135,7 +135,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/domain.User"
+                            "$ref": "#/definitions/entity.User"
                         }
                     },
                     "400": {
@@ -181,7 +181,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/domain.ArchiveUserRequest"
+                            "$ref": "#/definitions/entity.ArchiveUserRequest"
                         }
                     }
                 ],
@@ -206,7 +206,7 @@
         }
     },
     "definitions": {
-        "domain.ArchiveUserRequest": {
+        "entity.ArchiveUserRequest": {
             "type": "object",
             "required": [
                 "is_archive"
@@ -218,7 +218,7 @@
                 }
             }
         },
-        "domain.CreateUserRequest": {
+        "entity.CreateUserRequest": {
             "type": "object",
             "required": [
                 "confirm_password",
@@ -240,7 +240,7 @@
                 }
             }
         },
-        "domain.UpdateUserRequest": {
+        "entity.UpdateUserRequest": {
             "type": "object",
             "properties": {
                 "first_name": {
@@ -257,7 +257,7 @@
                 }
             }
         },
-        "domain.User": {
+        "entity.User": {
             "type": "object",
             "properties": {
                 "created_at": {
