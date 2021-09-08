@@ -9,7 +9,7 @@ import (
 
 type (
 	User interface {
-		SignUp(context.Context, *entity.CreateUserRequest) (*entity.User, error)
+		Create(context.Context, *entity.CreateUserRequest) (*entity.User, error)
 		Archive(context.Context, *entity.ArchiveUserRequest) error
 		Update(context.Context, *entity.UpdateUserRequest) (*entity.User, error)
 		GetByID(context.Context, int) (*entity.User, error)
