@@ -104,10 +104,8 @@ paths:
       produces:
       - application/json
       responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/entity.User'
+        "204":
+          description: ""
         "400":
           description: Bad Request
           schema:
@@ -169,10 +167,8 @@ paths:
       produces:
       - application/json
       responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/entity.User'
+        "204":
+          description: ""
         "400":
           description: Bad Request
           schema:

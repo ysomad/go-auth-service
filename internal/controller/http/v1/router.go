@@ -2,7 +2,6 @@
 package v1
 
 import (
-	"github.com/ysomad/go-auth-service/pkg/logger"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -21,7 +20,7 @@ import (
 // @host        0.0.0.0:8080
 // @BasePath    /v1
 
-func NewRouter(handler *gin.Engine, l logger.Interface, u service.User) {
+func NewRouter(handler *gin.Engine, u service.User) {
 	// Options
 	handler.Use(gin.Logger())
 	handler.Use(gin.Recovery())
@@ -36,6 +35,6 @@ func NewRouter(handler *gin.Engine, l logger.Interface, u service.User) {
 	// Routers
 	h := handler.Group("/v1")
 	{
-		newUserRoutes(h, l, u)
+		newUserRoutes(h, u)
 	}
 }
