@@ -17,13 +17,13 @@ func NewUserService(r UserRepo) *UserService {
 }
 
 // Create creates new user with email and encrypted password
-func (s *UserService) Create(ctx context.Context, email string, password string) (*entity.User, error) {
-	p, err := crypto.EncryptPassword(password, 11)
+func (s *UserService) Create(ctx context.Context, req entity.CreateUserRequest) (*entity.User, error) {
+	p, err := crypto.EncryptPassword(req.Password, 11)
 	if err != nil {
 		return nil, err
 	}
 
-	u, err := s.repo.Create(ctx, email, p)
+	u, err := s.repo.Create(ctx, req.Email, p)
 	if err != nil {
 		return nil, err
 	}
