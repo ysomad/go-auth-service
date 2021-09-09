@@ -10,16 +10,16 @@ import (
 
 type (
 	User interface {
-		Create(ctx context.Context, req entity.CreateUserRequest) (*entity.User, error)
+		SignUp(ctx context.Context, req entity.CreateUserRequest) error
 		Archive(ctx context.Context, id int, isArchive bool) error
-		PartialUpdate(ctx context.Context, id int, req entity.PartialUpdateRequest) (*entity.User, error)
+		PartialUpdate(ctx context.Context, id int, req entity.PartialUpdateRequest) error
 		GetByID(ctx context.Context, id int) (*entity.User, error)
 	}
 
 	UserRepo interface {
-		Create(ctx context.Context, email string, password string) (*entity.User, error)
+		Create(ctx context.Context, email string, password string) error
 		Archive(ctx context.Context, id int, isArchive bool) error
-		PartialUpdate(ctx context.Context, id int, cols map[string]interface{}) (*entity.User, error)
+		PartialUpdate(ctx context.Context, id int, cols map[string]interface{}) error
 		GetByID(ctx context.Context, id int) (*entity.User, error)
 	}
 )

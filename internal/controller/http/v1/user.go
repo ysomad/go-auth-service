@@ -1,23 +1,21 @@
 package v1
 
 import (
-	"github.com/ysomad/go-auth-service/internal/entity"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 
+	"github.com/ysomad/go-auth-service/internal/entity"
 	"github.com/ysomad/go-auth-service/internal/service"
-	"github.com/ysomad/go-auth-service/pkg/logger"
 )
 
 type userRoutes struct {
-	log         logger.Interface
 	userService service.User
 }
 
-func newUserRoutes(handler *gin.RouterGroup, l logger.Interface, u service.User) {
-	r := &userRoutes{l, u}
+func newUserRoutes(handler *gin.RouterGroup, u service.User) {
+	r := &userRoutes{u}
 
 	h := handler.Group("/users")
 	{
@@ -35,7 +33,7 @@ func newUserRoutes(handler *gin.RouterGroup, l logger.Interface, u service.User)
 // @Accept      json
 // @Produce     json
 // @Param       request body entity.CreateUserRequest true "To create a new user email and password should be provided"
-// @Success     200 {object} entity.User
+// @Success     204
 // @Failure     400 {object} messageResponse
 // @Failure     500 {object} messageResponse
 // @Failure		422 {object} validationErrorResponse
@@ -47,15 +45,12 @@ func (r *userRoutes) signUp(c *gin.Context) {
 		return
 	}
 
-	resp, err := r.userService.Create(c.Request.Context(), req)
-	if err != nil {
-		r.log.Error(err, "http - v1 - signUp - r.u.Create")
+	if err := r.userService.SignUp(c.Request.Context(), req); err != nil {
 		abortWithError(c, http.StatusBadRequest, err)
-
 		return
 	}
 
-	c.JSON(http.StatusOK, resp)
+	c.Status(http.StatusNoContent)
 }
 
 // @Summary     Archive or restore User
@@ -79,20 +74,16 @@ func (r *userRoutes) archive(c *gin.Context) {
 
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		r.log.Error(err, "http - v1 - archive")
 		abortWithError(c, http.StatusBadRequest, err)
-
 		return
 	}
 
 	if err = r.userService.Archive(c.Request.Context(), id, *req.IsArchive); err != nil {
-		r.log.Error(err, "http - v1 - archive")
 		abortWithError(c, http.StatusBadRequest, err)
-
 		return
 	}
 
-	c.AbortWithStatus(http.StatusNoContent)
+	c.Status(http.StatusNoContent)
 }
 
 // @Summary     Partial update
@@ -102,9 +93,8 @@ func (r *userRoutes) archive(c *gin.Context) {
 // @Accept      json
 // @Produce     json
 // @Param       request body entity.PartialUpdateRequest true "Provide at least one user field to update user data"
-// @Failure		422 {object} validationErrorResponse
 // @Param		id path int required "User ID"
-// @Success     200 {object} entity.User
+// @Success     204
 // @Failure     400 {object} messageResponse
 // @Failure		422 {object} validationErrorResponse
 // @Router      /users/{id} [patch]
@@ -117,21 +107,16 @@ func (r *userRoutes) partialUpdate(c *gin.Context) {
 
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		r.log.Error(err, "http - v1 - partialUpdate - strconv.Atoi")
 		abortWithError(c, http.StatusBadRequest, err)
-
 		return
 	}
 
-	user, err := r.userService.PartialUpdate(c.Request.Context(), id, req)
-	if err != nil {
-		r.log.Error(err, "http - v1 - partialUpdate - r.u.PartialUpdate")
+	if err = r.userService.PartialUpdate(c.Request.Context(), id, req); err != nil {
 		abortWithError(c, http.StatusBadRequest, err)
-
 		return
 	}
 
-	c.JSON(http.StatusOK, user)
+	c.Status(http.StatusNoContent)
 }
 
 // @Summary     Get
@@ -147,17 +132,13 @@ func (r *userRoutes) partialUpdate(c *gin.Context) {
 func (r *userRoutes) getByID(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		r.log.Error(err, "http - v1 - getByID")
 		abortWithError(c, http.StatusBadRequest, err)
-
 		return
 	}
 
 	user, err := r.userService.GetByID(c.Request.Context(), id)
 	if err != nil {
-		r.log.Error(err, "http - v1 - getByID")
 		abortWithError(c, http.StatusBadRequest, err)
-
 		return
 	}
 

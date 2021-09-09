@@ -49,11 +49,8 @@ var doc = `{
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/entity.User"
-                        }
+                    "204": {
+                        "description": ""
                     },
                     "400": {
                         "description": "Bad Request",
@@ -146,11 +143,8 @@ var doc = `{
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/entity.User"
-                        }
+                    "204": {
+                        "description": ""
                     },
                     "400": {
                         "description": "Bad Request",

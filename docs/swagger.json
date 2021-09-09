@@ -35,11 +35,8 @@
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/entity.User"
-                        }
+                    "204": {
+                        "description": ""
                     },
                     "400": {
                         "description": "Bad Request",
@@ -132,11 +129,8 @@
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/entity.User"
-                        }
+                    "204": {
+                        "description": ""
                     },
                     "400": {
                         "description": "Bad Request",
