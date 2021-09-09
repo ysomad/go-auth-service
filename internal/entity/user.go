@@ -19,20 +19,21 @@ type User struct {
 	IsSuperuser bool      `json:"-"`
 }
 
+// Data transfer objects
 type (
-	// CreateUserRequest represents request for user sign up
+	// CreateUserRequest represents request DTO for user sign up
 	CreateUserRequest struct {
 		Email           string `json:"email" example:"user@mail.com" binding:"required,email,lte=255"`
 		Password        string `json:"password" example:"secret" binding:"required,gte=6,lte=128"`
 		ConfirmPassword string `json:"confirmPassword" example:"secret" binding:"required,eqfield=Password"`
 	}
 
-	// ArchiveUserRequest represents request for archive or restore user operation
+	// ArchiveUserRequest represents request DTO for archive or restore user operation
 	ArchiveUserRequest struct {
 		IsArchive *bool `json:"isArchive" example:"false" binding:"required"`
 	}
 
-	// PartialUpdateRequest represents request for user partial update
+	// PartialUpdateRequest represents request DTO for user partial update
 	PartialUpdateRequest struct {
 		Username  string `json:"username" example:"username" binding:"omitempty,alphanum,gte=4,lte=32"`
 		FirstName string `json:"firstName" example:"Alex"  binding:"omitempty,alpha,lte=50"`
