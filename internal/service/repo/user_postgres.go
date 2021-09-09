@@ -3,7 +3,6 @@ package repo
 import (
 	"context"
 	"errors"
-	"fmt"
 	"time"
 
 	sq "github.com/Masterminds/squirrel"
@@ -15,7 +14,13 @@ import (
 	"github.com/ysomad/go-auth-service/pkg/postgres"
 )
 
-const table = "users"
+const _table = "users"
+
+const (
+	uniqueEmailErr    = "user with given email already exists"
+	uniqueUsernameErr = "user with given username already exists"
+	notFoundErr       = "user not found"
+)
 
 type UserRepo struct {
 	*postgres.Postgres
@@ -28,7 +33,7 @@ func NewUserRepo(pg *postgres.Postgres) *UserRepo {
 // Create creates new user with email and password
 func (r *UserRepo) Create(ctx context.Context, email string, password string) (*entity.User, error) {
 	sql, args, err := r.Builder.
-		Insert(table).
+		Insert(_table).
 		Columns("email", "password").
 		Values(email, password).
 		Suffix("RETURNING id, created_at, updated_at, is_active, is_archive").
@@ -51,7 +56,7 @@ func (r *UserRepo) Create(ctx context.Context, email string, password string) (*
 		if errors.As(err, &pgErr) {
 			// SQL err handling by code
 			if pgErr.Code == pgerrcode.UniqueViolation {
-				return nil, errors.New(fmt.Sprintf("user with email %s already exists", u.Email))
+				return nil, errors.New(uniqueEmailErr)
 			}
 
 			// Return more detailed error message
@@ -67,7 +72,7 @@ func (r *UserRepo) Create(ctx context.Context, email string, password string) (*
 // Archive sets is_archive to isArchive for user with id
 func (r *UserRepo) Archive(ctx context.Context, id int, isArchive bool) error {
 	sql, args, err := r.Builder.
-		Update(table).
+		Update(_table).
 		Set("is_archive", isArchive).
 		Set("updated_at", time.Now()).
 		Where(sq.Eq{"id": id, "is_archive": !isArchive}).
@@ -82,15 +87,7 @@ func (r *UserRepo) Archive(ctx context.Context, id int, isArchive bool) error {
 	}
 	// Create error message if archived/not archived user not found
 	if commandTag.RowsAffected() == 0 {
-		var state string
-
-		if !isArchive {
-			state = "archived"
-		} else {
-			state = "not archived"
-		}
-
-		return errors.New(fmt.Sprintf("%s user with id %d not found", state, id))
+		return errors.New(notFoundErr)
 	}
 
 	return nil
@@ -105,7 +102,7 @@ func (r *UserRepo) PartialUpdate(ctx context.Context, id int, cols map[string]in
 	}
 
 	sql, args, err := r.Builder.
-		Update(table).
+		Update(_table).
 		SetMap(cols).
 		Set("updated_at", u.UpdatedAt).
 		Where(sq.Eq{"id": u.ID, "is_archive": false}).
@@ -125,14 +122,14 @@ func (r *UserRepo) PartialUpdate(ctx context.Context, id int, cols map[string]in
 		&u.IsArchive,
 	); err != nil {
 		if err == pgx.ErrNoRows {
-			return nil, errors.New(fmt.Sprintf("user with id %d not found", u.ID))
+			return nil, errors.New(notFoundErr)
 		}
 
 		var pgErr *pgconn.PgError
 
 		if errors.As(err, &pgErr) {
 			if pgErr.Code == pgerrcode.UniqueViolation {
-				return nil, errors.New(fmt.Sprintf("user with username %s already exists", *u.Username))
+				return nil, errors.New(uniqueUsernameErr)
 			}
 
 			return nil, errors.New(pgErr.Detail)
@@ -150,7 +147,7 @@ func (r *UserRepo) GetByID(ctx context.Context, id int) (*entity.User, error) {
 
 	sql, args, err := r.Builder.
 		Select("email, username, first_name, last_name, created_at, updated_at, is_active, is_archive").
-		From(table).
+		From(_table).
 		Where(sq.Eq{"id": u.ID}).
 		ToSql()
 	if err != nil {
@@ -168,7 +165,7 @@ func (r *UserRepo) GetByID(ctx context.Context, id int) (*entity.User, error) {
 		&u.IsArchive,
 	); err != nil {
 		if err == pgx.ErrNoRows {
-			return nil, errors.New(fmt.Sprintf("user with id %d not found", u.ID))
+			return nil, errors.New(notFoundErr)
 		}
 
 		return nil, err
