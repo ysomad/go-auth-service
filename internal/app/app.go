@@ -3,7 +3,6 @@ package app
 
 import (
 	"fmt"
-	"github.com/ysomad/go-auth-service/pkg/crypto"
 	"os"
 	"os/signal"
 	"syscall"
@@ -31,7 +30,7 @@ func Run(cfg *config.Config) {
 	defer pg.Close()
 
 	// Service
-	userService := service.NewUserService(repo.NewUserRepo(pg), crypto.NewPasswordService())
+	userService := service.NewUserService(repo.NewUserRepo(pg))
 
 	// HTTP Server
 	handler := gin.New()
