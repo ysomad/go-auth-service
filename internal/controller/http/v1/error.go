@@ -19,4 +19,3 @@ func abortWithError(c *gin.Context, code int, err error) {
 func abortWithValidationError(c *gin.Context, code int, errs map[string]string) {
 	c.AbortWithStatusJSON(code, validationErrorResponse{errs})
 }
-

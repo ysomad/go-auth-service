@@ -9,7 +9,7 @@ import (
 )
 
 type UserService struct {
-	repo            UserRepo
+	repo UserRepo
 }
 
 func NewUserService(r UserRepo) *UserService {
@@ -41,7 +41,7 @@ func (s *UserService) Archive(ctx context.Context, id int, isArchive bool) error
 
 // PartialUpdate updates all updatable user columns
 func (s *UserService) PartialUpdate(ctx context.Context, id int, req entity.PartialUpdateRequest) error {
-	cols := map[string]interface{} {
+	cols := map[string]interface{}{
 		"username":   req.Username,
 		"first_name": req.FirstName,
 		"last_name":  req.LastName,
