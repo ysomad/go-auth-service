@@ -2,13 +2,14 @@ package v1
 
 import (
 	"errors"
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/locales/en"
 	ut "github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
 	enTranslations "github.com/go-playground/validator/v10/translations/en"
-	"net/http"
 )
 
 type RequestValidator struct {
@@ -38,16 +39,6 @@ func getTranslator() (ut.Translator, error) {
 	}
 
 	return trans, nil
-}
-
-// fmtValidationErrs formats translated validation errors
-func fmtValidationErrs(errs map[string]string) map[string]string {
-	fmtErrs := make(map[string]string, len(errs))
-	for k, v := range errs {
-		fmtErrs[k] = v
-	}
-
-	return fmtErrs
 }
 
 func (v *RequestValidator) registerTranslations() error {
@@ -81,7 +72,7 @@ func ValidRequest(c *gin.Context, req interface{}) bool {
 		abortWithValidationError(
 			c,
 			http.StatusUnprocessableEntity,
-			fmtValidationErrs(v.translateAll(validationErr)),
+			v.translateAll(validationErr),
 		)
 
 		return false
