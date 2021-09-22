@@ -44,9 +44,11 @@ func (as *AuthService) Login(ctx context.Context, req entity.LoginRequest, s ent
 		return entity.LoginResponse{}, err
 	}
 
-	s.SetUserID(u.ID)
-	s.SetRefreshToken(r)
-	s.SetExpiresIn(as.expiresIn)
+	// Set refresh session public fields
+	s.UserID = u.ID
+	s.RefreshToken = r
+	s.ExpiresIn = as.expiresIn
+	s.CreatedAt = time.Now()
 
 	// Create user session in redis
 	if err = as.session.Create(s); err != nil {

@@ -6,23 +6,20 @@ import (
 )
 
 type RefreshSession struct {
+	userAgent    string
+	userIP       string
+	fingerprint  uuid.UUID
+
 	RefreshToken uuid.UUID
 	UserID       int
-	UserAgent    string
-	UserIP       string
-	Fingerprint  uuid.UUID
 	ExpiresIn    time.Duration
 	CreatedAt    time.Time
 }
 
-func (s *RefreshSession) SetUserID(id int) {
-	s.UserID = id
-}
-
-func (s *RefreshSession) SetRefreshToken(t uuid.UUID) {
-	s.RefreshToken = t
-}
-
-func (s *RefreshSession) SetExpiresIn(e time.Duration) {
-	s.ExpiresIn = e
+func NewRefreshSession(ua string, uip string, fp uuid.UUID) RefreshSession {
+	return RefreshSession{
+		userAgent: ua,
+		userIP: uip,
+		fingerprint: fp,
+	}
 }
