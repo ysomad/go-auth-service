@@ -9,7 +9,7 @@ import (
 var (
 	UserUniqueViolationErr = errors.New("user with given email or username already exists")
 	UserNotFoundErr        = errors.New("user not found")
-	UserIncorrectCredsErr       = errors.New("incorrect email or password")
+	UserIncorrectCredsErr  = errors.New("incorrect email or password")
 	PartialUpdateErr       = errors.New("provide at least one field to update resource partially")
 )
 

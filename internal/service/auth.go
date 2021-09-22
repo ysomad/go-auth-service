@@ -10,10 +10,10 @@ import (
 )
 
 type AuthService struct {
-	session   SessionRepo
-	user      UserRepo
-	jwt       auth.JWT
-	expiresIn time.Duration
+	session          SessionRepo
+	user             UserRepo
+	jwt              auth.JWT
+	sessionExpiresIn time.Duration
 }
 
 func NewAuthService(s SessionRepo, u UserRepo, m auth.JWT, e time.Duration) *AuthService {
@@ -46,7 +46,7 @@ func (as *AuthService) Login(ctx context.Context, req entity.LoginRequest, s ent
 	// Set refresh session public fields
 	s.UserID = u.ID
 	s.RefreshToken = r
-	s.ExpiresIn = as.expiresIn
+	s.ExpiresIn = as.sessionExpiresIn
 	s.CreatedAt = time.Now()
 
 	// Create user session in redis
