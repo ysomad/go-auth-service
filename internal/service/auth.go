@@ -29,7 +29,7 @@ func (as *AuthService) Login(ctx context.Context, req entity.LoginRequest, s ent
 
 	// Compare passwords
 	if err = bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(req.Password)); err != nil {
-		return entity.LoginResponse{}, entity.UserIncorrectCredsErr
+		return entity.LoginResponse{}, entity.UserIncorrectErr
 	}
 
 	// Generate access and refresh token

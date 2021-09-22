@@ -165,7 +165,7 @@ func (r *UserRepo) GetByEmail(ctx context.Context, email string) (*entity.User, 
 		&u.IsArchive,
 	); err != nil {
 		if err == pgx.ErrNoRows {
-			return nil, entity.UserIncorrectCredsErr
+			return nil, entity.UserIncorrectErr
 		}
 
 		return nil, err
