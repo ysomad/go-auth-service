@@ -49,14 +49,25 @@ func (r *authRoutes) login(c *gin.Context) {
 
 	// Login user
 	resp, err := r.authService.Login(c.Request.Context(), req, entity.RefreshSession{
-		UserAgent: c.Request.Header.Get("User-Agent"),
-		UserIP: c.ClientIP(),
+		UserAgent:   c.Request.Header.Get("User-Agent"),
+		UserIP:      c.ClientIP(),
 		Fingerprint: fingerprint,
 	})
 	if err != nil {
 		abortWithError(c, http.StatusBadRequest, err)
 		return
 	}
+
+	// Set httponly secure cookie with refresh token to reuse it in web applications
+	c.SetCookie(
+		"refreshToken",
+		resp.RefreshToken.String(),
+		resp.ExpiresIn,
+		"/v1/auth",
+		"",
+		true,
+		true,
+	)
 
 	c.JSON(http.StatusOK, resp)
 }
