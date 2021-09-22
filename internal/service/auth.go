@@ -57,5 +57,5 @@ func (as *AuthService) Login(ctx context.Context, req entity.LoginRequest, s ent
 		return entity.LoginResponse{}, err
 	}
 
-	return entity.LoginResponse{AccessToken:  a, RefreshToken: r}, nil
+	return entity.LoginResponse{AccessToken: a, RefreshToken: r}, nil
 }

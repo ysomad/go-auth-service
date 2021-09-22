@@ -47,14 +47,12 @@ func (r *authRoutes) login(c *gin.Context) {
 		return
 	}
 
-	s := entity.NewRefreshSession(
-		c.Request.Header.Get("User-Agent"),
-		c.ClientIP(),
-		fingerprint,
-	)
-
 	// Login user
-	resp, err := r.authService.Login(c.Request.Context(), req, s)
+	resp, err := r.authService.Login(c.Request.Context(), req, entity.RefreshSession{
+		UserAgent: c.Request.Header.Get("User-Agent"),
+		UserIP: c.ClientIP(),
+		Fingerprint: fingerprint,
+	})
 	if err != nil {
 		abortWithError(c, http.StatusBadRequest, err)
 		return
