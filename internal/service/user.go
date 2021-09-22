@@ -2,8 +2,6 @@ package service
 
 import (
 	"context"
-	"errors"
-
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/ysomad/go-auth-service/internal/entity"
@@ -55,7 +53,7 @@ func (s *UserService) PartialUpdate(ctx context.Context, id int, req entity.Part
 	}
 
 	if len(cols) == 0 {
-		return errors.New(entity.UserPartialUpdateErr)
+		return entity.PartialUpdateErr
 	}
 
 	if err := s.repo.PartialUpdate(ctx, id, cols); err != nil {
