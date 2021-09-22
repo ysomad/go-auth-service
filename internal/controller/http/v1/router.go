@@ -20,7 +20,7 @@ import (
 // @host        0.0.0.0:8080
 // @BasePath    /v1
 
-func NewRouter(handler *gin.Engine, u service.User) {
+func NewRouter(handler *gin.Engine, u service.User, a service.Auth) {
 	// Options
 	handler.Use(gin.Logger())
 	handler.Use(gin.Recovery())
@@ -36,5 +36,6 @@ func NewRouter(handler *gin.Engine, u service.User) {
 	h := handler.Group("/v1")
 	{
 		newUserRoutes(h, u)
+		newAuthRoutes(h, a)
 	}
 }

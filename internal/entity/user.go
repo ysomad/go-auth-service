@@ -9,6 +9,7 @@ const (
 	UserUniqueEmailErr    = "user with given email already exists"
 	UserUniqueUsernameErr = "user with given username already exists"
 	UserNotFoundErr       = "user not found"
+	UserIncorrectErr      = "incorrect email or password"
 )
 
 // User represents user data model

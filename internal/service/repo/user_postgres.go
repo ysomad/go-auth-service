@@ -118,7 +118,7 @@ func (r *UserRepo) GetByID(ctx context.Context, id int) (*entity.User, error) {
 	sql, args, err := r.Builder.
 		Select("email, username, first_name, last_name, created_at, updated_at, is_active, is_archive").
 		From(_userTable).
-		Where(sq.Eq{"id": u.ID}).
+		Where(sq.Eq{"id": u.ID, "is_active": true, "is_archive": false}).
 		ToSql()
 	if err != nil {
 		return nil, err
@@ -136,6 +136,36 @@ func (r *UserRepo) GetByID(ctx context.Context, id int) (*entity.User, error) {
 	); err != nil {
 		if err == pgx.ErrNoRows {
 			return nil, errors.New(entity.UserNotFoundErr)
+		}
+
+		return nil, err
+	}
+
+	return &u, nil
+}
+
+// GetByEmail returns user data by its email
+func (r *UserRepo) GetByEmail(ctx context.Context, email string) (*entity.User, error) {
+	u := entity.User{Email: email}
+
+	sql, args, err := r.Builder.
+		Select("id, email, password, is_active, is_archive").
+		From(_userTable).
+		Where(sq.Eq{"email": u.Email, "is_active": true, "is_archive": false}).
+		ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	if err = r.Pool.QueryRow(ctx, sql, args...).Scan(
+		&u.ID,
+		&u.Email,
+		&u.Password,
+		&u.IsActive,
+		&u.IsArchive,
+	); err != nil {
+		if err == pgx.ErrNoRows {
+			return nil, errors.New(entity.UserIncorrectErr)
 		}
 
 		return nil, err

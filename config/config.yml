@@ -12,3 +12,7 @@ logger:
 postgres:
   pool_max: 2
 
+jwt:
+  access_token_ttl: 15m
+  refresh_token_ttl: 30m
+  signing_key: 'secret'

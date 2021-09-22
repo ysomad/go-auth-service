@@ -24,6 +24,31 @@ definitions:
     - email
     - password
     type: object
+  entity.LoginRequest:
+    properties:
+      email:
+        example: user@mail.com
+        type: string
+      fingerprint:
+        example: c84f18a2-c6c7-4850-be15-93f9cbaef3b3
+        type: string
+      password:
+        example: secret
+        type: string
+    required:
+    - email
+    - fingerprint
+    - password
+    type: object
+  entity.LoginResponse:
+    properties:
+      accessToken:
+        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+        type: string
+      refreshToken:
+        example: c84f18a2-c6c7-4850-be15-93f9cbaef3b3
+        type: string
+    type: object
   entity.PartialUpdateRequest:
     properties:
       firstName:
@@ -88,6 +113,42 @@ info:
   title: Golang auth service
   version: "1.0"
 paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Create access and refresh tokens using user email and password
+      operationId: login
+      parameters:
+      - description: To login user email, password and fingerprint as uuid v4 type
+          should be provided
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/entity.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.LoginResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.messageResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/v1.validationErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.messageResponse'
+      summary: Login
+      tags:
+      - Authorization
   /users:
     post:
       consumes:

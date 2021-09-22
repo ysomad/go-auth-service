@@ -8,7 +8,10 @@ require (
 	github.com/go-playground/locales v0.14.0
 	github.com/go-playground/universal-translator v0.18.0
 	github.com/go-playground/validator/v10 v10.9.0
+	github.com/go-redis/redis v6.15.9+incompatible
+	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/golang-migrate/migrate/v4 v4.14.1
+	github.com/google/uuid v1.1.2
 	github.com/ilyakaznacheev/cleanenv v1.2.5
 	github.com/jackc/pgconn v1.10.0
 	github.com/jackc/pgerrcode v0.0.0-20201024163028-a0d42d470451

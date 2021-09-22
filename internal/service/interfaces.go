@@ -21,5 +21,14 @@ type (
 		Archive(ctx context.Context, id int, isArchive bool) error
 		PartialUpdate(ctx context.Context, id int, cols map[string]interface{}) error
 		GetByID(ctx context.Context, id int) (*entity.User, error)
+		GetByEmail(ctx context.Context, email string) (*entity.User, error)
+	}
+
+	Auth interface {
+		Login(ctx context.Context, req entity.LoginRequest, s entity.RefreshSession) (entity.LoginResponse, error)
+	}
+
+	SessionRepo interface {
+		Create(s entity.RefreshSession) error
 	}
 )

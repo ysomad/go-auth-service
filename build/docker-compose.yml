@@ -13,6 +13,13 @@ services:
     ports:
       - "5432:5432"
 
+  redis:
+    container_name: redis
+    image: redis:alpine
+    command: redis-server --requirepass secret
+    ports:
+      - "6379:6379"
+
   app:
     build:
       context: ..
@@ -25,6 +32,7 @@ services:
       - "8080:8080"
     depends_on:
       - postgres
+      - redis
 
 volumes:
   pg-data:

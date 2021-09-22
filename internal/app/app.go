@@ -3,6 +3,8 @@ package app
 
 import (
 	"fmt"
+	"github.com/go-redis/redis"
+	"github.com/ysomad/go-auth-service/pkg/auth"
 	"os"
 	"os/signal"
 	"syscall"
@@ -23,18 +25,39 @@ func Run(cfg *config.Config) {
 	l := logger.New(cfg.Log.Level)
 
 	// Repository
+
+	// Postgres
 	pg, err := postgres.New(cfg.PG.URL, postgres.MaxPoolSize(cfg.PG.PoolMax))
 	if err != nil {
 		l.Fatal(fmt.Errorf("app - Run - postgres.New: %w", err))
 	}
 	defer pg.Close()
 
+	// Redis
+	rdb := redis.NewClient(&redis.Options{
+		Addr:     cfg.Redis.Addr,
+		Password: cfg.Redis.Password,
+		DB:       0,
+	})
+	_, err = rdb.Ping().Result()
+	if err != nil {
+		l.Fatal(fmt.Errorf("app - Run - rdb.Ping: %w", err))
+	}
+
 	// Service
-	userService := service.NewUserService(repo.NewUserRepo(pg))
+	userRepo := repo.NewUserRepo(pg)
+
+	jwtManager, err := auth.NewJWTManager(cfg.JWT.SigningKey, cfg.JWT.AccessTokenTTL)
+	if err != nil {
+		l.Fatal(fmt.Errorf("app - Run - auth.NewTokenManager"))
+	}
+
+	userService := service.NewUserService(userRepo)
+	authService := service.NewAuthService(repo.NewSessionRepo(rdb), userRepo, jwtManager, cfg.JWT.RefreshTokenTTL)
 
 	// HTTP Server
 	handler := gin.New()
-	v1.NewRouter(handler, userService)
+	v1.NewRouter(handler, userService, authService)
 	httpServer := httpserver.New(handler, httpserver.Port(cfg.HTTP.Port))
 
 	// Waiting signal

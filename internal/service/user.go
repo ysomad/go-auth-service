@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"errors"
+
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/ysomad/go-auth-service/internal/entity"
