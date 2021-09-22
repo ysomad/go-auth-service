@@ -15,4 +15,15 @@ type RefreshSession struct {
 	CreatedAt    time.Time
 }
 
+func (s *RefreshSession) SetUserID(id int) {
+	s.UserID = id
+}
+
+func (s *RefreshSession) SetRefreshToken(t uuid.UUID) {
+	s.RefreshToken = t
+}
+
+func (s *RefreshSession) SetExpiresIn(e time.Duration) {
+	s.ExpiresIn = e
+}
 

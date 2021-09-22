@@ -23,30 +23,30 @@ func NewAuthService(s SessionRepo, u UserRepo, m auth.JWT, e time.Duration) *Aut
 
 func (as *AuthService) Login(ctx context.Context, req entity.LoginRequest, s entity.RefreshSession) (entity.LoginResponse, error) {
 	// Get user from db
-	user, err := as.user.GetByEmail(ctx, req.Email)
+	u, err := as.user.GetByEmail(ctx, req.Email)
 	if err != nil {
 		return entity.LoginResponse{}, err
 	}
 
 	// Compare passwords
-	if err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
+	if err = bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(req.Password)); err != nil {
 		return entity.LoginResponse{}, errors.New(entity.UserIncorrectErr)
 	}
 
 	// Generate access and refresh token
-	accessToken, err := as.jwt.NewAccess(user.ID)
+	a, err := as.jwt.NewAccess(u.ID)
 	if err != nil {
 		return entity.LoginResponse{}, err
 	}
 
-	refreshToken, err := as.jwt.NewRefresh()
+	r, err := as.jwt.NewRefresh()
 	if err != nil {
 		return entity.LoginResponse{}, err
 	}
 
-	s.UserID = user.ID
-	s.RefreshToken = refreshToken
-	s.ExpiresIn = as.expiresIn
+	s.SetUserID(u.ID)
+	s.SetRefreshToken(r)
+	s.SetExpiresIn(as.expiresIn)
 
 	// Create user session in redis
 	if err = as.session.Create(s); err != nil {
@@ -54,7 +54,7 @@ func (as *AuthService) Login(ctx context.Context, req entity.LoginRequest, s ent
 	}
 
 	return entity.LoginResponse{
-		AccessToken:  accessToken,
-		RefreshToken: refreshToken,
+		AccessToken:  a,
+		RefreshToken: r,
 	}, nil
 }
