@@ -21,7 +21,7 @@ func (r *SessionRepo) Create(s entity.RefreshSession) error {
 		return err
 	}
 
-	if err = r.Set(s.RefreshToken.String(), b, s.ExpiresIn).Err(); err != nil {
+	if err = r.SetNX(s.RefreshToken.String(), b, s.ExpiresIn).Err(); err != nil {
 		return err
 	}
 

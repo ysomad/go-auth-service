@@ -46,6 +46,7 @@ func (as *AuthService) Login(ctx context.Context, req entity.LoginRequest, s ent
 	// Set refresh session public fields
 	s.UserID = u.ID
 	s.RefreshToken = r
+	s.ExpiresAt = time.Now().Add(as.sessionExpiresIn).Unix()
 	s.ExpiresIn = as.sessionExpiresIn
 	s.CreatedAt = time.Now()
 
@@ -54,8 +55,5 @@ func (as *AuthService) Login(ctx context.Context, req entity.LoginRequest, s ent
 		return entity.LoginResponse{}, err
 	}
 
-	return entity.LoginResponse{
-		AccessToken:  a,
-		RefreshToken: r,
-	}, nil
+	return entity.LoginResponse{AccessToken:  a, RefreshToken: r}, nil
 }

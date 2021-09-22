@@ -12,6 +12,7 @@ type RefreshSession struct {
 
 	RefreshToken uuid.UUID
 	UserID       int
+	ExpiresAt    int64
 	ExpiresIn    time.Duration
 	CreatedAt    time.Time
 }
