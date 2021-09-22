@@ -1,9 +1,7 @@
 # Golang authentication service
 
-Powered by [Evrone Go clean template](https://github.com/evrone/go-clean-template)
-
 ## Local development
-1. Run postgres in docker container
+1. Run postgres and redis in docker container
 ```shell
 $ make compose-up
 ```
@@ -11,3 +9,7 @@ $ make compose-up
 ```shell
 $ make run
 ```
+
+## Links
+- [Evrone Go clean template](https://github.com/evrone/go-clean-template)
+- [Token-Based Authentication](https://gist.github.com/zmts/802dc9c3510d79fd40f9dc38a12bccfc)
