@@ -1,16 +1,16 @@
 package entity
 
 import (
+	"errors"
 	"time"
 )
 
 // User error messages
-const (
-	UserUniqueEmailErr    = "user with given email already exists"
-	UserUniqueUsernameErr = "user with given username already exists"
-	UserNotFoundErr       = "user not found"
-	UserIncorrectErr      = "incorrect email or password"
-	UserPartialUpdateErr  = "provide at least one field to update resource partially"
+var (
+	UserUniqueViolationErr = errors.New("user with given email or username already exists")
+	UserNotFoundErr        = errors.New("user not found")
+	UserIncorrectCredsErr       = errors.New("incorrect email or password")
+	PartialUpdateErr       = errors.New("provide at least one field to update resource partially")
 )
 
 // User represents user data model

@@ -6,9 +6,9 @@ import (
 )
 
 type RefreshSession struct {
-	userAgent    string
-	userIP       string
-	fingerprint  uuid.UUID
+	userAgent   string
+	userIP      string
+	fingerprint uuid.UUID
 
 	RefreshToken uuid.UUID
 	UserID       int
@@ -18,8 +18,8 @@ type RefreshSession struct {
 
 func NewRefreshSession(ua string, uip string, fp uuid.UUID) RefreshSession {
 	return RefreshSession{
-		userAgent: ua,
-		userIP: uip,
+		userAgent:   ua,
+		userIP:      uip,
 		fingerprint: fp,
 	}
 }

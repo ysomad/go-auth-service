@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"errors"
 	"golang.org/x/crypto/bcrypt"
 	"time"
 
@@ -30,7 +29,7 @@ func (as *AuthService) Login(ctx context.Context, req entity.LoginRequest, s ent
 
 	// Compare passwords
 	if err = bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(req.Password)); err != nil {
-		return entity.LoginResponse{}, errors.New(entity.UserIncorrectErr)
+		return entity.LoginResponse{}, entity.UserIncorrectCredsErr
 	}
 
 	// Generate access and refresh token
