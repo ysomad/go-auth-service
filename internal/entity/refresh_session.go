@@ -26,4 +26,3 @@ func (s *RefreshSession) SetRefreshToken(t uuid.UUID) {
 func (s *RefreshSession) SetExpiresIn(e time.Duration) {
 	s.ExpiresIn = e
 }
-

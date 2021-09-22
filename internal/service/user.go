@@ -55,7 +55,7 @@ func (s *UserService) PartialUpdate(ctx context.Context, id int, req entity.Part
 	}
 
 	if len(cols) == 0 {
-		return errors.New("provide at least one field to update resource partially")
+		return errors.New(entity.UserPartialUpdateErr)
 	}
 
 	if err := s.repo.PartialUpdate(ctx, id, cols); err != nil {

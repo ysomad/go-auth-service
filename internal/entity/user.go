@@ -10,6 +10,7 @@ const (
 	UserUniqueUsernameErr = "user with given username already exists"
 	UserNotFoundErr       = "user not found"
 	UserIncorrectErr      = "incorrect email or password"
+	UserPartialUpdateErr  = "provide at least one field to update resource partially"
 )
 
 // User represents user data model

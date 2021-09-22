@@ -136,11 +136,11 @@ func (r *userRoutes) getByID(c *gin.Context) {
 		return
 	}
 
-	user, err := r.userService.GetByID(c.Request.Context(), id)
+	u, err := r.userService.GetByID(c.Request.Context(), id)
 	if err != nil {
 		abortWithError(c, http.StatusBadRequest, err)
 		return
 	}
 
-	c.JSON(http.StatusOK, user)
+	c.JSON(http.StatusOK, u)
 }
