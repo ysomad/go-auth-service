@@ -28,7 +28,7 @@ type (
 		Login(ctx context.Context, req entity.LoginRequest, s entity.RefreshSession) (entity.LoginResponse, error)
 	}
 
-	SessionRepo interface {
+	RefreshSessionRepo interface {
 		Create(s entity.RefreshSession) error
 	}
 )

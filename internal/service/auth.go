@@ -10,13 +10,13 @@ import (
 )
 
 type AuthService struct {
-	session          SessionRepo
+	session          RefreshSessionRepo
 	user             UserRepo
 	jwt              auth.JWT
 	sessionExpiresIn time.Duration
 }
 
-func NewAuthService(s SessionRepo, u UserRepo, m auth.JWT, e time.Duration) *AuthService {
+func NewAuthService(s RefreshSessionRepo, u UserRepo, m auth.JWT, e time.Duration) *AuthService {
 	return &AuthService{s, u, m, e}
 }
 
