@@ -32,7 +32,7 @@ func (as *AuthService) Login(ctx context.Context, req entity.LoginRequest, s ent
 		return entity.LoginResponse{}, entity.UserIncorrectErr
 	}
 
-	// Generate access and refresh token
+	// Generate access and refresh tokens
 	a, err := as.jwt.NewAccess(u.ID)
 	if err != nil {
 		return entity.LoginResponse{}, err
@@ -44,13 +44,14 @@ func (as *AuthService) Login(ctx context.Context, req entity.LoginRequest, s ent
 	}
 
 	// Set refresh session public fields
-	now := time.Now()
-
 	s.UserID = u.ID
 	s.RefreshToken = r
-	s.ExpiresAt = now.Add(as.sessionExpiresIn).Unix()
+
 	s.ExpiresIn = as.sessionExpiresIn
-	s.CreatedAt = now
+	s.CreatedAt = time.Now()
+	if err = s.SetExpiresAt(); err != nil {
+		return entity.LoginResponse{}, err
+	}
 
 	// Create user session in redis
 	if err = as.session.Create(s); err != nil {
