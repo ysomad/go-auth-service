@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-type RefreshSession struct {
+type Session struct {
 	RefreshToken uuid.UUID
 	UserID       int
 	UserAgent    string
