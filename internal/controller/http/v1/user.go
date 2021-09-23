@@ -44,7 +44,7 @@ func (r *userRoutes) signUp(c *gin.Context) {
 	var req entity.CreateUserRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
-		abortWithValidationErr(c, http.StatusUnprocessableEntity, r.translator.All(err))
+		abortWithValidationError(c, http.StatusUnprocessableEntity, r.translator.All(err))
 		return
 	}
 
@@ -72,7 +72,7 @@ func (r *userRoutes) archive(c *gin.Context) {
 	var req entity.ArchiveUserRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
-		abortWithValidationErr(c, http.StatusUnprocessableEntity, r.translator.All(err))
+		abortWithValidationError(c, http.StatusUnprocessableEntity, r.translator.All(err))
 		return
 	}
 
@@ -106,7 +106,7 @@ func (r *userRoutes) partialUpdate(c *gin.Context) {
 	var req entity.PartialUpdateRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
-		abortWithValidationErr(c, http.StatusUnprocessableEntity, r.translator.All(err))
+		abortWithValidationError(c, http.StatusUnprocessableEntity, r.translator.All(err))
 		return
 	}
 
