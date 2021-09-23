@@ -25,10 +25,10 @@ type (
 	}
 
 	Auth interface {
-		Login(ctx context.Context, req entity.LoginRequest, s entity.RefreshSession) (entity.LoginResponse, error)
+		Login(ctx context.Context, req entity.LoginRequest, s entity.Session) (entity.LoginResponse, error)
 	}
 
-	RefreshSessionRepo interface {
-		Create(s entity.RefreshSession) error
+	SessionRepo interface {
+		Create(s entity.Session) error
 	}
 )
