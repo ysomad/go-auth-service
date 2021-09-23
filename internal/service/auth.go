@@ -10,17 +10,17 @@ import (
 )
 
 type AuthService struct {
-	session          RefreshSessionRepo
+	session          SessionRepo
 	user             UserRepo
 	jwt              auth.JWT
 	sessionExpiresIn time.Duration
 }
 
-func NewAuthService(s RefreshSessionRepo, u UserRepo, m auth.JWT, e time.Duration) *AuthService {
+func NewAuthService(s SessionRepo, u UserRepo, m auth.JWT, e time.Duration) *AuthService {
 	return &AuthService{s, u, m, e}
 }
 
-func (as *AuthService) Login(ctx context.Context, req entity.LoginRequest, s entity.RefreshSession) (entity.LoginResponse, error) {
+func (as *AuthService) Login(ctx context.Context, req entity.LoginRequest, s entity.Session) (entity.LoginResponse, error) {
 	// Get user from db
 	u, err := as.user.GetByEmail(ctx, req.Email)
 	if err != nil {

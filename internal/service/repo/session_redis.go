@@ -15,7 +15,7 @@ func NewSessionRepo(r *redis.Client) *SessionRepo {
 }
 
 // Create sets new refresh session to redis with refresh token as key
-func (r *SessionRepo) Create(s entity.RefreshSession) error {
+func (r *SessionRepo) Create(s entity.Session) error {
 	b, err := json.Marshal(s)
 	if err != nil {
 		return err

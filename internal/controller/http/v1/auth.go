@@ -10,7 +10,7 @@ import (
 )
 
 type authRoutes struct {
-	translator validation.Translator
+	translator  validation.Translator
 	authService service.Auth
 }
 
@@ -51,7 +51,7 @@ func (r *authRoutes) login(c *gin.Context) {
 	}
 
 	// Login user
-	resp, err := r.authService.Login(c.Request.Context(), req, entity.RefreshSession{
+	resp, err := r.authService.Login(c.Request.Context(), req, entity.Session{
 		UserAgent:   c.Request.Header.Get("User-Agent"),
 		UserIP:      c.ClientIP(),
 		Fingerprint: fingerprint,
