@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"github.com/ysomad/go-auth-service/pkg/validation"
 	"net/http"
 	"strconv"
 
@@ -11,11 +12,12 @@ import (
 )
 
 type userRoutes struct {
+	translator  validation.Translator
 	userService service.User
 }
 
-func newUserRoutes(handler *gin.RouterGroup, u service.User) {
-	r := &userRoutes{u}
+func newUserRoutes(handler *gin.RouterGroup, t validation.Translator, u service.User) {
+	r := &userRoutes{t, u}
 
 	h := handler.Group("/users")
 	{
@@ -41,7 +43,8 @@ func newUserRoutes(handler *gin.RouterGroup, u service.User) {
 func (r *userRoutes) signUp(c *gin.Context) {
 	var req entity.CreateUserRequest
 
-	if !ValidRequest(c, &req) {
+	if err := c.ShouldBindJSON(&req); err != nil {
+		abortWithValidationErr(c, http.StatusUnprocessableEntity, r.translator.All(err))
 		return
 	}
 
@@ -68,7 +71,8 @@ func (r *userRoutes) signUp(c *gin.Context) {
 func (r *userRoutes) archive(c *gin.Context) {
 	var req entity.ArchiveUserRequest
 
-	if !ValidRequest(c, &req) {
+	if err := c.ShouldBindJSON(&req); err != nil {
+		abortWithValidationErr(c, http.StatusUnprocessableEntity, r.translator.All(err))
 		return
 	}
 
@@ -101,7 +105,8 @@ func (r *userRoutes) archive(c *gin.Context) {
 func (r *userRoutes) partialUpdate(c *gin.Context) {
 	var req entity.PartialUpdateRequest
 
-	if !ValidRequest(c, &req) {
+	if err := c.ShouldBindJSON(&req); err != nil {
+		abortWithValidationErr(c, http.StatusUnprocessableEntity, r.translator.All(err))
 		return
 	}
 

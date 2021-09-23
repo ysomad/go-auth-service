@@ -14,7 +14,7 @@ import (
 	"github.com/ysomad/go-auth-service/pkg/postgres"
 )
 
-const _userTable = "users"
+const userTable = "users"
 
 type UserRepo struct {
 	*postgres.Postgres
@@ -27,7 +27,7 @@ func NewUserRepo(pg *postgres.Postgres) *UserRepo {
 // Create creates new user with email and password
 func (r *UserRepo) Create(ctx context.Context, email string, password string) error {
 	sql, args, err := r.Builder.
-		Insert(_userTable).
+		Insert(userTable).
 		Columns("email", "password").
 		Values(email, password).
 		ToSql()
@@ -58,7 +58,7 @@ func (r *UserRepo) Create(ctx context.Context, email string, password string) er
 // Archive sets is_archive to isArchive for user with id
 func (r *UserRepo) Archive(ctx context.Context, id int, isArchive bool) error {
 	sql, args, err := r.Builder.
-		Update(_userTable).
+		Update(userTable).
 		Set("is_archive", isArchive).
 		Set("updated_at", time.Now()).
 		Where(sq.Eq{"id": id, "is_archive": !isArchive}).
@@ -81,7 +81,7 @@ func (r *UserRepo) Archive(ctx context.Context, id int, isArchive bool) error {
 // PartialUpdate update User column values with values presented in cols
 func (r *UserRepo) PartialUpdate(ctx context.Context, id int, cols map[string]interface{}) error {
 	sql, args, err := r.Builder.
-		Update(_userTable).
+		Update(userTable).
 		SetMap(cols).
 		Set("updated_at", time.Now()).
 		Where(sq.Eq{"id": id, "is_archive": false}).
@@ -117,7 +117,7 @@ func (r *UserRepo) GetByID(ctx context.Context, id int) (*entity.User, error) {
 
 	sql, args, err := r.Builder.
 		Select("email, username, first_name, last_name, created_at, updated_at, is_active, is_archive").
-		From(_userTable).
+		From(userTable).
 		Where(sq.Eq{"id": u.ID, "is_active": true, "is_archive": false}).
 		ToSql()
 	if err != nil {
@@ -150,7 +150,7 @@ func (r *UserRepo) GetByEmail(ctx context.Context, email string) (*entity.User, 
 
 	sql, args, err := r.Builder.
 		Select("id, email, password, is_active, is_archive").
-		From(_userTable).
+		From(userTable).
 		Where(sq.Eq{"email": u.Email, "is_active": true, "is_archive": false}).
 		ToSql()
 	if err != nil {

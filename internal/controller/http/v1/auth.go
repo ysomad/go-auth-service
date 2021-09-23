@@ -5,15 +5,17 @@ import (
 	"github.com/google/uuid"
 	"github.com/ysomad/go-auth-service/internal/entity"
 	"github.com/ysomad/go-auth-service/internal/service"
+	"github.com/ysomad/go-auth-service/pkg/validation"
 	"net/http"
 )
 
 type authRoutes struct {
+	translator validation.Translator
 	authService service.Auth
 }
 
-func newAuthRoutes(handler *gin.RouterGroup, a service.Auth) {
-	r := &authRoutes{a}
+func newAuthRoutes(handler *gin.RouterGroup, t validation.Translator, a service.Auth) {
+	r := &authRoutes{t, a}
 
 	h := handler.Group("/auth")
 	{
@@ -36,7 +38,8 @@ func newAuthRoutes(handler *gin.RouterGroup, a service.Auth) {
 func (r *authRoutes) login(c *gin.Context) {
 	var req entity.LoginRequest
 
-	if !ValidRequest(c, &req) {
+	if err := c.ShouldBindJSON(&req); err != nil {
+		abortWithValidationErr(c, http.StatusUnprocessableEntity, r.translator.All(err))
 		return
 	}
 

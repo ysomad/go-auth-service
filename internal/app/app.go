@@ -3,8 +3,11 @@ package app
 
 import (
 	"fmt"
+	ut "github.com/go-playground/universal-translator"
+	"github.com/go-playground/validator/v10"
 	"github.com/go-redis/redis"
 	"github.com/ysomad/go-auth-service/pkg/auth"
+	"github.com/ysomad/go-auth-service/pkg/validation"
 	"os"
 	"os/signal"
 	"syscall"
@@ -18,6 +21,11 @@ import (
 	"github.com/ysomad/go-auth-service/pkg/httpserver"
 	"github.com/ysomad/go-auth-service/pkg/logger"
 	"github.com/ysomad/go-auth-service/pkg/postgres"
+)
+
+var (
+	uni      *ut.UniversalTranslator
+	validate *validator.Validate
 )
 
 // Run creates objects via constructors.
@@ -49,15 +57,21 @@ func Run(cfg *config.Config) {
 
 	jwtManager, err := auth.NewJWTManager(cfg.JWT.SigningKey, cfg.JWT.AccessTokenTTL)
 	if err != nil {
-		l.Fatal(fmt.Errorf("app - Run - auth.NewTokenManager"))
+		l.Fatal(fmt.Errorf("app - Run - auth.NewTokenManager: %w", err))
 	}
 
 	userService := service.NewUserService(userRepo)
 	authService := service.NewAuthService(repo.NewSessionRepo(rdb), userRepo, jwtManager, cfg.JWT.RefreshTokenTTL)
 
+	// Validation translator
+	trans, err := validation.NewGinTranslator()
+	if err != nil {
+		l.Fatal(fmt.Errorf("app - Run - validation.NewGinTranslator: %w", err))
+	}
+
 	// HTTP Server
 	handler := gin.New()
-	v1.NewRouter(handler, userService, authService)
+	v1.NewRouter(handler, trans, userService, authService)
 	httpServer := httpserver.New(handler, httpserver.Port(cfg.HTTP.Port))
 
 	// Waiting signal

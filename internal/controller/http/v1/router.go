@@ -2,6 +2,7 @@
 package v1
 
 import (
+	"github.com/ysomad/go-auth-service/pkg/validation"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -20,7 +21,7 @@ import (
 // @host        0.0.0.0:8080
 // @BasePath    /v1
 
-func NewRouter(handler *gin.Engine, u service.User, a service.Auth) {
+func NewRouter(handler *gin.Engine, t validation.Translator, u service.User, a service.Auth) {
 	// Options
 	handler.Use(gin.Logger())
 	handler.Use(gin.Recovery())
@@ -35,7 +36,7 @@ func NewRouter(handler *gin.Engine, u service.User, a service.Auth) {
 	// Routers
 	h := handler.Group("/v1")
 	{
-		newUserRoutes(h, u)
-		newAuthRoutes(h, a)
+		newUserRoutes(h, t, u)
+		newAuthRoutes(h, t, a)
 	}
 }
