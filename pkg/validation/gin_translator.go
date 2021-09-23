@@ -10,7 +10,7 @@ import (
 )
 
 type Translator interface {
-	All(err error) validator.ValidationErrorsTranslations
+	All(err error) map[string]string
 }
 
 type GinTranslator struct {
@@ -41,7 +41,7 @@ func (t *GinTranslator) register() error {
 }
 
 // All returns translated validation errors received from gin.c.ShouldBindJSON err
-func (t *GinTranslator) All(err error) validator.ValidationErrorsTranslations {
+func (t *GinTranslator) All(err error) map[string]string {
 	t.register()
 
 	return err.(validator.ValidationErrors).Translate(t.trans)

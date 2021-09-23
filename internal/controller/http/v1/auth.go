@@ -39,7 +39,7 @@ func (r *authRoutes) login(c *gin.Context) {
 	var req entity.LoginRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
-		abortWithValidationErr(c, http.StatusUnprocessableEntity, r.translator.All(err))
+		abortWithValidationError(c, http.StatusUnprocessableEntity, r.translator.All(err))
 		return
 	}
 
