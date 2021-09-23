@@ -8,18 +8,18 @@ import (
 
 // Session represents refresh token session for JWT authentication
 type Session struct {
-	RefreshToken uuid.UUID
-	UserID       int
-	UserAgent    string
-	UserIP       string
-	Fingerprint  uuid.UUID
-	ExpiresAt    time.Time
-	ExpiresIn    time.Duration
-	CreatedAt    time.Time
+	RefreshToken uuid.UUID     `json:"refreshToken"`
+	UserID       int           `json:"userId"`
+	UserAgent    string        `json:"userAgent"`
+	UserIP       string        `json:"userIP"`
+	Fingerprint  uuid.UUID     `json:"fingerprint"`
+	ExpiresAt    time.Time     `json:"expiresAt"`
+	ExpiresIn    time.Duration `json:"expiresIn"`
+	CreatedAt    time.Time     `json:"createdAt"`
 }
 
 func (s *Session) SetExpiresAt() error {
-	if s.ExpiresIn == 0 || s.CreatedAt.IsZero()  {
+	if s.ExpiresIn == 0 || s.CreatedAt.IsZero() {
 		return errors.New("session creation error")
 	}
 
