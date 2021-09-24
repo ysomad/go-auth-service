@@ -10,7 +10,7 @@ import (
 )
 
 type JWT interface {
-	NewAccess(userID int) (string, error)
+	NewAccess(userID uuid.UUID) (string, error)
 	NewRefresh() (uuid.UUID, error)
 }
 
@@ -30,7 +30,7 @@ func NewJWTManager(signingKey string, accessTokenTTL time.Duration) (*JWTManager
 	}, nil
 }
 
-func (m *JWTManager) NewAccess(userID int) (string, error) {
+func (m *JWTManager) NewAccess(userID uuid.UUID) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"sub": userID,
 		"exp": time.Now().Add(m.accessTokenTTL).Unix(),

@@ -1,22 +1,22 @@
 package v1
 
 import (
-	"github.com/ysomad/go-auth-service/pkg/validation"
+	"github.com/google/uuid"
 	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 
 	"github.com/ysomad/go-auth-service/internal/entity"
 	"github.com/ysomad/go-auth-service/internal/service"
+	"github.com/ysomad/go-auth-service/pkg/validation"
 )
 
 type userRoutes struct {
-	translator  validation.Translator
+	validator   validation.Validator
 	userService service.User
 }
 
-func newUserRoutes(handler *gin.RouterGroup, t validation.Translator, u service.User) {
+func newUserRoutes(handler *gin.RouterGroup, t validation.Validator, u service.User) {
 	r := &userRoutes{t, u}
 
 	h := handler.Group("/users")
@@ -44,7 +44,7 @@ func (r *userRoutes) signUp(c *gin.Context) {
 	var req entity.CreateUserRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
-		abortWithValidationError(c, http.StatusUnprocessableEntity, r.translator.All(err))
+		abortWithValidationError(c, http.StatusUnprocessableEntity, r.validator.TranslateAll(err))
 		return
 	}
 
@@ -62,7 +62,7 @@ func (r *userRoutes) signUp(c *gin.Context) {
 // @Tags  	    Users
 // @Accept      json
 // @Produce     json
-// @Param		id path int required "User ID"
+// @Param		id path string required "User ID"
 // @Param       request body entity.ArchiveUserRequest true "To archive or restore a user is_archive should be provided"
 // @Success     204
 // @Failure     400 {object} messageResponse
@@ -72,11 +72,11 @@ func (r *userRoutes) archive(c *gin.Context) {
 	var req entity.ArchiveUserRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
-		abortWithValidationError(c, http.StatusUnprocessableEntity, r.translator.All(err))
+		abortWithValidationError(c, http.StatusUnprocessableEntity, r.validator.TranslateAll(err))
 		return
 	}
 
-	id, err := strconv.Atoi(c.Param("id"))
+	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		abortWithError(c, http.StatusBadRequest, err)
 		return
@@ -97,7 +97,7 @@ func (r *userRoutes) archive(c *gin.Context) {
 // @Accept      json
 // @Produce     json
 // @Param       request body entity.PartialUpdateRequest true "Provide at least one user field to update user data"
-// @Param		id path int required "User ID"
+// @Param		id path string required "User ID"
 // @Success     204
 // @Failure     400 {object} messageResponse
 // @Failure		422 {object} validationErrorResponse
@@ -106,11 +106,11 @@ func (r *userRoutes) partialUpdate(c *gin.Context) {
 	var req entity.PartialUpdateRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
-		abortWithValidationError(c, http.StatusUnprocessableEntity, r.translator.All(err))
+		abortWithValidationError(c, http.StatusUnprocessableEntity, r.validator.TranslateAll(err))
 		return
 	}
 
-	id, err := strconv.Atoi(c.Param("id"))
+	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		abortWithError(c, http.StatusBadRequest, err)
 		return
@@ -130,12 +130,12 @@ func (r *userRoutes) partialUpdate(c *gin.Context) {
 // @Tags  	    Users
 // @Accept      json
 // @Produce     json
-// @Param		id path int required "User ID"
+// @Param		id path string required "User ID"
 // @Success     200 {object} entity.User
 // @Failure     400 {object} messageResponse
 // @Router      /users/{id} [get]
 func (r *userRoutes) getByID(c *gin.Context) {
-	id, err := strconv.Atoi(c.Param("id"))
+	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		abortWithError(c, http.StatusBadRequest, err)
 		return

@@ -142,7 +142,7 @@ var doc = `{
                 "operationId": "get",
                 "parameters": [
                     {
-                        "type": "integer",
+                        "type": "string",
                         "description": "User ID",
                         "name": "id",
                         "in": "path",
@@ -188,7 +188,7 @@ var doc = `{
                         }
                     },
                     {
-                        "type": "integer",
+                        "type": "string",
                         "description": "User ID",
                         "name": "id",
                         "in": "path",
@@ -230,7 +230,7 @@ var doc = `{
                 "operationId": "archive",
                 "parameters": [
                     {
-                        "type": "integer",
+                        "type": "string",
                         "description": "User ID",
                         "name": "id",
                         "in": "path",
@@ -369,8 +369,8 @@ var doc = `{
                     "example": "Alex"
                 },
                 "id": {
-                    "type": "integer",
-                    "example": 1
+                    "type": "string",
+                    "example": "c84f18a2-c6c7-4850-be15-93f9cbaef3b3"
                 },
                 "isActive": {
                     "type": "boolean",

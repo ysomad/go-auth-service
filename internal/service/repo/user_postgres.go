@@ -3,6 +3,7 @@ package repo
 import (
 	"context"
 	"errors"
+	"github.com/google/uuid"
 	"time"
 
 	sq "github.com/Masterminds/squirrel"
@@ -56,7 +57,7 @@ func (r *UserRepo) Create(ctx context.Context, email string, password string) er
 }
 
 // Archive sets is_archive to isArchive for user with id
-func (r *UserRepo) Archive(ctx context.Context, id int, isArchive bool) error {
+func (r *UserRepo) Archive(ctx context.Context, id uuid.UUID, isArchive bool) error {
 	sql, args, err := r.Builder.
 		Update(userTable).
 		Set("is_archive", isArchive).
@@ -79,7 +80,7 @@ func (r *UserRepo) Archive(ctx context.Context, id int, isArchive bool) error {
 }
 
 // PartialUpdate update User column values with values presented in cols
-func (r *UserRepo) PartialUpdate(ctx context.Context, id int, cols map[string]interface{}) error {
+func (r *UserRepo) PartialUpdate(ctx context.Context, id uuid.UUID, cols map[string]interface{}) error {
 	sql, args, err := r.Builder.
 		Update(userTable).
 		SetMap(cols).
@@ -112,7 +113,7 @@ func (r *UserRepo) PartialUpdate(ctx context.Context, id int, cols map[string]in
 }
 
 // GetByID returns user data by its id
-func (r *UserRepo) GetByID(ctx context.Context, id int) (*entity.User, error) {
+func (r *UserRepo) GetByID(ctx context.Context, id uuid.UUID) (*entity.User, error) {
 	u := entity.User{ID: id}
 
 	sql, args, err := r.Builder.

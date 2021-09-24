@@ -73,8 +73,8 @@ definitions:
         example: Alex
         type: string
       id:
-        example: 1
-        type: integer
+        example: c84f18a2-c6c7-4850-be15-93f9cbaef3b3
+        type: string
       isActive:
         example: true
         type: boolean
@@ -193,7 +193,7 @@ paths:
         in: path
         name: id
         required: true
-        type: integer
+        type: string
       produces:
       - application/json
       responses:
@@ -224,7 +224,7 @@ paths:
         in: path
         name: id
         required: true
-        type: integer
+        type: string
       produces:
       - application/json
       responses:
@@ -252,7 +252,7 @@ paths:
         in: path
         name: id
         required: true
-        type: integer
+        type: string
       - description: To archive or restore a user is_archive should be provided
         in: body
         name: request

@@ -10,11 +10,11 @@ import (
 )
 
 type authRoutes struct {
-	translator  validation.Translator
+	validator   validation.Validator
 	authService service.Auth
 }
 
-func newAuthRoutes(handler *gin.RouterGroup, t validation.Translator, a service.Auth) {
+func newAuthRoutes(handler *gin.RouterGroup, t validation.Validator, a service.Auth) {
 	r := &authRoutes{t, a}
 
 	h := handler.Group("/auth")
@@ -39,7 +39,7 @@ func (r *authRoutes) login(c *gin.Context) {
 	var req entity.LoginRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
-		abortWithValidationError(c, http.StatusUnprocessableEntity, r.translator.All(err))
+		abortWithValidationError(c, http.StatusUnprocessableEntity, r.validator.TranslateAll(err))
 		return
 	}
 

@@ -21,7 +21,7 @@ import (
 // @host        0.0.0.0:8080
 // @BasePath    /v1
 
-func NewRouter(handler *gin.Engine, t validation.Translator, u service.User, a service.Auth) {
+func NewRouter(handler *gin.Engine, t validation.Validator, u service.User, a service.Auth) {
 	// Options
 	handler.Use(gin.Logger())
 	handler.Use(gin.Recovery())

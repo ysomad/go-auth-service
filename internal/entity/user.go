@@ -2,6 +2,7 @@ package entity
 
 import (
 	"errors"
+	"github.com/google/uuid"
 	"time"
 )
 
@@ -15,7 +16,7 @@ var (
 
 // User represents user data model
 type User struct {
-	ID          int       `json:"id" example:"1" binding:"numeric"`
+	ID          uuid.UUID `json:"id" example:"c84f18a2-c6c7-4850-be15-93f9cbaef3b3" binding:"uuid4"`
 	Email       string    `json:"email" example:"user@mail.com" binding:"email"`
 	Username    *string   `json:"username,omitempty" example:"username" binding:"alphanum,gte=4,lte=32"`
 	Password    string    `json:"-" example:"secret" binding:"gte=6,lte=128"`
