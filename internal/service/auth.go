@@ -54,7 +54,7 @@ func (as *AuthService) Login(ctx context.Context, req entity.LoginRequest, s ent
 	}
 
 	// Create user session in redis
-	if err = as.session.Create(s); err != nil {
+	if err = as.session.Create(ctx, s); err != nil {
 		return entity.LoginResponse{}, err
 	}
 

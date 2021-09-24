@@ -26,7 +26,7 @@ func newAuthRoutes(handler *gin.RouterGroup, t validation.Validator, a service.A
 // @Summary     Login
 // @Description Create access and refresh tokens using user email and password
 // @ID          login
-// @Tags  	    Authorization
+// @Tags  	    Auth
 // @Accept      json
 // @Produce     json
 // @Param       request body entity.LoginRequest true "To login user email, password and fingerprint as uuid v4 type should be provided"

@@ -33,7 +33,7 @@ var doc = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Authorization"
+                    "Auth"
                 ],
                 "summary": "Login",
                 "operationId": "login",

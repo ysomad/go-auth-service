@@ -30,6 +30,6 @@ type (
 	}
 
 	SessionRepo interface {
-		Create(s entity.Session) error
+		Create(ctx context.Context, s entity.Session) error
 	}
 )
