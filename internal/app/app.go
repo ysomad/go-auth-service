@@ -3,9 +3,7 @@ package app
 
 import (
 	"fmt"
-	ut "github.com/go-playground/universal-translator"
-	"github.com/go-playground/validator/v10"
-	"github.com/go-redis/redis"
+	"github.com/go-redis/redis/v8"
 	"github.com/ysomad/go-auth-service/pkg/auth"
 	"github.com/ysomad/go-auth-service/pkg/validation"
 	"os"
@@ -21,11 +19,6 @@ import (
 	"github.com/ysomad/go-auth-service/pkg/httpserver"
 	"github.com/ysomad/go-auth-service/pkg/logger"
 	"github.com/ysomad/go-auth-service/pkg/postgres"
-)
-
-var (
-	uni      *ut.UniversalTranslator
-	validate *validator.Validate
 )
 
 // Run creates objects via constructors.
@@ -47,10 +40,6 @@ func Run(cfg *config.Config) {
 		Password: cfg.Redis.Password,
 		DB:       0,
 	})
-	_, err = rdb.Ping().Result()
-	if err != nil {
-		l.Fatal(fmt.Errorf("app - Run - rdb.Ping: %w", err))
-	}
 
 	// Service
 	userRepo := repo.NewUserRepo(pg)

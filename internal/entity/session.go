@@ -9,7 +9,7 @@ import (
 // Session represents refresh token session for JWT authentication
 type Session struct {
 	RefreshToken uuid.UUID     `json:"refreshToken"`
-	UserID       uuid.UUID     `json:"userId"`
+	UserID       uuid.UUID     `json:"userID"`
 	UserAgent    string        `json:"userAgent"`
 	UserIP       string        `json:"userIP"`
 	Fingerprint  uuid.UUID     `json:"fingerprint"`

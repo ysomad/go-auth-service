@@ -1,8 +1,10 @@
 package repo
 
 import (
+	"context"
 	"encoding/json"
-	"github.com/go-redis/redis"
+	"fmt"
+	"github.com/go-redis/redis/v8"
 	"github.com/ysomad/go-auth-service/internal/entity"
 )
 
@@ -15,13 +17,22 @@ func NewSessionRepo(r *redis.Client) *SessionRepo {
 }
 
 // Create sets new refresh session to redis with refresh token as key
-func (r *SessionRepo) Create(s entity.Session) error {
+func (r *SessionRepo) Create(ctx context.Context, s entity.Session) error {
 	b, err := json.Marshal(s)
 	if err != nil {
 		return err
 	}
 
-	if err = r.SetNX(s.RefreshToken.String(), b, s.ExpiresIn).Err(); err != nil {
+	key := fmt.Sprintf("%s:%s", s.UserID.String(), s.RefreshToken.String())
+
+	// Create session
+	if err = r.SAdd(ctx, key, b).Err();
+	err != nil {
+		return err
+	}
+
+	// Set expiry
+	if err = r.Expire(ctx, key, s.ExpiresIn).Err(); err != nil {
 		return err
 	}
 

@@ -148,7 +148,7 @@ paths:
             $ref: '#/definitions/v1.messageResponse'
       summary: Login
       tags:
-      - Authorization
+      - Auth
   /users:
     post:
       consumes:
