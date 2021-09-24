@@ -43,7 +43,7 @@ func (v *GinValidator) register() error {
 
 // TranslateAll returns translated validation errors received from gin.c.ShouldBindJSON err
 func (v *GinValidator) TranslateAll(err error) map[string]string {
-	v.register()
+	_ = v.register()
 
 	return err.(validator.ValidationErrors).Translate(v.trans)
 }

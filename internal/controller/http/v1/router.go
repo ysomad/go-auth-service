@@ -2,6 +2,7 @@
 package v1
 
 import (
+	"github.com/ysomad/go-auth-service/pkg/auth"
 	"github.com/ysomad/go-auth-service/pkg/validation"
 	"net/http"
 
@@ -20,8 +21,11 @@ import (
 // @version     1.0
 // @host        0.0.0.0:8080
 // @BasePath    /v1
+// @securityDefinitions.apikey Bearer
+// @in header
+// @name Authorization
 
-func NewRouter(handler *gin.Engine, t validation.Validator, u service.User, a service.Auth) {
+func NewRouter(handler *gin.Engine, t validation.Validator, u service.User, a service.Auth, j auth.JWT) {
 	// Options
 	handler.Use(gin.Logger())
 	handler.Use(gin.Recovery())
@@ -36,7 +40,7 @@ func NewRouter(handler *gin.Engine, t validation.Validator, u service.User, a se
 	// Routers
 	h := handler.Group("/v1")
 	{
-		newUserRoutes(h, t, u)
+		newUserRoutes(h, t, u, j)
 		newAuthRoutes(h, t, a)
 	}
 }

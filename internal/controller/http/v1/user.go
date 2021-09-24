@@ -1,7 +1,7 @@
 package v1
 
 import (
-	"github.com/google/uuid"
+	"github.com/ysomad/go-auth-service/pkg/auth"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -16,19 +16,19 @@ type userRoutes struct {
 	userService service.User
 }
 
-func newUserRoutes(handler *gin.RouterGroup, t validation.Validator, u service.User) {
+func newUserRoutes(handler *gin.RouterGroup, t validation.Validator, u service.User, j auth.JWT) {
 	r := &userRoutes{t, u}
 
 	h := handler.Group("/users")
 	{
-		h.PATCH(":id/archive", r.archive)
-		h.GET(":id", r.getByID)
-		h.PATCH(":id", r.partialUpdate)
 		h.POST("", r.signUp)
+		h.PATCH("archive", r.archive).Use(authMiddleware(j))
+		h.GET("", r.getUser).Use(authMiddleware(j))
+		h.PATCH("", r.partialUpdate).Use(authMiddleware(j))
 	}
 }
 
-// @Summary     Sign up
+// @Summary     Create new user
 // @Description Create a new user with email and password
 // @ID          signup
 // @Tags  	    Users
@@ -56,18 +56,20 @@ func (r *userRoutes) signUp(c *gin.Context) {
 	c.Status(http.StatusNoContent)
 }
 
-// @Summary     Archive or restore User
-// @Description Archive or restore User
+// @Summary     Archive or restore user
+// @Description Archive or restore user
 // @ID          archive
 // @Tags  	    Users
 // @Accept      json
 // @Produce     json
-// @Param		id path string required "User ID"
 // @Param       request body entity.ArchiveUserRequest true "To archive or restore a user is_archive should be provided"
 // @Success     204
+// @Failure     401 {object} messageResponse
 // @Failure     400 {object} messageResponse
 // @Failure		422 {object} validationErrorResponse
-// @Router      /users/{id}/archive [patch]
+// @Failure     500 {object} messageResponse
+// @Router      /users/archive [patch]
+// @Security    Bearer
 func (r *userRoutes) archive(c *gin.Context) {
 	var req entity.ArchiveUserRequest
 
@@ -76,9 +78,9 @@ func (r *userRoutes) archive(c *gin.Context) {
 		return
 	}
 
-	id, err := uuid.Parse(c.Param("id"))
+	id, err := getUserID(c)
 	if err != nil {
-		abortWithError(c, http.StatusBadRequest, err)
+		abortWithError(c, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -97,11 +99,13 @@ func (r *userRoutes) archive(c *gin.Context) {
 // @Accept      json
 // @Produce     json
 // @Param       request body entity.PartialUpdateRequest true "Provide at least one user field to update user data"
-// @Param		id path string required "User ID"
 // @Success     204
+// @Failure     401 {object} messageResponse
 // @Failure     400 {object} messageResponse
+// @Failure     500 {object} messageResponse
 // @Failure		422 {object} validationErrorResponse
-// @Router      /users/{id} [patch]
+// @Router      /users [patch]
+// @Security    Bearer
 func (r *userRoutes) partialUpdate(c *gin.Context) {
 	var req entity.PartialUpdateRequest
 
@@ -110,9 +114,9 @@ func (r *userRoutes) partialUpdate(c *gin.Context) {
 		return
 	}
 
-	id, err := uuid.Parse(c.Param("id"))
+	id, err := getUserID(c)
 	if err != nil {
-		abortWithError(c, http.StatusBadRequest, err)
+		abortWithError(c, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -124,20 +128,22 @@ func (r *userRoutes) partialUpdate(c *gin.Context) {
 	c.Status(http.StatusNoContent)
 }
 
-// @Summary     Get
-// @Description Receive user data by id
+// @Summary     Get user data
+// @Description Receive user data
 // @ID          get
 // @Tags  	    Users
 // @Accept      json
 // @Produce     json
-// @Param		id path string required "User ID"
+// @Failure     401 {object} messageResponse
 // @Success     200 {object} entity.User
 // @Failure     400 {object} messageResponse
-// @Router      /users/{id} [get]
-func (r *userRoutes) getByID(c *gin.Context) {
-	id, err := uuid.Parse(c.Param("id"))
+// @Failure     500 {object} messageResponse
+// @Router      /users [get]
+// @Security    Bearer
+func (r *userRoutes) getUser(c *gin.Context) {
+	id, err := getUserID(c)
 	if err != nil {
-		abortWithError(c, http.StatusBadRequest, err)
+		abortWithError(c, http.StatusInternalServerError, err)
 		return
 	}
 

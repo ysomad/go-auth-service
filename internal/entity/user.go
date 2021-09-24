@@ -16,12 +16,12 @@ var (
 
 // User represents user data model
 type User struct {
-	ID          uuid.UUID `json:"id" example:"c84f18a2-c6c7-4850-be15-93f9cbaef3b3" binding:"uuid4"`
-	Email       string    `json:"email" example:"user@mail.com" binding:"email"`
-	Username    *string   `json:"username,omitempty" example:"username" binding:"alphanum,gte=4,lte=32"`
-	Password    string    `json:"-" example:"secret" binding:"gte=6,lte=128"`
-	FirstName   *string   `json:"firstName,omitempty" example:"Alex" binding:"alpha,lte=50"`
-	LastName    *string   `json:"lastName,omitempty" example:"Malykh" binding:"alpha,lte=50"`
+	ID          uuid.UUID `json:"id" example:"c84f18a2-c6c7-4850-be15-93f9cbaef3b3"`
+	Email       string    `json:"email" example:"user@mail.com"`
+	Username    *string   `json:"username,omitempty" example:"username"`
+	Password    string    `json:"-" example:"secret"`
+	FirstName   *string   `json:"firstName,omitempty" example:"Alex"`
+	LastName    *string   `json:"lastName,omitempty" example:"Malykh"`
 	CreatedAt   time.Time `json:"createdAt" example:"2021-08-31T16:55:18.080768Z"`
 	UpdatedAt   time.Time `json:"updatedAt" example:"2021-08-31T16:55:18.080768Z"`
 	IsActive    bool      `json:"isActive" example:"true"`

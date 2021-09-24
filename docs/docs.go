@@ -77,6 +77,51 @@ var doc = `{
             }
         },
         "/users": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Receive user data",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Get user data",
+                "operationId": "get",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/entity.User"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/v1.messageResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/v1.messageResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/v1.messageResponse"
+                        }
+                    }
+                }
+            },
             "post": {
                 "description": "Create a new user with email and password",
                 "consumes": [
@@ -88,7 +133,7 @@ var doc = `{
                 "tags": [
                     "Users"
                 ],
-                "summary": "Sign up",
+                "summary": "Create new user",
                 "operationId": "signup",
                 "parameters": [
                     {
@@ -124,47 +169,13 @@ var doc = `{
                         }
                     }
                 }
-            }
-        },
-        "/users/{id}": {
-            "get": {
-                "description": "Receive user data by id",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Users"
-                ],
-                "summary": "Get",
-                "operationId": "get",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "User ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/entity.User"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/v1.messageResponse"
-                        }
-                    }
-                }
             },
             "patch": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "description": "Update user data partially",
                 "consumes": [
                     "application/json"
@@ -186,13 +197,6 @@ var doc = `{
                         "schema": {
                             "$ref": "#/definitions/entity.PartialUpdateRequest"
                         }
-                    },
-                    {
-                        "type": "string",
-                        "description": "User ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
                     }
                 ],
                 "responses": {
@@ -205,18 +209,35 @@ var doc = `{
                             "$ref": "#/definitions/v1.messageResponse"
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/v1.messageResponse"
+                        }
+                    },
                     "422": {
                         "description": "Unprocessable Entity",
                         "schema": {
                             "$ref": "#/definitions/v1.validationErrorResponse"
                         }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/v1.messageResponse"
+                        }
                     }
                 }
             }
         },
-        "/users/{id}/archive": {
+        "/users/archive": {
             "patch": {
-                "description": "Archive or restore User",
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Archive or restore user",
                 "consumes": [
                     "application/json"
                 ],
@@ -226,16 +247,9 @@ var doc = `{
                 "tags": [
                     "Users"
                 ],
-                "summary": "Archive or restore User",
+                "summary": "Archive or restore user",
                 "operationId": "archive",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "User ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
                     {
                         "description": "To archive or restore a user is_archive should be provided",
                         "name": "request",
@@ -256,10 +270,22 @@ var doc = `{
                             "$ref": "#/definitions/v1.messageResponse"
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/v1.messageResponse"
+                        }
+                    },
                     "422": {
                         "description": "Unprocessable Entity",
                         "schema": {
                             "$ref": "#/definitions/v1.validationErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/v1.messageResponse"
                         }
                     }
                 }
@@ -416,6 +442,13 @@ var doc = `{
                     }
                 }
             }
+        }
+    },
+    "securityDefinitions": {
+        "Bearer": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
     }
 }`
