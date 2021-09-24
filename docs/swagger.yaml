@@ -150,6 +150,73 @@ paths:
       tags:
       - Auth
   /users:
+    get:
+      consumes:
+      - application/json
+      description: Receive user data
+      operationId: get
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.User'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.messageResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/v1.messageResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.messageResponse'
+      security:
+      - Bearer: []
+      summary: Get user data
+      tags:
+      - Users
+    patch:
+      consumes:
+      - application/json
+      description: Update user data partially
+      operationId: update
+      parameters:
+      - description: Provide at least one user field to update user data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/entity.PartialUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: ""
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.messageResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/v1.messageResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/v1.validationErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.messageResponse'
+      security:
+      - Bearer: []
+      summary: Partial update
+      tags:
+      - Users
     post:
       consumes:
       - application/json
@@ -179,80 +246,16 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/v1.messageResponse'
-      summary: Sign up
+      summary: Create new user
       tags:
       - Users
-  /users/{id}:
-    get:
-      consumes:
-      - application/json
-      description: Receive user data by id
-      operationId: get
-      parameters:
-      - description: User ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/entity.User'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/v1.messageResponse'
-      summary: Get
-      tags:
-      - Users
+  /users/archive:
     patch:
       consumes:
       - application/json
-      description: Update user data partially
-      operationId: update
-      parameters:
-      - description: Provide at least one user field to update user data
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/entity.PartialUpdateRequest'
-      - description: User ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "204":
-          description: ""
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/v1.messageResponse'
-        "422":
-          description: Unprocessable Entity
-          schema:
-            $ref: '#/definitions/v1.validationErrorResponse'
-      summary: Partial update
-      tags:
-      - Users
-  /users/{id}/archive:
-    patch:
-      consumes:
-      - application/json
-      description: Archive or restore User
+      description: Archive or restore user
       operationId: archive
       parameters:
-      - description: User ID
-        in: path
-        name: id
-        required: true
-        type: string
       - description: To archive or restore a user is_archive should be provided
         in: body
         name: request
@@ -268,11 +271,26 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/v1.messageResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/v1.messageResponse'
         "422":
           description: Unprocessable Entity
           schema:
             $ref: '#/definitions/v1.validationErrorResponse'
-      summary: Archive or restore User
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.messageResponse'
+      security:
+      - Bearer: []
+      summary: Archive or restore user
       tags:
       - Users
+securityDefinitions:
+  Bearer:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

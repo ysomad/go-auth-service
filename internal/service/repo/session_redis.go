@@ -26,8 +26,7 @@ func (r *SessionRepo) Create(ctx context.Context, s entity.Session) error {
 	key := fmt.Sprintf("%s:%s", s.UserID.String(), s.RefreshToken.String())
 
 	// Create session
-	if err = r.SAdd(ctx, key, b).Err();
-	err != nil {
+	if err = r.SAdd(ctx, key, b).Err(); err != nil {
 		return err
 	}
 
