@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"github.com/google/uuid"
 
 	"github.com/ysomad/go-auth-service/internal/entity"
 )
@@ -11,16 +12,16 @@ import (
 type (
 	User interface {
 		SignUp(ctx context.Context, req entity.CreateUserRequest) error
-		Archive(ctx context.Context, id int, isArchive bool) error
-		PartialUpdate(ctx context.Context, id int, req entity.PartialUpdateRequest) error
-		GetByID(ctx context.Context, id int) (*entity.User, error)
+		Archive(ctx context.Context, id uuid.UUID, isArchive bool) error
+		PartialUpdate(ctx context.Context, id uuid.UUID, req entity.PartialUpdateRequest) error
+		GetByID(ctx context.Context, id uuid.UUID) (*entity.User, error)
 	}
 
 	UserRepo interface {
 		Create(ctx context.Context, email string, password string) error
-		Archive(ctx context.Context, id int, isArchive bool) error
-		PartialUpdate(ctx context.Context, id int, cols map[string]interface{}) error
-		GetByID(ctx context.Context, id int) (*entity.User, error)
+		Archive(ctx context.Context, id uuid.UUID, isArchive bool) error
+		PartialUpdate(ctx context.Context, id uuid.UUID, cols map[string]interface{}) error
+		GetByID(ctx context.Context, id uuid.UUID) (*entity.User, error)
 		GetByEmail(ctx context.Context, email string) (*entity.User, error)
 	}
 

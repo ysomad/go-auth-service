@@ -64,9 +64,9 @@ func Run(cfg *config.Config) {
 	authService := service.NewAuthService(repo.NewSessionRepo(rdb), userRepo, jwtManager, cfg.JWT.RefreshTokenTTL)
 
 	// Validation translator
-	trans, err := validation.NewGinTranslator()
+	trans, err := validation.NewGinValidator()
 	if err != nil {
-		l.Fatal(fmt.Errorf("app - Run - validation.NewGinTranslator: %w", err))
+		l.Fatal(fmt.Errorf("app - Run - validation.NewGinValidator: %w", err))
 	}
 
 	// HTTP Server

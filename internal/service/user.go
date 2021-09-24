@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/ysomad/go-auth-service/internal/entity"
@@ -30,7 +31,7 @@ func (s *UserService) SignUp(ctx context.Context, req entity.CreateUserRequest) 
 }
 
 // Archive sets user is_archive
-func (s *UserService) Archive(ctx context.Context, id int, isArchive bool) error {
+func (s *UserService) Archive(ctx context.Context, id uuid.UUID, isArchive bool) error {
 	if err := s.repo.Archive(ctx, id, isArchive); err != nil {
 		return err
 	}
@@ -39,7 +40,7 @@ func (s *UserService) Archive(ctx context.Context, id int, isArchive bool) error
 }
 
 // PartialUpdate updates all updatable user columns
-func (s *UserService) PartialUpdate(ctx context.Context, id int, req entity.PartialUpdateRequest) error {
+func (s *UserService) PartialUpdate(ctx context.Context, id uuid.UUID, req entity.PartialUpdateRequest) error {
 	cols := map[string]interface{}{
 		"username":   req.Username,
 		"first_name": req.FirstName,
@@ -64,7 +65,7 @@ func (s *UserService) PartialUpdate(ctx context.Context, id int, req entity.Part
 }
 
 // GetByID gets user data by ID
-func (s *UserService) GetByID(ctx context.Context, id int) (*entity.User, error) {
+func (s *UserService) GetByID(ctx context.Context, id uuid.UUID) (*entity.User, error) {
 	u, err := s.repo.GetByID(ctx, id)
 	if err != nil {
 		return nil, err
