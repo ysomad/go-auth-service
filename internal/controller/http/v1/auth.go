@@ -105,12 +105,6 @@ func (r *authRoutes) refreshJWT(c *gin.Context) {
 		return
 	}
 
-	// Overwrite request refreshToken with token from cookies if it's present
-	token, err := c.Cookie(refreshTokenKey)
-	if err == nil {
-		req.RefreshToken = token
-	}
-
 	fp, err := uuid.Parse(req.Fingerprint)
 	if err != nil {
 		abortWithError(c, http.StatusBadRequest, err)

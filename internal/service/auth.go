@@ -102,7 +102,7 @@ func (as *AuthService) RefreshToken(ctx context.Context, dto entity.SessionSecur
 
 	// Check user agent, ip, fingerprint and refresh token lifetime, if it's expire return token expired error
 	if !as.allowAccess(s, dto) {
-		return entity.LoginResponse{}, entity.TokenExpiredErr
+		return entity.LoginResponse{}, entity.ErrSessionExpired
 	}
 
 	// Generate refresh token

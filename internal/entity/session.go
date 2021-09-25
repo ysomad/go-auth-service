@@ -1,8 +1,13 @@
 package entity
 
 import (
+	"errors"
 	"github.com/google/uuid"
 	"time"
+)
+
+var (
+	ErrSessionExpired = errors.New("session expired")
 )
 
 // Session represents refresh token session for JWT authentication

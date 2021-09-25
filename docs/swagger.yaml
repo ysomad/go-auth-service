@@ -175,12 +175,6 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/v1.refreshJWTRequest'
-  /users:
-    get:
-      consumes:
-      - application/json
-      description: Receive user data
-      operationId: get
       produces:
       - application/json
       responses:
@@ -188,15 +182,14 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/entity.LoginResponse'
-            $ref: '#/definitions/entity.User'
         "400":
           description: Bad Request
           schema:
             $ref: '#/definitions/v1.messageResponse'
-        "401":
-          description: Unauthorized
+        "422":
+          description: Unprocessable Entity
           schema:
-            $ref: '#/definitions/v1.messageResponse'
+            $ref: '#/definitions/v1.validationErrorResponse'
         "500":
           description: Internal Server Error
           schema:
@@ -210,6 +203,25 @@ paths:
       - application/json
       description: Receive user data
       operationId: get
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.User'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.messageResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/v1.messageResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.messageResponse'
       security:
       - Bearer: []
       summary: Get user data
@@ -250,46 +262,6 @@ paths:
             $ref: '#/definitions/v1.messageResponse'
       security:
       - Bearer: []
-      summary: Get user data
-      summary: Partial update
-      tags:
-      - Users
-    post:
-      consumes:
-      - application/json
-      description: Create a new user with email and password
-      operationId: signup
-      parameters:
-      - description: To create a new user email and password should be provided
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/entity.PartialUpdateRequest'
-          $ref: '#/definitions/entity.CreateUserRequest'
-      produces:
-      - application/json
-      responses:
-        "204":
-          description: ""
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/v1.messageResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/v1.messageResponse'
-        "422":
-          description: Unprocessable Entity
-          schema:
-            $ref: '#/definitions/v1.validationErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/v1.messageResponse'
-      security:
-      - Bearer: []
       summary: Partial update
       tags:
       - Users
@@ -322,9 +294,6 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/v1.messageResponse'
-      summary: Create new user
-      tags:
-      - Users
       summary: Create new user
       tags:
       - Users

@@ -58,6 +58,10 @@ func (r *SessionRepo) Get(ctx context.Context, refreshToken uuid.UUID) (entity.S
 		return entity.Session{}, err
 	}
 
+	if res["token"] == "" {
+		return entity.Session{}, entity.ErrSessionExpired
+	}
+
 	// Parse values from strings
 	token, err := uuid.Parse(res["token"])
 	if err != nil {

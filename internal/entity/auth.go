@@ -1,12 +1,7 @@
 package entity
 
 import (
-	"errors"
 	"github.com/google/uuid"
-)
-
-var (
-	TokenExpiredErr = errors.New("token expired")
 )
 
 type (
