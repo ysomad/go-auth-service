@@ -130,7 +130,7 @@ paths:
       consumes:
       - application/json
       description: Create access and refresh tokens using user email and password
-      operationId: login
+      operationId: authLogin
       parameters:
       - description: To login user email, password and fingerprint as uuid v4 type
           should be provided
@@ -160,15 +160,15 @@ paths:
             $ref: '#/definitions/v1.messageResponse'
       summary: Login
       tags:
-      - Auth
+      - auth
   /auth/refresh:
     post:
       consumes:
       - application/json
-      description: Creates new access token
-      operationId: refresh
+      description: Create new access token
+      operationId: authRefresh
       parameters:
-      - description: To get new access token fingerprint and refresh token should
+      - description: To get new access token, fingerprint and refresh token should
           be provided
         in: body
         name: request
@@ -196,13 +196,13 @@ paths:
             $ref: '#/definitions/v1.messageResponse'
       summary: Refresh access token
       tags:
-      - Auth
+      - auth
   /users:
     get:
       consumes:
       - application/json
       description: Receive user data
-      operationId: get
+      operationId: userGet
       produces:
       - application/json
       responses:
@@ -224,14 +224,14 @@ paths:
             $ref: '#/definitions/v1.messageResponse'
       security:
       - Bearer: []
-      summary: Get user data
+      summary: Get
       tags:
-      - Users
+      - users
     patch:
       consumes:
       - application/json
       description: Update user data partially
-      operationId: update
+      operationId: userPartialUpdate
       parameters:
       - description: Provide at least one user field to update user data
         in: body
@@ -264,12 +264,12 @@ paths:
       - Bearer: []
       summary: Partial update
       tags:
-      - Users
+      - users
     post:
       consumes:
       - application/json
       description: Create a new user with email and password
-      operationId: signup
+      operationId: userCreate
       parameters:
       - description: To create a new user email and password should be provided
         in: body
@@ -294,15 +294,15 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/v1.messageResponse'
-      summary: Create new user
+      summary: Create
       tags:
-      - Users
+      - users
   /users/archive:
     patch:
       consumes:
       - application/json
       description: Archive or restore user
-      operationId: archive
+      operationId: userArchive
       parameters:
       - description: To archive or restore a user is_archive should be provided
         in: body
@@ -333,9 +333,9 @@ paths:
             $ref: '#/definitions/v1.messageResponse'
       security:
       - Bearer: []
-      summary: Archive or restore user
+      summary: Archive/Restore
       tags:
-      - Users
+      - users
 securityDefinitions:
   Bearer:
     in: header

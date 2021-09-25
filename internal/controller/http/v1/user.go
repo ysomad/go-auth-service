@@ -38,16 +38,15 @@ type userCreateRequest struct {
 	ConfirmPassword string `json:"confirmPassword" example:"secret" binding:"required,eqfield=Password"`
 }
 
-// @Summary     Create new user
+// @Summary     Create
 // @Description Create a new user with email and password
-// @ID          signup
-// @Tags  	    Users
+// @ID          userCreate
+// @Tags  	    users
 // @Accept      json
 // @Produce     json
 // @Param       request body userCreateRequest true "To create a new user email and password should be provided"
 // @Success     204
-// @Failure     400 {object} messageResponse
-// @Failure     500 {object} messageResponse
+// @Failure     400,500 {object} messageResponse
 // @Failure		422 {object} validationErrorResponse
 // @Router      /users [post]
 func (r *userRoutes) create(c *gin.Context) {
@@ -70,18 +69,16 @@ type userArchiveRequest struct {
 	IsArchive *bool `json:"isArchive" example:"false" binding:"required"`
 }
 
-// @Summary     Archive or restore user
+// @Summary     Archive/Restore
 // @Description Archive or restore user
-// @ID          archive
-// @Tags  	    Users
+// @ID          userArchive
+// @Tags  	    users
 // @Accept      json
 // @Produce     json
 // @Param       request body userArchiveRequest true "To archive or restore a user is_archive should be provided"
 // @Success     204
-// @Failure     401 {object} messageResponse
-// @Failure     400 {object} messageResponse
+// @Failure     400,401,500 {object} messageResponse
 // @Failure		422 {object} validationErrorResponse
-// @Failure     500 {object} messageResponse
 // @Router      /users/archive [patch]
 // @Security    Bearer
 func (r *userRoutes) archive(c *gin.Context) {
@@ -114,15 +111,13 @@ type userPartialUpdateRequest struct {
 
 // @Summary     Partial update
 // @Description Update user data partially
-// @ID         	update
-// @Tags  	    Users
+// @ID         	userPartialUpdate
+// @Tags  	    users
 // @Accept      json
 // @Produce     json
 // @Param       request body userPartialUpdateRequest true "Provide at least one user field to update user data"
 // @Success     204
-// @Failure     401 {object} messageResponse
-// @Failure     400 {object} messageResponse
-// @Failure     500 {object} messageResponse
+// @Failure     400,401,500 {object} messageResponse
 // @Failure		422 {object} validationErrorResponse
 // @Router      /users [patch]
 // @Security    Bearer
@@ -153,16 +148,14 @@ func (r *userRoutes) partialUpdate(c *gin.Context) {
 	c.Status(http.StatusNoContent)
 }
 
-// @Summary     Get user data
+// @Summary     Get
 // @Description Receive user data
-// @ID          get
-// @Tags  	    Users
+// @ID          userGet
+// @Tags  	    users
 // @Accept      json
 // @Produce     json
-// @Failure     401 {object} messageResponse
+// @Failure     400,401,500 {object} messageResponse
 // @Success     200 {object} entity.User
-// @Failure     400 {object} messageResponse
-// @Failure     500 {object} messageResponse
 // @Router      /users [get]
 // @Security    Bearer
 func (r *userRoutes) getUser(c *gin.Context) {
