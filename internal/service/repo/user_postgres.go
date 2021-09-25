@@ -43,7 +43,7 @@ func (r *UserRepo) Create(ctx context.Context, email string, password string) er
 		if errors.As(err, &pgErr) {
 			// SQL err handling by code
 			if pgErr.Code == pgerrcode.UniqueViolation {
-				return entity.UserUniqueViolationErr
+				return entity.ErrUserUniqueViolation
 			}
 
 			// Return more detailed error message
@@ -73,7 +73,7 @@ func (r *UserRepo) Archive(ctx context.Context, id uuid.UUID, isArchive bool) er
 		return err
 	}
 	if ct.RowsAffected() == 0 {
-		return entity.UserNotFoundErr
+		return entity.ErrUserNotFound
 	}
 
 	return nil
@@ -97,7 +97,7 @@ func (r *UserRepo) PartialUpdate(ctx context.Context, id uuid.UUID, cols map[str
 
 		if errors.As(err, &pgErr) {
 			if pgErr.Code == pgerrcode.UniqueViolation {
-				return entity.UserUniqueViolationErr
+				return entity.ErrUserUniqueViolation
 			}
 
 			return errors.New(pgErr.Detail)
@@ -106,7 +106,7 @@ func (r *UserRepo) PartialUpdate(ctx context.Context, id uuid.UUID, cols map[str
 		return err
 	}
 	if ct.RowsAffected() == 0 {
-		return entity.UserNotFoundErr
+		return entity.ErrUserNotFound
 	}
 
 	return nil
@@ -136,7 +136,7 @@ func (r *UserRepo) GetByID(ctx context.Context, id uuid.UUID) (*entity.User, err
 		&u.IsArchive,
 	); err != nil {
 		if err == pgx.ErrNoRows {
-			return nil, entity.UserNotFoundErr
+			return nil, entity.ErrUserNotFound
 		}
 
 		return nil, err
@@ -166,7 +166,7 @@ func (r *UserRepo) GetByEmail(ctx context.Context, email string) (*entity.User, 
 		&u.IsArchive,
 	); err != nil {
 		if err == pgx.ErrNoRows {
-			return nil, entity.UserIncorrectErr
+			return nil, entity.ErrUserInvalidCredentials
 		}
 
 		return nil, err

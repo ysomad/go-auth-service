@@ -54,7 +54,7 @@ func (s *UserService) PartialUpdate(ctx context.Context, id uuid.UUID, req entit
 	}
 
 	if len(cols) == 0 {
-		return entity.PartialUpdateErr
+		return entity.ErrPartialUpdate
 	}
 
 	if err := s.repo.PartialUpdate(ctx, id, cols); err != nil {

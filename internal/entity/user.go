@@ -6,12 +6,11 @@ import (
 	"time"
 )
 
-// User error messages
 var (
-	UserUniqueViolationErr = errors.New("user with given email or username already exists")
-	UserNotFoundErr        = errors.New("user not found")
-	UserIncorrectErr       = errors.New("incorrect email or password")
-	PartialUpdateErr       = errors.New("provide at least one field to update resource partially")
+	ErrUserUniqueViolation    = errors.New("user with given email or username already exists")
+	ErrUserNotFound           = errors.New("user not found")
+	ErrUserInvalidCredentials = errors.New("invalid email or password")
+	ErrPartialUpdate          = errors.New("provide at least one field to update resource partially")
 )
 
 // User represents user data model

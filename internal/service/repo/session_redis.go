@@ -90,12 +90,12 @@ func (r *SessionRepo) Get(ctx context.Context, refreshToken uuid.UUID) (entity.S
 
 	s := entity.Session{
 		RefreshToken: token,
-		UserID: uid,
-		UserAgent: res["ua"],
-		UserIP: res["ip"],
-		Fingerprint: fp,
-		ExpiresAt: exp,
-		CreatedAt: created,
+		UserID:       uid,
+		UserAgent:    res["ua"],
+		UserIP:       res["ip"],
+		Fingerprint:  fp,
+		ExpiresAt:    exp,
+		CreatedAt:    created,
 	}
 
 	return s, nil
