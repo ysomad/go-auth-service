@@ -13,7 +13,7 @@ import (
 type JWT interface {
 	NewAccess(userID uuid.UUID) (string, error)
 	NewRefresh() (uuid.UUID, error)
-	Validate(accessToken string) (jwt.MapClaims, error)
+	Validate(accessToken string) (string, error)
 }
 
 type JWTManager struct {
@@ -46,7 +46,7 @@ func (m *JWTManager) NewRefresh() (uuid.UUID, error) {
 }
 
 // Validate parses and validating JWT token, returns user id from it
-func (m *JWTManager) Validate(accessToken string) (jwt.MapClaims, error) {
+func (m *JWTManager) Validate(accessToken string) (string, error) {
 	token, err := jwt.Parse(accessToken, func(token *jwt.Token) (i interface{}, err error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
@@ -55,13 +55,13 @@ func (m *JWTManager) Validate(accessToken string) (jwt.MapClaims, error) {
 		return []byte(m.signingKey), nil
 	})
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok && !token.Valid {
-		return nil, errors.New("error get user claims from token")
+		return "", errors.New("error get user claims from token")
 	}
 
-	return claims, nil
+	return claims["sub"].(string), nil
 }

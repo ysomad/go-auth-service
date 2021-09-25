@@ -28,20 +28,26 @@ func newAuthRoutes(handler *gin.RouterGroup, t validation.Validator, a service.A
 	}
 }
 
+type loginRequest struct {
+	Email       string `json:"email" example:"user@mail.com" binding:"required,email,lte=255"`
+	Password    string `json:"password" example:"secret" binding:"required,gte=6,lte=128"`
+	Fingerprint string `json:"fingerprint" example:"c84f18a2-c6c7-4850-be15-93f9cbaef3b3" binding:"required,uuid4"`
+}
+
 // @Summary     Login
 // @Description Create access and refresh tokens using user email and password
 // @ID          login
 // @Tags  	    Auth
 // @Accept      json
 // @Produce     json
-// @Param       request body entity.LoginRequest true "To login user email, password and fingerprint as uuid v4 type should be provided"
-// @Success     200 {object} entity.LoginResponse
+// @Param       request body loginRequest true "To login user email, password and fingerprint as uuid v4 type should be provided"
+// @Success     200 {object} entity.JWT
 // @Failure     400 {object} messageResponse
 // @Failure     500 {object} messageResponse
 // @Failure		422 {object} validationErrorResponse
 // @Router      /auth/login [post]
 func (r *authRoutes) login(c *gin.Context) {
-	var req entity.LoginRequest
+	var req loginRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 		abortWithValidationError(c, http.StatusUnprocessableEntity, r.validator.TranslateAll(err))
@@ -56,11 +62,17 @@ func (r *authRoutes) login(c *gin.Context) {
 	}
 
 	// Login user
-	resp, err := r.authService.Login(c.Request.Context(), req, entity.SessionSecurityDTO{
-		UserAgent:   c.Request.Header.Get("User-Agent"),
-		UserIP:      c.ClientIP(),
-		Fingerprint: fp,
-	})
+	resp, err := r.authService.Login(
+		c.Request.Context(),
+		entity.UserCredentialsDTO{
+			Email:    req.Email,
+			Password: req.Password,
+		},
+		entity.SessionSecurityDTO{
+			UserAgent:   c.Request.Header.Get("User-Agent"),
+			UserIP:      c.ClientIP(),
+			Fingerprint: fp,
+		})
 	if err != nil {
 		abortWithError(c, http.StatusBadRequest, err)
 		return
@@ -92,7 +104,7 @@ type refreshJWTRequest struct {
 // @Accept      json
 // @Produce     json
 // @Param       request body refreshJWTRequest true "To get new access token fingerprint and refresh token should be provided"
-// @Success     200 {object} entity.LoginResponse
+// @Success     200 {object} entity.JWT
 // @Failure     400 {object} messageResponse
 // @Failure     500 {object} messageResponse
 // @Failure		422 {object} validationErrorResponse

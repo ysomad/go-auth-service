@@ -32,29 +32,21 @@ func authMiddleware(jwt auth.JWT) gin.HandlerFunc {
 		}
 
 		accessToken := fields[1]
-		payload, err := jwt.Validate(accessToken)
+		userID, err := jwt.Validate(accessToken)
 		if err != nil {
 			abortWithError(c, http.StatusUnauthorized, err)
 			return
 		}
 
-		c.Set("user", payload["sub"].(string))
+		c.Set("user", userID)
 		c.Next()
 	}
 }
 
 func getUserID(c *gin.Context) (uuid.UUID, error) {
-	sub, ok := c.Get("user")
-	if !ok {
-		return uuid.UUID{}, errors.New("empty subject")
-	}
+	idStr := c.GetString("user")
 
-	idString, ok := sub.(string)
-	if !ok {
-		return uuid.UUID{}, errors.New("invalid type of subject")
-	}
-
-	id, err := uuid.Parse(idString)
+	id, err := uuid.Parse(idStr)
 	if err != nil {
 		return uuid.UUID{}, err
 	}

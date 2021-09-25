@@ -22,6 +22,7 @@ type Session struct {
 	CreatedAt    time.Time     `json:"createdAt" redis:"created"`
 }
 
+// SessionSecurityDTO stores session security data
 type SessionSecurityDTO struct {
 	RefreshToken uuid.UUID
 	Fingerprint  uuid.UUID
