@@ -1,64 +1,12 @@
 basePath: /v1
 definitions:
-  entity.ArchiveUserRequest:
-    properties:
-      isArchive:
-        example: false
-        type: boolean
-    required:
-    - isArchive
-    type: object
-  entity.CreateUserRequest:
-    properties:
-      confirmPassword:
-        example: secret
-        type: string
-      email:
-        example: user@mail.com
-        type: string
-      password:
-        example: secret
-        type: string
-    required:
-    - confirmPassword
-    - email
-    - password
-    type: object
-  entity.LoginRequest:
-    properties:
-      email:
-        example: user@mail.com
-        type: string
-      fingerprint:
-        example: c84f18a2-c6c7-4850-be15-93f9cbaef3b3
-        type: string
-      password:
-        example: secret
-        type: string
-    required:
-    - email
-    - fingerprint
-    - password
-    type: object
-  entity.LoginResponse:
+  entity.JWT:
     properties:
       accessToken:
         example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
         type: string
       refreshToken:
         example: c84f18a2-c6c7-4850-be15-93f9cbaef3b3
-        type: string
-    type: object
-  entity.PartialUpdateRequest:
-    properties:
-      firstName:
-        example: Alex
-        type: string
-      lastName:
-        example: Malykh
-        type: string
-      username:
-        example: username
         type: string
     type: object
   entity.User:
@@ -91,6 +39,22 @@ definitions:
         example: username
         type: string
     type: object
+  v1.loginRequest:
+    properties:
+      email:
+        example: user@mail.com
+        type: string
+      fingerprint:
+        example: c84f18a2-c6c7-4850-be15-93f9cbaef3b3
+        type: string
+      password:
+        example: secret
+        type: string
+    required:
+    - email
+    - fingerprint
+    - password
+    type: object
   v1.messageResponse:
     properties:
       error:
@@ -108,6 +72,42 @@ definitions:
     required:
     - fingerprint
     - refreshToken
+    type: object
+  v1.userArchiveRequest:
+    properties:
+      isArchive:
+        example: false
+        type: boolean
+    required:
+    - isArchive
+    type: object
+  v1.userCreateRequest:
+    properties:
+      confirmPassword:
+        example: secret
+        type: string
+      email:
+        example: user@mail.com
+        type: string
+      password:
+        example: secret
+        type: string
+    required:
+    - confirmPassword
+    - email
+    - password
+    type: object
+  v1.userPartialUpdateRequest:
+    properties:
+      firstName:
+        example: Alex
+        type: string
+      lastName:
+        example: Malykh
+        type: string
+      username:
+        example: username
+        type: string
     type: object
   v1.validationErrorResponse:
     properties:
@@ -138,14 +138,14 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/entity.LoginRequest'
+          $ref: '#/definitions/v1.loginRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/entity.LoginResponse'
+            $ref: '#/definitions/entity.JWT'
         "400":
           description: Bad Request
           schema:
@@ -181,7 +181,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/entity.LoginResponse'
+            $ref: '#/definitions/entity.JWT'
         "400":
           description: Bad Request
           schema:
@@ -238,7 +238,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/entity.PartialUpdateRequest'
+          $ref: '#/definitions/v1.userPartialUpdateRequest'
       produces:
       - application/json
       responses:
@@ -276,7 +276,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/entity.CreateUserRequest'
+          $ref: '#/definitions/v1.userCreateRequest'
       produces:
       - application/json
       responses:
@@ -309,7 +309,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/entity.ArchiveUserRequest'
+          $ref: '#/definitions/v1.userArchiveRequest'
       produces:
       - application/json
       responses:

@@ -80,12 +80,12 @@ func (r *UserRepo) Archive(ctx context.Context, id uuid.UUID, isArchive bool) er
 }
 
 // PartialUpdate update User column values with values presented in cols
-func (r *UserRepo) PartialUpdate(ctx context.Context, id uuid.UUID, cols map[string]interface{}) error {
+func (r *UserRepo) PartialUpdate(ctx context.Context, id uuid.UUID, cols entity.UpdateColumns) error {
 	sql, args, err := r.Builder.
 		Update(userTable).
 		SetMap(cols).
 		Set("updated_at", time.Now()).
-		Where(sq.Eq{"id": id, "is_archive": false}).
+		Where(sq.Eq{"id": id, "is_archive": false, "is_active": true}).
 		ToSql()
 	if err != nil {
 		return err

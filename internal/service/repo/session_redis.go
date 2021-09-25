@@ -29,10 +29,11 @@ func (r *SessionRepo) sessionKey(key string) string {
 }
 
 // Create sets new refresh session to redis with refresh token as key
-func (r *SessionRepo) Create(ctx context.Context, s entity.Session) error {
+func (r *SessionRepo) Create(ctx context.Context, s *entity.Session) error {
 	tokenString := s.RefreshToken.String()
 	key := r.sessionKey(tokenString)
 
+	// Set hash
 	if err := r.HSet(ctx, key, map[string]interface{}{
 		"token":   tokenString,
 		"uid":     s.UserID.String(),
@@ -45,6 +46,7 @@ func (r *SessionRepo) Create(ctx context.Context, s entity.Session) error {
 		return err
 	}
 
+	// Set expiry to created hash key
 	if err := r.Expire(ctx, key, s.ExpiresIn).Err(); err != nil {
 		return err
 	}
@@ -52,43 +54,43 @@ func (r *SessionRepo) Create(ctx context.Context, s entity.Session) error {
 	return nil
 }
 
-func (r *SessionRepo) Get(ctx context.Context, refreshToken uuid.UUID) (entity.Session, error) {
+func (r *SessionRepo) Get(ctx context.Context, refreshToken uuid.UUID) (*entity.Session, error) {
 	res, err := r.HGetAll(ctx, r.sessionKey(refreshToken.String())).Result()
 	if err != nil {
-		return entity.Session{}, err
+		return nil, err
 	}
 
 	if res["token"] == "" {
-		return entity.Session{}, entity.ErrSessionExpired
+		return nil, entity.ErrSessionExpired
 	}
 
 	// Parse values from strings
 	token, err := uuid.Parse(res["token"])
 	if err != nil {
-		return entity.Session{}, err
+		return nil, err
 	}
 
 	uid, err := uuid.Parse(res["uid"])
 	if err != nil {
-		return entity.Session{}, err
+		return nil, err
 	}
 
 	fp, err := uuid.Parse(res["fp"])
 	if err != nil {
-		return entity.Session{}, err
+		return nil, err
 	}
 
 	exp, err := strconv.ParseInt(res["exp"], 10, 64)
 	if err != nil {
-		return entity.Session{}, err
+		return nil, err
 	}
 
 	created, err := time.Parse(time.RFC3339Nano, res["created"])
 	if err != nil {
-		return entity.Session{}, err
+		return nil, err
 	}
 
-	s := entity.Session{
+	return &entity.Session{
 		RefreshToken: token,
 		UserID:       uid,
 		UserAgent:    res["ua"],
@@ -96,9 +98,7 @@ func (r *SessionRepo) Get(ctx context.Context, refreshToken uuid.UUID) (entity.S
 		Fingerprint:  fp,
 		ExpiresAt:    exp,
 		CreatedAt:    created,
-	}
-
-	return s, nil
+	}, nil
 }
 
 func (r *SessionRepo) Terminate(ctx context.Context, refreshToken uuid.UUID) error {

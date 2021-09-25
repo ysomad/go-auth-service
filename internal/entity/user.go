@@ -3,6 +3,7 @@ package entity
 import (
 	"errors"
 	"github.com/google/uuid"
+	"golang.org/x/crypto/bcrypt"
 	"time"
 )
 
@@ -28,21 +29,38 @@ type User struct {
 	IsSuperuser bool      `json:"-"`
 }
 
-// CreateUserRequest represents request DTO for user sign up
-type CreateUserRequest struct {
-	Email           string `json:"email" example:"user@mail.com" binding:"required,email,lte=255"`
-	Password        string `json:"password" example:"secret" binding:"required,gte=6,lte=128"`
-	ConfirmPassword string `json:"confirmPassword" example:"secret" binding:"required,eqfield=Password"`
+func (u *User) ComparePassword(password string) error {
+	if err := bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(password)); err != nil {
+		return ErrUserInvalidCredentials
+	}
+
+	return nil
 }
 
-// ArchiveUserRequest represents request DTO for archive or restore user operation
-type ArchiveUserRequest struct {
-	IsArchive *bool `json:"isArchive" example:"false" binding:"required"`
+type UserCredentialsDTO struct {
+	Email    string
+	Password string
 }
 
-// PartialUpdateRequest represents request DTO for user partial update
-type PartialUpdateRequest struct {
-	Username  string `json:"username" example:"username" binding:"omitempty,alphanum,gte=4,lte=32"`
-	FirstName string `json:"firstName" example:"Alex"  binding:"omitempty,alpha,lte=50"`
-	LastName  string `json:"lastName" example:"Malykh" binding:"omitempty,alpha,lte=50"`
+type UserPartialUpdateDTO struct {
+	ID        uuid.UUID
+	Username  string
+	FirstName string
+	LastName  string
+}
+
+type UpdateColumns map[string]interface{}
+
+func (c UpdateColumns) Validate() error {
+	for k, v := range c {
+		if v == "" || v == nil {
+			delete(c, k)
+		}
+	}
+
+	if len(c) == 0 {
+		return ErrPartialUpdate
+	}
+
+	return nil
 }

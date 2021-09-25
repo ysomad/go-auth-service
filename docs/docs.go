@@ -44,7 +44,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/entity.LoginRequest"
+                            "$ref": "#/definitions/v1.loginRequest"
                         }
                     }
                 ],
@@ -52,7 +52,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/entity.LoginResponse"
+                            "$ref": "#/definitions/entity.JWT"
                         }
                     },
                     "400": {
@@ -105,7 +105,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/entity.LoginResponse"
+                            "$ref": "#/definitions/entity.JWT"
                         }
                     },
                     "400": {
@@ -195,7 +195,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/entity.CreateUserRequest"
+                            "$ref": "#/definitions/v1.userCreateRequest"
                         }
                     }
                 ],
@@ -248,7 +248,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/entity.PartialUpdateRequest"
+                            "$ref": "#/definitions/v1.userPartialUpdateRequest"
                         }
                     }
                 ],
@@ -309,7 +309,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/entity.ArchiveUserRequest"
+                            "$ref": "#/definitions/v1.userArchiveRequest"
                         }
                     }
                 ],
@@ -346,63 +346,7 @@ var doc = `{
         }
     },
     "definitions": {
-        "entity.ArchiveUserRequest": {
-            "type": "object",
-            "required": [
-                "isArchive"
-            ],
-            "properties": {
-                "isArchive": {
-                    "type": "boolean",
-                    "example": false
-                }
-            }
-        },
-        "entity.CreateUserRequest": {
-            "type": "object",
-            "required": [
-                "confirmPassword",
-                "email",
-                "password"
-            ],
-            "properties": {
-                "confirmPassword": {
-                    "type": "string",
-                    "example": "secret"
-                },
-                "email": {
-                    "type": "string",
-                    "example": "user@mail.com"
-                },
-                "password": {
-                    "type": "string",
-                    "example": "secret"
-                }
-            }
-        },
-        "entity.LoginRequest": {
-            "type": "object",
-            "required": [
-                "email",
-                "fingerprint",
-                "password"
-            ],
-            "properties": {
-                "email": {
-                    "type": "string",
-                    "example": "user@mail.com"
-                },
-                "fingerprint": {
-                    "type": "string",
-                    "example": "c84f18a2-c6c7-4850-be15-93f9cbaef3b3"
-                },
-                "password": {
-                    "type": "string",
-                    "example": "secret"
-                }
-            }
-        },
-        "entity.LoginResponse": {
+        "entity.JWT": {
             "type": "object",
             "properties": {
                 "accessToken": {
@@ -412,23 +356,6 @@ var doc = `{
                 "refreshToken": {
                     "type": "string",
                     "example": "c84f18a2-c6c7-4850-be15-93f9cbaef3b3"
-                }
-            }
-        },
-        "entity.PartialUpdateRequest": {
-            "type": "object",
-            "properties": {
-                "firstName": {
-                    "type": "string",
-                    "example": "Alex"
-                },
-                "lastName": {
-                    "type": "string",
-                    "example": "Malykh"
-                },
-                "username": {
-                    "type": "string",
-                    "example": "username"
                 }
             }
         },
@@ -473,6 +400,28 @@ var doc = `{
                 }
             }
         },
+        "v1.loginRequest": {
+            "type": "object",
+            "required": [
+                "email",
+                "fingerprint",
+                "password"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "user@mail.com"
+                },
+                "fingerprint": {
+                    "type": "string",
+                    "example": "c84f18a2-c6c7-4850-be15-93f9cbaef3b3"
+                },
+                "password": {
+                    "type": "string",
+                    "example": "secret"
+                }
+            }
+        },
         "v1.messageResponse": {
             "type": "object",
             "properties": {
@@ -496,6 +445,57 @@ var doc = `{
                 "refreshToken": {
                     "type": "string",
                     "example": "c84f18a2-c6c7-4850-be15-93f9cbaef3b3"
+                }
+            }
+        },
+        "v1.userArchiveRequest": {
+            "type": "object",
+            "required": [
+                "isArchive"
+            ],
+            "properties": {
+                "isArchive": {
+                    "type": "boolean",
+                    "example": false
+                }
+            }
+        },
+        "v1.userCreateRequest": {
+            "type": "object",
+            "required": [
+                "confirmPassword",
+                "email",
+                "password"
+            ],
+            "properties": {
+                "confirmPassword": {
+                    "type": "string",
+                    "example": "secret"
+                },
+                "email": {
+                    "type": "string",
+                    "example": "user@mail.com"
+                },
+                "password": {
+                    "type": "string",
+                    "example": "secret"
+                }
+            }
+        },
+        "v1.userPartialUpdateRequest": {
+            "type": "object",
+            "properties": {
+                "firstName": {
+                    "type": "string",
+                    "example": "Alex"
+                },
+                "lastName": {
+                    "type": "string",
+                    "example": "Malykh"
+                },
+                "username": {
+                    "type": "string",
+                    "example": "username"
                 }
             }
         },
