@@ -76,6 +76,9 @@ var doc = `{
                 }
             }
         },
+        "/auth/refresh": {
+            "post": {
+                "description": "Creates new access token",
         "/users": {
             "get": {
                 "security": [
@@ -91,8 +94,27 @@ var doc = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Users"
+                    "Auth"
                 ],
+                "summary": "Refresh access token",
+                "operationId": "refresh",
+                "parameters": [
+                    {
+                        "description": "To get new access token fingerprint and refresh token should be provided",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/v1.refreshJWTRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/entity.LoginResponse"
+                        }
                 "summary": "Get user data",
                 "operationId": "get",
                 "responses": {
@@ -101,6 +123,66 @@ var doc = `{
                         "schema": {
                             "$ref": "#/definitions/entity.User"
                         }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/v1.messageResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/v1.messageResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/v1.messageResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/users": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Receive user data",
+            },
+            "post": {
+                "description": "Create a new user with email and password",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Get user data",
+                "operationId": "get",
+                "summary": "Create new user",
+                "operationId": "signup",
+                "parameters": [
+                    {
+                        "description": "To create a new user email and password should be provided",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entity.CreateUserRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": ""
                     },
                     "400": {
                         "description": "Bad Request",
@@ -426,6 +508,23 @@ var doc = `{
                 "error": {
                     "type": "string",
                     "example": "message"
+                }
+            }
+        },
+        "v1.refreshJWTRequest": {
+            "type": "object",
+            "required": [
+                "fingerprint",
+                "refreshToken"
+            ],
+            "properties": {
+                "fingerprint": {
+                    "type": "string",
+                    "example": "c84f18a2-c6c7-4850-be15-93f9cbaef3b3"
+                },
+                "refreshToken": {
+                    "type": "string",
+                    "example": "c84f18a2-c6c7-4850-be15-93f9cbaef3b3"
                 }
             }
         },

@@ -9,6 +9,10 @@ import (
 	"net/http"
 )
 
+const (
+	refreshTokenKey = "token"
+)
+
 type authRoutes struct {
 	validator   validation.Validator
 	authService service.Auth
@@ -20,6 +24,7 @@ func newAuthRoutes(handler *gin.RouterGroup, t validation.Validator, a service.A
 	h := handler.Group("/auth")
 	{
 		h.POST("login", r.login)
+		h.POST("refresh", r.refreshJWT)
 	}
 }
 
@@ -44,17 +49,17 @@ func (r *authRoutes) login(c *gin.Context) {
 	}
 
 	// Get user data
-	fingerprint, err := uuid.Parse(req.Fingerprint)
+	fp, err := uuid.Parse(req.Fingerprint)
 	if err != nil {
 		abortWithError(c, http.StatusBadRequest, err)
 		return
 	}
 
 	// Login user
-	resp, err := r.authService.Login(c.Request.Context(), req, entity.Session{
+	resp, err := r.authService.Login(c.Request.Context(), req, entity.SessionSecurityDTO{
 		UserAgent:   c.Request.Header.Get("User-Agent"),
 		UserIP:      c.ClientIP(),
-		Fingerprint: fingerprint,
+		Fingerprint: fp,
 	})
 	if err != nil {
 		abortWithError(c, http.StatusBadRequest, err)
@@ -63,7 +68,7 @@ func (r *authRoutes) login(c *gin.Context) {
 
 	// Set httponly secure cookie with refresh token to reuse it in web applications
 	c.SetCookie(
-		"refreshToken",
+		refreshTokenKey,
 		resp.RefreshToken.String(),
 		resp.ExpiresIn,
 		"/v1/auth",
@@ -71,6 +76,63 @@ func (r *authRoutes) login(c *gin.Context) {
 		true,
 		true,
 	)
+
+	c.JSON(http.StatusOK, resp)
+}
+
+type refreshJWTRequest struct {
+	RefreshToken string `json:"refreshToken" example:"c84f18a2-c6c7-4850-be15-93f9cbaef3b3" binding:"required,uuid4"`
+	Fingerprint  string `json:"fingerprint" example:"c84f18a2-c6c7-4850-be15-93f9cbaef3b3" binding:"required,uuid4"`
+}
+
+// @Summary     Refresh access token
+// @Description Creates new access token
+// @ID          refresh
+// @Tags  	    Auth
+// @Accept      json
+// @Produce     json
+// @Param       request body refreshJWTRequest true "To get new access token fingerprint and refresh token should be provided"
+// @Success     200 {object} entity.LoginResponse
+// @Failure     400 {object} messageResponse
+// @Failure     500 {object} messageResponse
+// @Failure		422 {object} validationErrorResponse
+// @Router      /auth/refresh [post]
+func (r *authRoutes) refreshJWT(c *gin.Context) {
+	var req refreshJWTRequest
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		abortWithValidationError(c, http.StatusUnprocessableEntity, r.validator.TranslateAll(err))
+		return
+	}
+
+	// Overwrite request refreshToken with token from cookies if it's present
+	token, err := c.Cookie(refreshTokenKey)
+	if err == nil {
+		req.RefreshToken = token
+	}
+
+	fp, err := uuid.Parse(req.Fingerprint)
+	if err != nil {
+		abortWithError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	rt, err := uuid.Parse(req.RefreshToken)
+	if err != nil {
+		abortWithError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	resp, err := r.authService.RefreshToken(c.Request.Context(), entity.SessionSecurityDTO{
+		RefreshToken: rt,
+		UserAgent:    c.Request.Header.Get("User-Agent"),
+		UserIP:       c.ClientIP(),
+		Fingerprint:  fp,
+	})
+	if err != nil {
+		abortWithError(c, http.StatusBadRequest, err)
+		return
+	}
 
 	c.JSON(http.StatusOK, resp)
 }
