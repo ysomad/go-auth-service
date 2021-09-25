@@ -1,29 +1,25 @@
 package entity
 
 import (
-	"errors"
 	"github.com/google/uuid"
 	"time"
 )
 
 // Session represents refresh token session for JWT authentication
 type Session struct {
-	RefreshToken uuid.UUID     `json:"refreshToken"`
-	UserID       uuid.UUID     `json:"userID"`
-	UserAgent    string        `json:"userAgent"`
-	UserIP       string        `json:"userIP"`
-	Fingerprint  uuid.UUID     `json:"fingerprint"`
-	ExpiresAt    time.Time     `json:"expiresAt"`
+	RefreshToken uuid.UUID     `json:"refreshToken" redis:"token"`
+	UserID       uuid.UUID     `json:"userID" redis:"uid"`
+	UserAgent    string        `json:"userAgent" redis:"ua"`
+	UserIP       string        `json:"userIP" redis:"ip"`
+	Fingerprint  uuid.UUID     `json:"fingerprint" redis:"fp"`
 	ExpiresIn    time.Duration `json:"expiresIn"`
-	CreatedAt    time.Time     `json:"createdAt"`
+	ExpiresAt    int64         `json:"expiresAt" redis:"exp"`
+	CreatedAt    time.Time     `json:"createdAt" redis:"created"`
 }
 
-func (s *Session) SetExpiresAt() error {
-	if s.ExpiresIn == 0 || s.CreatedAt.IsZero() {
-		return errors.New("session creation error")
-	}
-
-	s.ExpiresAt = s.CreatedAt.Add(s.ExpiresIn)
-
-	return nil
+type SessionSecurityDTO struct {
+	RefreshToken uuid.UUID
+	Fingerprint  uuid.UUID
+	UserAgent    string
+	UserIP       string
 }

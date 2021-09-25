@@ -26,10 +26,13 @@ type (
 	}
 
 	Auth interface {
-		Login(ctx context.Context, req entity.LoginRequest, s entity.Session) (entity.LoginResponse, error)
+		Login(ctx context.Context, req entity.LoginRequest, dto entity.SessionSecurityDTO) (entity.LoginResponse, error)
+		RefreshToken(ctx context.Context, dto entity.SessionSecurityDTO) (entity.LoginResponse, error)
 	}
 
 	SessionRepo interface {
 		Create(ctx context.Context, s entity.Session) error
+		Get(ctx context.Context, refreshToken uuid.UUID) (entity.Session, error)
+		Terminate(ctx context.Context, refreshToken uuid.UUID) error
 	}
 )

@@ -76,6 +76,59 @@ var doc = `{
                 }
             }
         },
+        "/auth/refresh": {
+            "post": {
+                "description": "Creates new access token",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Refresh access token",
+                "operationId": "refresh",
+                "parameters": [
+                    {
+                        "description": "To get new access token fingerprint and refresh token should be provided",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/v1.refreshJWTRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/entity.LoginResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/v1.messageResponse"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "$ref": "#/definitions/v1.validationErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/v1.messageResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/users": {
             "get": {
                 "security": [
@@ -426,6 +479,23 @@ var doc = `{
                 "error": {
                     "type": "string",
                     "example": "message"
+                }
+            }
+        },
+        "v1.refreshJWTRequest": {
+            "type": "object",
+            "required": [
+                "fingerprint",
+                "refreshToken"
+            ],
+            "properties": {
+                "fingerprint": {
+                    "type": "string",
+                    "example": "c84f18a2-c6c7-4850-be15-93f9cbaef3b3"
+                },
+                "refreshToken": {
+                    "type": "string",
+                    "example": "c84f18a2-c6c7-4850-be15-93f9cbaef3b3"
                 }
             }
         },

@@ -97,6 +97,18 @@ definitions:
         example: message
         type: string
     type: object
+  v1.refreshJWTRequest:
+    properties:
+      fingerprint:
+        example: c84f18a2-c6c7-4850-be15-93f9cbaef3b3
+        type: string
+      refreshToken:
+        example: c84f18a2-c6c7-4850-be15-93f9cbaef3b3
+        type: string
+    required:
+    - fingerprint
+    - refreshToken
+    type: object
   v1.validationErrorResponse:
     properties:
       error:
@@ -147,6 +159,42 @@ paths:
           schema:
             $ref: '#/definitions/v1.messageResponse'
       summary: Login
+      tags:
+      - Auth
+  /auth/refresh:
+    post:
+      consumes:
+      - application/json
+      description: Creates new access token
+      operationId: refresh
+      parameters:
+      - description: To get new access token fingerprint and refresh token should
+          be provided
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/v1.refreshJWTRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.LoginResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.messageResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/v1.validationErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.messageResponse'
+      summary: Refresh access token
       tags:
       - Auth
   /users:
