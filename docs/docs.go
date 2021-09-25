@@ -33,10 +33,10 @@ var doc = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Auth"
+                    "auth"
                 ],
                 "summary": "Login",
-                "operationId": "login",
+                "operationId": "authLogin",
                 "parameters": [
                     {
                         "description": "To login user email, password and fingerprint as uuid v4 type should be provided",
@@ -78,7 +78,7 @@ var doc = `{
         },
         "/auth/refresh": {
             "post": {
-                "description": "Creates new access token",
+                "description": "Create new access token",
                 "consumes": [
                     "application/json"
                 ],
@@ -86,13 +86,13 @@ var doc = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Auth"
+                    "auth"
                 ],
                 "summary": "Refresh access token",
-                "operationId": "refresh",
+                "operationId": "authRefresh",
                 "parameters": [
                     {
-                        "description": "To get new access token fingerprint and refresh token should be provided",
+                        "description": "To get new access token, fingerprint and refresh token should be provided",
                         "name": "request",
                         "in": "body",
                         "required": true,
@@ -144,10 +144,10 @@ var doc = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Users"
+                    "users"
                 ],
-                "summary": "Get user data",
-                "operationId": "get",
+                "summary": "Get",
+                "operationId": "userGet",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -184,10 +184,10 @@ var doc = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Users"
+                    "users"
                 ],
-                "summary": "Create new user",
-                "operationId": "signup",
+                "summary": "Create",
+                "operationId": "userCreate",
                 "parameters": [
                     {
                         "description": "To create a new user email and password should be provided",
@@ -237,10 +237,10 @@ var doc = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Users"
+                    "users"
                 ],
                 "summary": "Partial update",
-                "operationId": "update",
+                "operationId": "userPartialUpdate",
                 "parameters": [
                     {
                         "description": "Provide at least one user field to update user data",
@@ -298,10 +298,10 @@ var doc = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Users"
+                    "users"
                 ],
-                "summary": "Archive or restore user",
-                "operationId": "archive",
+                "summary": "Archive/Restore",
+                "operationId": "userArchive",
                 "parameters": [
                     {
                         "description": "To archive or restore a user is_archive should be provided",

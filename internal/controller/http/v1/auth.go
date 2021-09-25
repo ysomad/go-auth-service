@@ -36,14 +36,13 @@ type loginRequest struct {
 
 // @Summary     Login
 // @Description Create access and refresh tokens using user email and password
-// @ID          login
-// @Tags  	    Auth
+// @ID          authLogin
+// @Tags  	    auth
 // @Accept      json
 // @Produce     json
 // @Param       request body loginRequest true "To login user email, password and fingerprint as uuid v4 type should be provided"
 // @Success     200 {object} entity.JWT
-// @Failure     400 {object} messageResponse
-// @Failure     500 {object} messageResponse
+// @Failure     400,500 {object} messageResponse
 // @Failure		422 {object} validationErrorResponse
 // @Router      /auth/login [post]
 func (r *authRoutes) login(c *gin.Context) {
@@ -98,15 +97,14 @@ type refreshJWTRequest struct {
 }
 
 // @Summary     Refresh access token
-// @Description Creates new access token
-// @ID          refresh
-// @Tags  	    Auth
+// @Description Create new access token
+// @ID          authRefresh
+// @Tags  	    auth
 // @Accept      json
 // @Produce     json
-// @Param       request body refreshJWTRequest true "To get new access token fingerprint and refresh token should be provided"
+// @Param       request body refreshJWTRequest true "To get new access token, fingerprint and refresh token should be provided"
 // @Success     200 {object} entity.JWT
-// @Failure     400 {object} messageResponse
-// @Failure     500 {object} messageResponse
+// @Failure     400,500 {object} messageResponse
 // @Failure		422 {object} validationErrorResponse
 // @Router      /auth/refresh [post]
 func (r *authRoutes) refreshJWT(c *gin.Context) {
