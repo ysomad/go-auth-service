@@ -79,6 +79,14 @@ var doc = `{
         "/auth/refresh": {
             "post": {
                 "description": "Creates new access token",
+        "/users": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Receive user data",
                 "consumes": [
                     "application/json"
                 ],
@@ -107,6 +115,14 @@ var doc = `{
                         "schema": {
                             "$ref": "#/definitions/entity.LoginResponse"
                         }
+                "summary": "Get user data",
+                "operationId": "get",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/entity.User"
+                        }
                     },
                     "400": {
                         "description": "Bad Request",
@@ -114,10 +130,10 @@ var doc = `{
                             "$ref": "#/definitions/v1.messageResponse"
                         }
                     },
-                    "422": {
-                        "description": "Unprocessable Entity",
+                    "401": {
+                        "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/v1.validationErrorResponse"
+                            "$ref": "#/definitions/v1.messageResponse"
                         }
                     },
                     "500": {
@@ -137,6 +153,9 @@ var doc = `{
                     }
                 ],
                 "description": "Receive user data",
+            },
+            "post": {
+                "description": "Create a new user with email and password",
                 "consumes": [
                     "application/json"
                 ],
@@ -148,12 +167,22 @@ var doc = `{
                 ],
                 "summary": "Get user data",
                 "operationId": "get",
-                "responses": {
-                    "200": {
-                        "description": "OK",
+                "summary": "Create new user",
+                "operationId": "signup",
+                "parameters": [
+                    {
+                        "description": "To create a new user email and password should be provided",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
                         "schema": {
-                            "$ref": "#/definitions/entity.User"
+                            "$ref": "#/definitions/entity.CreateUserRequest"
                         }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": ""
                     },
                     "400": {
                         "description": "Bad Request",
