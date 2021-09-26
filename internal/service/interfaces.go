@@ -30,7 +30,7 @@ type (
 
 	SessionRepo interface {
 		Create(ctx context.Context, s *entity.Session) error
-		Get(ctx context.Context, refreshToken uuid.UUID) (*entity.Session, error)
+		GetOne(ctx context.Context, refreshToken uuid.UUID) (*entity.Session, error)
 		Terminate(ctx context.Context, refreshToken uuid.UUID) error
 	}
 )

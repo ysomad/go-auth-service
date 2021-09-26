@@ -53,7 +53,7 @@ func (r *authRoutes) login(c *gin.Context) {
 		return
 	}
 
-	// Get user data
+	// GetOne user data
 	fp, err := uuid.Parse(req.Fingerprint)
 	if err != nil {
 		abortWithError(c, http.StatusBadRequest, err)

@@ -3,17 +3,10 @@ package repo
 import (
 	"context"
 	"fmt"
-	"strconv"
-	"time"
-
 	"github.com/go-redis/redis/v8"
 	"github.com/google/uuid"
 
 	"github.com/ysomad/go-auth-service/internal/entity"
-)
-
-const (
-	sessionPrefix = "sess"
 )
 
 type SessionRepo struct {
@@ -24,85 +17,59 @@ func NewSessionRepo(r *redis.Client) *SessionRepo {
 	return &SessionRepo{r}
 }
 
-func (r *SessionRepo) sessionKey(key string) string {
-	return fmt.Sprintf("%s:%s", sessionPrefix, key)
+func (r *SessionRepo) sessionKey(userID uuid.UUID, refreshToken uuid.UUID) string {
+	return fmt.Sprintf("%s:%s", userID, refreshToken)
+}
+
+// sessionList returns list of found session with refresh token
+func (r *SessionRepo) sessionList(ctx context.Context, refreshToken uuid.UUID, cursor uint64, count int64) ([]string, uint64, error) {
+	return r.Scan(ctx, cursor, fmt.Sprintf("*:%s", refreshToken), count).Result()
 }
 
 // Create sets new refresh session to redis with refresh token as key
 func (r *SessionRepo) Create(ctx context.Context, s *entity.Session) error {
-	tokenString := s.RefreshToken.String()
-	key := r.sessionKey(tokenString)
-
-	// Set hash
-	if err := r.HSet(ctx, key, map[string]interface{}{
-		"token":   tokenString,
-		"uid":     s.UserID.String(),
-		"ua":      s.UserAgent,
-		"ip":      s.UserIP,
-		"fp":      s.Fingerprint.String(),
-		"exp":     s.ExpiresAt,
-		"created": s.CreatedAt,
-	}).Err(); err != nil {
+	b, err := s.MarshalBinary()
+	if err != nil {
 		return err
 	}
 
-	// Set expiry to created hash key
-	if err := r.Expire(ctx, key, s.ExpiresIn).Err(); err != nil {
+	if err = r.Set(ctx, r.sessionKey(s.UserID, s.RefreshToken), b, s.ExpiresIn).Err(); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (r *SessionRepo) Get(ctx context.Context, refreshToken uuid.UUID) (*entity.Session, error) {
-	res, err := r.HGetAll(ctx, r.sessionKey(refreshToken.String())).Result()
+func (r *SessionRepo) GetOne(ctx context.Context, refreshToken uuid.UUID) (*entity.Session, error) {
+	sessionKeys, _, err := r.sessionList(ctx, refreshToken, 0, 0)
 	if err != nil {
 		return nil, err
 	}
 
-	if res["token"] == "" {
+	if len(sessionKeys) == 0 {
 		return nil, entity.ErrSessionExpired
 	}
 
-	// Parse values from strings
-	token, err := uuid.Parse(res["token"])
-	if err != nil {
+	var session entity.Session
+
+	if err = r.Get(ctx, sessionKeys[0]).Scan(&session); err != nil {
 		return nil, err
 	}
 
-	uid, err := uuid.Parse(res["uid"])
-	if err != nil {
-		return nil, err
-	}
-
-	fp, err := uuid.Parse(res["fp"])
-	if err != nil {
-		return nil, err
-	}
-
-	exp, err := strconv.ParseInt(res["exp"], 10, 64)
-	if err != nil {
-		return nil, err
-	}
-
-	created, err := time.Parse(time.RFC3339Nano, res["created"])
-	if err != nil {
-		return nil, err
-	}
-
-	return &entity.Session{
-		RefreshToken: token,
-		UserID:       uid,
-		UserAgent:    res["ua"],
-		UserIP:       res["ip"],
-		Fingerprint:  fp,
-		ExpiresAt:    exp,
-		CreatedAt:    created,
-	}, nil
+	return &session, nil
 }
 
 func (r *SessionRepo) Terminate(ctx context.Context, refreshToken uuid.UUID) error {
-	if err := r.Del(ctx, r.sessionKey(refreshToken.String())).Err(); err != nil {
+	sessionKeys, _, err := r.sessionList(ctx, refreshToken, 0, 0)
+	if err != nil {
+		return err
+	}
+
+	if len(sessionKeys) == 0 {
+		return entity.ErrSessionExpired
+	}
+
+	if err = r.Del(ctx, sessionKeys[0]).Err(); err != nil {
 		return err
 	}
 

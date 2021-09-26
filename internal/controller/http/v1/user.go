@@ -148,7 +148,7 @@ func (r *userRoutes) partialUpdate(c *gin.Context) {
 	c.Status(http.StatusNoContent)
 }
 
-// @Summary     Get
+// @Summary     GetOne
 // @Description Receive user data
 // @ID          userGet
 // @Tags  	    users
