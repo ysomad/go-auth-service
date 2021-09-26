@@ -17,16 +17,16 @@ import (
 
 const userTable = "users"
 
-type UserRepo struct {
+type userRepo struct {
 	*postgres.Postgres
 }
 
-func NewUserRepo(pg *postgres.Postgres) *UserRepo {
-	return &UserRepo{pg}
+func NewUserRepo(pg *postgres.Postgres) *userRepo {
+	return &userRepo{pg}
 }
 
 // Create creates new user with email and password
-func (r *UserRepo) Create(ctx context.Context, email string, password string) error {
+func (r *userRepo) Create(ctx context.Context, email string, password string) error {
 	sql, args, err := r.Builder.
 		Insert(userTable).
 		Columns("email", "password").
@@ -57,7 +57,7 @@ func (r *UserRepo) Create(ctx context.Context, email string, password string) er
 }
 
 // Archive sets is_archive to isArchive for user with id
-func (r *UserRepo) Archive(ctx context.Context, id uuid.UUID, isArchive bool) error {
+func (r *userRepo) Archive(ctx context.Context, id uuid.UUID, isArchive bool) error {
 	sql, args, err := r.Builder.
 		Update(userTable).
 		Set("is_archive", isArchive).
@@ -80,7 +80,7 @@ func (r *UserRepo) Archive(ctx context.Context, id uuid.UUID, isArchive bool) er
 }
 
 // PartialUpdate update User column values with values presented in cols
-func (r *UserRepo) PartialUpdate(ctx context.Context, id uuid.UUID, cols entity.UpdateColumns) error {
+func (r *userRepo) PartialUpdate(ctx context.Context, id uuid.UUID, cols entity.UpdateColumns) error {
 	sql, args, err := r.Builder.
 		Update(userTable).
 		SetMap(cols).
@@ -113,7 +113,7 @@ func (r *UserRepo) PartialUpdate(ctx context.Context, id uuid.UUID, cols entity.
 }
 
 // GetByID returns user data by its id
-func (r *UserRepo) GetByID(ctx context.Context, id uuid.UUID) (*entity.User, error) {
+func (r *userRepo) GetByID(ctx context.Context, id uuid.UUID) (*entity.User, error) {
 	u := entity.User{ID: id}
 
 	sql, args, err := r.Builder.
@@ -146,7 +146,7 @@ func (r *UserRepo) GetByID(ctx context.Context, id uuid.UUID) (*entity.User, err
 }
 
 // GetByEmail returns user data by its email
-func (r *UserRepo) GetByEmail(ctx context.Context, email string) (*entity.User, error) {
+func (r *userRepo) GetByEmail(ctx context.Context, email string) (*entity.User, error) {
 	u := entity.User{Email: email}
 
 	sql, args, err := r.Builder.

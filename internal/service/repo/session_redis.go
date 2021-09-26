@@ -9,25 +9,25 @@ import (
 	"github.com/ysomad/go-auth-service/internal/entity"
 )
 
-type SessionRepo struct {
+type sessionRepo struct {
 	*redis.Client
 }
 
-func NewSessionRepo(r *redis.Client) *SessionRepo {
-	return &SessionRepo{r}
+func NewSessionRepo(r *redis.Client) *sessionRepo {
+	return &sessionRepo{r}
 }
 
-func (r *SessionRepo) sessionKey(userID uuid.UUID, refreshToken uuid.UUID) string {
+func (r *sessionRepo) sessionKey(userID uuid.UUID, refreshToken uuid.UUID) string {
 	return fmt.Sprintf("%s:%s", userID, refreshToken)
 }
 
 // sessionList returns list of found session with refresh token
-func (r *SessionRepo) sessionList(ctx context.Context, refreshToken uuid.UUID, cursor uint64, count int64) ([]string, uint64, error) {
+func (r *sessionRepo) sessionList(ctx context.Context, refreshToken uuid.UUID, cursor uint64, count int64) ([]string, uint64, error) {
 	return r.Scan(ctx, cursor, fmt.Sprintf("*:%s", refreshToken), count).Result()
 }
 
 // Create sets new refresh session to redis with refresh token as key
-func (r *SessionRepo) Create(ctx context.Context, s *entity.Session) error {
+func (r *sessionRepo) Create(ctx context.Context, s *entity.Session) error {
 	b, err := s.MarshalBinary()
 	if err != nil {
 		return err
@@ -40,7 +40,7 @@ func (r *SessionRepo) Create(ctx context.Context, s *entity.Session) error {
 	return nil
 }
 
-func (r *SessionRepo) GetOne(ctx context.Context, refreshToken uuid.UUID) (*entity.Session, error) {
+func (r *sessionRepo) GetOne(ctx context.Context, refreshToken uuid.UUID) (*entity.Session, error) {
 	sessionKeys, _, err := r.sessionList(ctx, refreshToken, 0, 0)
 	if err != nil {
 		return nil, err
@@ -59,7 +59,7 @@ func (r *SessionRepo) GetOne(ctx context.Context, refreshToken uuid.UUID) (*enti
 	return &session, nil
 }
 
-func (r *SessionRepo) Terminate(ctx context.Context, refreshToken uuid.UUID) error {
+func (r *sessionRepo) Terminate(ctx context.Context, refreshToken uuid.UUID) error {
 	sessionKeys, _, err := r.sessionList(ctx, refreshToken, 0, 0)
 	if err != nil {
 		return err

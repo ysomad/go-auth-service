@@ -16,23 +16,23 @@ type JWT interface {
 	Validate(accessToken string) (string, error)
 }
 
-type JWTManager struct {
+type managerJWT struct {
 	signingKey     string
 	accessTokenTTL time.Duration
 }
 
-func NewJWTManager(signingKey string, accessTokenTTL time.Duration) (*JWTManager, error) {
+func NewJWTManager(signingKey string, accessTokenTTL time.Duration) (*managerJWT, error) {
 	if signingKey == "" {
 		return nil, errors.New("empty signing key")
 	}
 
-	return &JWTManager{
+	return &managerJWT{
 		signingKey:     signingKey,
 		accessTokenTTL: accessTokenTTL,
 	}, nil
 }
 
-func (m *JWTManager) NewAccess(userID uuid.UUID) (string, error) {
+func (m *managerJWT) NewAccess(userID uuid.UUID) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
 		Subject:   userID.String(),
 		ExpiresAt: time.Now().Add(m.accessTokenTTL).Unix(),
@@ -41,12 +41,12 @@ func (m *JWTManager) NewAccess(userID uuid.UUID) (string, error) {
 	return token.SignedString([]byte(m.signingKey))
 }
 
-func (m *JWTManager) NewRefresh() (uuid.UUID, error) {
+func (m *managerJWT) NewRefresh() (uuid.UUID, error) {
 	return uuid.NewRandom()
 }
 
 // Validate parses and validating JWT token, returns user id from it
-func (m *JWTManager) Validate(accessToken string) (string, error) {
+func (m *managerJWT) Validate(accessToken string) (string, error) {
 	token, err := jwt.Parse(accessToken, func(token *jwt.Token) (i interface{}, err error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])

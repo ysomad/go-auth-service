@@ -14,12 +14,12 @@ type Validator interface {
 	TranslateAll(err error) map[string]string
 }
 
-type GinValidator struct {
+type ginValidator struct {
 	validate *validator.Validate
 	trans    ut.Translator
 }
 
-func NewGinValidator() (*GinValidator, error) {
+func NewGinValidator() (*ginValidator, error) {
 	eng := en.New()
 	uni := ut.New(eng, eng)
 	trans, found := uni.GetTranslator("en")
@@ -27,13 +27,13 @@ func NewGinValidator() (*GinValidator, error) {
 		return nil, errors.New("validation translator not found")
 	}
 
-	return &GinValidator{
+	return &ginValidator{
 		validate: binding.Validator.Engine().(*validator.Validate),
 		trans:    trans,
 	}, nil
 }
 
-func (v *GinValidator) register() error {
+func (v *ginValidator) register() error {
 	if err := enTranslations.RegisterDefaultTranslations(v.validate, v.trans); err != nil {
 		return err
 	}
@@ -42,12 +42,12 @@ func (v *GinValidator) register() error {
 }
 
 // TranslateAll returns translated validation errors received from gin.c.ShouldBindJSON err
-func (v *GinValidator) TranslateAll(err error) map[string]string {
+func (v *ginValidator) TranslateAll(err error) map[string]string {
 	_ = v.register()
 
 	return err.(validator.ValidationErrors).Translate(v.trans)
 }
 
-func (v *GinValidator) ValidateVar(val interface{}, tag string) error {
+func (v *ginValidator) ValidateVar(val interface{}, tag string) error {
 	return v.validate.Var(val, tag)
 }
