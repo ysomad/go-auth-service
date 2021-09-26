@@ -46,9 +46,6 @@ func (s *UserService) Archive(ctx context.Context, id uuid.UUID, isArchive bool)
 
 // PartialUpdate updates all updatable userRepo columns
 func (s *UserService) PartialUpdate(ctx context.Context, id uuid.UUID, cols entity.UpdateColumns) error {
-	// Validate update columns
-
-
 	if err := s.repo.PartialUpdate(ctx, id, cols); err != nil {
 		return fmt.Errorf("UserService - PartialUpdate - s.repo.PartialUpdate: %w", err)
 	}
