@@ -146,7 +146,7 @@ var doc = `{
                 "tags": [
                     "users"
                 ],
-                "summary": "Get",
+                "summary": "GetOne",
                 "operationId": "userGet",
                 "responses": {
                     "200": {

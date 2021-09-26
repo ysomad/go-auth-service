@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/ysomad/go-auth-service/internal/entity"
@@ -47,21 +48,21 @@ func (as *AuthService) verifyAccess(curr *entity.Session, s entity.SessionSecuri
 
 // Login identifies user by email, password and creates new refresh session
 func (as *AuthService) Login(ctx context.Context, cred entity.UserCredentialsDTO, security entity.SessionSecurityDTO) (entity.JWT, error) {
-	// Get user from db
+	// GetOne user from db
 	user, err := as.userRepo.GetByEmail(ctx, cred.Email)
 	if err != nil {
-		return entity.JWT{}, err
+		return entity.JWT{}, fmt.Errorf("AuthService - Login - as.userRepo.GetByEmail: %w", err)
 	}
 
 	// Compare passwords
 	if err = user.ComparePassword(cred.Password); err != nil {
-		return entity.JWT{}, err
+		return entity.JWT{}, fmt.Errorf("AuthService - Login - user.ComparePassword: %w", err)
 	}
 
 	// Generate refresh token
 	refreshToken, err := as.jwtService.NewRefresh()
 	if err != nil {
-		return entity.JWT{}, err
+		return entity.JWT{}, fmt.Errorf("AuthService - Login - as.jwtService.NewRefresh: %w", err)
 	}
 
 	// Create refresh session in redis
@@ -76,13 +77,13 @@ func (as *AuthService) Login(ctx context.Context, cred entity.UserCredentialsDTO
 		ExpiresAt:    as.unixExpiration(now),
 		CreatedAt:    now,
 	}); err != nil {
-		return entity.JWT{}, err
+		return entity.JWT{}, fmt.Errorf("AuthService - Login - as.sessionRepo.Create: %w", err)
 	}
 
 	// Generate access token
 	accessToken, err := as.jwtService.NewAccess(user.ID)
 	if err != nil {
-		return entity.JWT{}, err
+		return entity.JWT{}, fmt.Errorf("AuthService - Login - as.jwtService.NewAccess: %w", err)
 	}
 
 	return entity.JWT{
@@ -96,25 +97,25 @@ func (as *AuthService) Login(ctx context.Context, cred entity.UserCredentialsDTO
 // If one of session security fields is not the same as in the current refresh session,
 // then the current session is deleted and a new one is not created. User should log in with email and password again
 func (as *AuthService) RefreshToken(ctx context.Context, security entity.SessionSecurityDTO) (entity.JWT, error) {
-	currSession, err := as.sessionRepo.Get(ctx, security.RefreshToken)
+	currSession, err := as.sessionRepo.GetOne(ctx, security.RefreshToken)
 	if err != nil {
-		return entity.JWT{}, err
+		return entity.JWT{}, fmt.Errorf("AuthService - RefreshToken - as.sessionRepo.GetOne: %w", err)
 	}
 
 	// Delete current refresh session from redis
 	if err = as.sessionRepo.Terminate(ctx, currSession.RefreshToken); err != nil {
-		return entity.JWT{}, err
+		return entity.JWT{}, fmt.Errorf("AuthService - RefreshToken - as.sessionRepo.Terminate: %w", err)
 	}
 
 	// Check user agent, ip, fingerprint and refresh token lifetime
 	if err = as.verifyAccess(currSession, security); err != nil {
-		return entity.JWT{}, err
+		return entity.JWT{}, fmt.Errorf("AuthService - RefreshToken - as.verifyAccess: %w", err)
 	}
 
 	// Generate refresh token
 	refreshToken, err := as.jwtService.NewRefresh()
 	if err != nil {
-		return entity.JWT{}, err
+		return entity.JWT{}, fmt.Errorf("AuthService - RefreshToken - as.jwtService.NewRefresh: %w", err)
 	}
 
 	// Create new refresh session in redis
@@ -129,13 +130,13 @@ func (as *AuthService) RefreshToken(ctx context.Context, security entity.Session
 		ExpiresAt:    as.unixExpiration(now),
 		CreatedAt:    now,
 	}); err != nil {
-		return entity.JWT{}, err
+		return entity.JWT{}, fmt.Errorf("AuthService - RefreshToken - as.sessionRepo.Create: %w", err)
 	}
 
 	// Generate access token
 	accessToken, err := as.jwtService.NewAccess(currSession.UserID)
 	if err != nil {
-		return entity.JWT{}, err
+		return entity.JWT{}, fmt.Errorf("AuthService - RefreshToken - as.jwtService.NewAccess: %w", err)
 	}
 
 	return entity.JWT{
