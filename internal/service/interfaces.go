@@ -11,7 +11,7 @@ type (
 	User interface {
 		Create(ctx context.Context, email string, password string) error
 		Archive(ctx context.Context, id uuid.UUID, isArchive bool) error
-		PartialUpdate(ctx context.Context, u entity.UserPartialUpdateDTO) error
+		PartialUpdate(ctx context.Context, id uuid.UUID, cols entity.UpdateColumns) error
 		GetByID(ctx context.Context, id uuid.UUID) (*entity.User, error)
 	}
 

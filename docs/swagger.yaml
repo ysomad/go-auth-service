@@ -224,7 +224,7 @@ paths:
             $ref: '#/definitions/v1.messageResponse'
       security:
       - Bearer: []
-      summary: GetOne
+      summary: Get
       tags:
       - users
     patch:

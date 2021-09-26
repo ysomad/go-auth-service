@@ -45,18 +45,11 @@ func (s *UserService) Archive(ctx context.Context, id uuid.UUID, isArchive bool)
 }
 
 // PartialUpdate updates all updatable userRepo columns
-func (s *UserService) PartialUpdate(ctx context.Context, u entity.UserPartialUpdateDTO) error {
+func (s *UserService) PartialUpdate(ctx context.Context, id uuid.UUID, cols entity.UpdateColumns) error {
 	// Validate update columns
-	cols := entity.UpdateColumns{
-		"username":   u.Username,
-		"first_name": u.FirstName,
-		"last_name":  u.LastName,
-	}
-	if err := cols.Validate(); err != nil {
-		return fmt.Errorf("UserService - PartialUpdate - cols.Validate: %w", err)
-	}
 
-	if err := s.repo.PartialUpdate(ctx, u.ID, cols); err != nil {
+
+	if err := s.repo.PartialUpdate(ctx, id, cols); err != nil {
 		return fmt.Errorf("UserService - PartialUpdate - s.repo.PartialUpdate: %w", err)
 	}
 

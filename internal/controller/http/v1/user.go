@@ -135,12 +135,17 @@ func (r *userRoutes) partialUpdate(c *gin.Context) {
 		return
 	}
 
-	if err = r.userService.PartialUpdate(c.Request.Context(), entity.UserPartialUpdateDTO{
-		ID:        id,
-		Username:  req.Username,
-		FirstName: req.FirstName,
-		LastName:  req.LastName,
-	}); err != nil {
+	cols := entity.UpdateColumns{
+		"username":   req.Username,
+		"first_name": req.FirstName,
+		"last_name":  req.LastName,
+	}
+	if err = cols.Validate(); err != nil {
+		abortWithError(c, http.StatusUnprocessableEntity, err)
+		return
+	}
+
+	if err = r.userService.PartialUpdate(c.Request.Context(), id, cols); err != nil {
 		abortWithError(c, http.StatusBadRequest, err)
 		return
 	}
@@ -148,7 +153,7 @@ func (r *userRoutes) partialUpdate(c *gin.Context) {
 	c.Status(http.StatusNoContent)
 }
 
-// @Summary     GetOne
+// @Summary     Get
 // @Description Receive user data
 // @ID          userGet
 // @Tags  	    users
