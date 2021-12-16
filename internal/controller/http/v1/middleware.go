@@ -1,17 +1,64 @@
 package v1
 
 import (
-	"errors"
-	"github.com/google/uuid"
 	"net/http"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/ysomad/go-auth-service/pkg/auth"
+	"github.com/ysomad/go-auth-service/internal/entity"
+	"github.com/ysomad/go-auth-service/internal/service"
 )
 
-func authMiddleware(jwt auth.JWT) gin.HandlerFunc {
+func sessionMiddleware(s service.Session) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		sid, err := c.Cookie(sessionIDKey)
+		if err != nil {
+			abortWithError(c, http.StatusUnauthorized, entity.ErrUnauthorized)
+			return
+		}
+
+		// TODO: add session id validation
+
+		ctx := c.Request.Context()
+
+		sess, err := s.Find(ctx, sid)
+		if err != nil {
+			abortWithError(c, http.StatusUnauthorized, entity.ErrSessionExpired)
+			return
+		}
+
+		d, err := entity.NewDevice(c.Request.Header.Get("User-Agent"), c.ClientIP())
+		if err != nil {
+			abortWithError(c, http.StatusUnauthorized, entity.ErrSessionExpired)
+			return
+		}
+
+		// Check current request device vs session device
+		if sess.UserIP != d.UserIP || sess.UserAgent != d.UserAgent {
+			// TODO: send notification that someone logged in on new device
+			s.Terminate(ctx, sid)
+
+			abortWithError(c, http.StatusUnauthorized, entity.ErrSessionExpired)
+			return
+		}
+
+		c.Next()
+	}
+}
+
+/*
+func getUserID(c *gin.Context) (uuid.UUID, error) {
+	idStr := c.GetString("user")
+
+	id, err := uuid.Parse(idStr)
+	if err != nil {
+		return uuid.UUID{}, err
+	}
+
+	return id, nil
+}
+
+func jwtMiddleware(jwt auth.JWT) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		header := c.GetHeader("Authorization")
 		if len(header) == 0 {
@@ -43,13 +90,5 @@ func authMiddleware(jwt auth.JWT) gin.HandlerFunc {
 	}
 }
 
-func getUserID(c *gin.Context) (uuid.UUID, error) {
-	idStr := c.GetString("user")
 
-	id, err := uuid.Parse(idStr)
-	if err != nil {
-		return uuid.UUID{}, err
-	}
-
-	return id, nil
-}
+*/

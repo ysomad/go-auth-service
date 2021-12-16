@@ -28,7 +28,7 @@ type Postgres struct {
 }
 
 // New -.
-func New(url string, opts ...Option) (*Postgres, error) {
+func New(uri string, opts ...Option) (*Postgres, error) {
 	pg := &Postgres{
 		maxPoolSize:  _defaultMaxPoolSize,
 		connAttempts: _defaultConnAttempts,
@@ -42,7 +42,7 @@ func New(url string, opts ...Option) (*Postgres, error) {
 
 	pg.Builder = squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar)
 
-	poolConfig, err := pgxpool.ParseConfig(url)
+	poolConfig, err := pgxpool.ParseConfig(uri)
 	if err != nil {
 		return nil, fmt.Errorf("postgres - NewPostgres - pgxpool.ParseConfig: %w", err)
 	}

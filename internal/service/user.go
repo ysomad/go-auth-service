@@ -3,62 +3,80 @@ package service
 import (
 	"context"
 	"fmt"
-	"github.com/google/uuid"
+	"time"
+
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/ysomad/go-auth-service/internal/entity"
+	"github.com/ysomad/go-auth-service/internal/service/repository"
+)
+
+const (
+	userCacheKey = "user"
 )
 
 type userService struct {
-	repo UserRepo
+	userRepo UserRepo
+
+	cache    CacheRepo
+	cacheTTL time.Duration
 }
 
-func NewUserService(r UserRepo) *userService {
-	return &userService{r}
+func NewUserService(r UserRepo, c CacheRepo, cacheTTL time.Duration) *userService {
+	return &userService{r, c, cacheTTL}
 }
 
-func (s *userService) hash(str string) ([]byte, error) {
-	return bcrypt.GenerateFromPassword([]byte(str), 11)
-}
+func (s *userService) FindByID(ctx context.Context, uid string) (entity.User, error) {
+	var user entity.User
 
-// Create creates new userRepo with email and encrypted password
-func (s *userService) Create(ctx context.Context, email string, password string) error {
-	b, err := s.hash(password)
+	if err := s.cache.Get(ctx, repository.BuildCacheKey(userCacheKey, uid), &user); err != nil {
+		return entity.User{}, fmt.Errorf("userService - FindByID - s.cacheRepo.Get: %w", err)
+	}
+
+	if (user != entity.User{}) {
+		return user, nil
+	}
+
+	user, err := s.userRepo.GetByID(ctx, uid)
 	if err != nil {
-		return fmt.Errorf("userService - Create - s.hash: %w", err)
+		return entity.User{}, fmt.Errorf("userService - FindByID - s.userRepo.GetByID: %w", err)
 	}
 
-	if err = s.repo.Create(ctx, email, string(b)); err != nil {
-		return fmt.Errorf("userService - Create - s.repo.Create: %w", err)
+	if err = s.cache.Set(ctx, repository.BuildCacheKey(userCacheKey, uid), user, s.cacheTTL); err != nil {
+		return entity.User{}, fmt.Errorf("userService - FindByID - s.cacheRepo.Set: %w", err)
 	}
 
-	return nil
+	return user, nil
 }
-
-// Archive sets userRepo is_archive
-func (s *userService) Archive(ctx context.Context, id uuid.UUID, isArchive bool) error {
-	if err := s.repo.Archive(ctx, id, isArchive); err != nil {
-		return fmt.Errorf("userService - Archive - s.repo.Archive: %w", err)
-	}
-
-	return nil
-}
-
-// PartialUpdate updates all updatable userRepo columns
-func (s *userService) PartialUpdate(ctx context.Context, id uuid.UUID, cols entity.UpdateColumns) error {
-	if err := s.repo.PartialUpdate(ctx, id, cols); err != nil {
-		return fmt.Errorf("userService - PartialUpdate - s.repo.PartialUpdate: %w", err)
-	}
-
-	return nil
-}
-
-// GetByID gets userRepo data by ID
-func (s *userService) GetByID(ctx context.Context, id uuid.UUID) (*entity.User, error) {
-	u, err := s.repo.GetByID(ctx, id)
+func (s *userService) Register(ctx context.Context, email, password string) (entity.User, error) {
+	bhash, err := bcrypt.GenerateFromPassword([]byte(password), 11)
 	if err != nil {
-		return nil, fmt.Errorf("userService - GetByID - s.repo.GetByID: %w", err)
+		return entity.User{}, fmt.Errorf("userService - Register - bcrypt.GenerateFromPassword: %w", err)
+	}
+
+	dto, err := entity.NewUserSensitiveData(email, string(bhash))
+	if err != nil {
+		return entity.User{}, fmt.Errorf("userService - Register - entity.NewUserRegister: %w", err)
+	}
+
+	u, err := s.userRepo.Create(ctx, dto)
+	if err != nil {
+		return entity.User{}, fmt.Errorf("userService - Register - s.userRepo.Create: %w", err)
 	}
 
 	return u, nil
+}
+
+// Archive sets User isArchive state to archive
+func (s *userService) Archive(ctx context.Context, uid string, archive bool) error {
+	u, err := s.userRepo.Archive(ctx, uid, archive)
+	if err != nil {
+		return fmt.Errorf("userService - Archive - s.userRepo.Archive: %w", err)
+	}
+
+	if err = s.cache.Add(ctx, repository.BuildCacheKey(userCacheKey, uid), u, s.cacheTTL); err != nil {
+		return fmt.Errorf("userService - Archive - s.cacheRepo.Add: %w", err)
+	}
+
+	return nil
 }

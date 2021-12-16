@@ -1,142 +1,71 @@
 package v1
 
 import (
+	"net/http"
+
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	"github.com/ysomad/go-auth-service/internal/entity"
 	"github.com/ysomad/go-auth-service/internal/service"
 	"github.com/ysomad/go-auth-service/pkg/validation"
-	"net/http"
 )
 
 const (
-	refreshTokenKey = "token"
+	sessionIDKey = "id"
 )
 
 type authRoutes struct {
-	validator   validation.Validator
-	authService service.Auth
+	validation.Validator
+	sessionService service.Session
 }
 
-func newAuthRoutes(handler *gin.RouterGroup, t validation.Validator, a service.Auth) {
-	r := &authRoutes{t, a}
+func newAuthRoutes(handler *gin.RouterGroup, v validation.Validator, a service.Session) {
+	r := &authRoutes{v, a}
 
 	h := handler.Group("/auth")
 	{
 		h.POST("login", r.login)
-		h.POST("refresh", r.refreshJWT)
 	}
 }
 
 type loginRequest struct {
-	Email       string `json:"email" example:"user@mail.com" binding:"required,email,lte=255"`
-	Password    string `json:"password" example:"secret" binding:"required,gte=6,lte=128"`
-	Fingerprint string `json:"fingerprint" example:"c84f18a2-c6c7-4850-be15-93f9cbaef3b3" binding:"required,uuid4"`
+	Email    string `json:"email" example:"user@mail.com" binding:"required,email,lte=255"`
+	Password string `json:"password" example:"secret" binding:"required,gte=6,lte=128"`
 }
 
 // @Summary     Login
-// @Description Create access and refresh tokens using user email and password
+// @Description Logs in and returns authentication cookie
 // @ID          authLogin
 // @Tags  	    auth
 // @Accept      json
 // @Produce     json
-// @Param       request body loginRequest true "To login user email, password and fingerprint as uuid v4 type should be provided"
-// @Success     200 {object} entity.JWT
-// @Failure     400,500 {object} messageResponse
+// @Param       request body loginRequest true "To login user email and password should be provided."
+// @Success     200
+// @Header      200 {string} Set-Cookie "`id`=22KWxEi4XlPGqFrMadBFW1qEFWv; Path=v1; `HttpOnly`; `Secure`"
+// @Failure     400 {object} messageResponse
 // @Failure		422 {object} validationErrorResponse
 // @Router      /auth/login [post]
 func (r *authRoutes) login(c *gin.Context) {
 	var req loginRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
-		abortWithValidationError(c, http.StatusUnprocessableEntity, r.validator.TranslateAll(err))
+		abortWithValidationError(c, http.StatusUnprocessableEntity, r.TranslateError(err))
 		return
 	}
 
-	// GetOne user data
-	fp, err := uuid.Parse(req.Fingerprint)
+	d, err := entity.NewDevice(c.Request.Header.Get("User-Agent"), c.ClientIP())
 	if err != nil {
 		abortWithError(c, http.StatusBadRequest, err)
 		return
 	}
 
-	// Login user
-	resp, err := r.authService.Login(
-		c.Request.Context(),
-		entity.UserCredentialsDTO{
-			Email:    req.Email,
-			Password: req.Password,
-		},
-		entity.SessionSecurityDTO{
-			UserAgent:   c.Request.Header.Get("User-Agent"),
-			UserIP:      c.ClientIP(),
-			Fingerprint: fp,
-		})
+	sess, err := r.sessionService.LoginWithEmail(c.Request.Context(), req.Email, req.Password, d)
 	if err != nil {
 		abortWithError(c, http.StatusBadRequest, err)
 		return
 	}
 
-	// Set httponly secure cookie with refresh token to reuse it in web applications
-	c.SetCookie(
-		refreshTokenKey,
-		resp.RefreshToken.String(),
-		resp.ExpiresIn,
-		"/v1/auth",
-		"",
-		true,
-		true,
-	)
+	// Set httponly secure cookie with session id
+	c.SetCookie(sessionIDKey, sess.ID, int(sess.TTL.Seconds()), "v1", "", true, true)
 
-	c.JSON(http.StatusOK, resp)
-}
-
-type refreshJWTRequest struct {
-	RefreshToken string `json:"refreshToken" example:"c84f18a2-c6c7-4850-be15-93f9cbaef3b3" binding:"required,uuid4"`
-	Fingerprint  string `json:"fingerprint" example:"c84f18a2-c6c7-4850-be15-93f9cbaef3b3" binding:"required,uuid4"`
-}
-
-// @Summary     Refresh access token
-// @Description Create new access token
-// @ID          authRefresh
-// @Tags  	    auth
-// @Accept      json
-// @Produce     json
-// @Param       request body refreshJWTRequest true "To get new access token, fingerprint and refresh token should be provided"
-// @Success     200 {object} entity.JWT
-// @Failure     400,500 {object} messageResponse
-// @Failure		422 {object} validationErrorResponse
-// @Router      /auth/refresh [post]
-func (r *authRoutes) refreshJWT(c *gin.Context) {
-	var req refreshJWTRequest
-
-	if err := c.ShouldBindJSON(&req); err != nil {
-		abortWithValidationError(c, http.StatusUnprocessableEntity, r.validator.TranslateAll(err))
-		return
-	}
-
-	fp, err := uuid.Parse(req.Fingerprint)
-	if err != nil {
-		abortWithError(c, http.StatusBadRequest, err)
-		return
-	}
-
-	rt, err := uuid.Parse(req.RefreshToken)
-	if err != nil {
-		abortWithError(c, http.StatusBadRequest, err)
-		return
-	}
-
-	resp, err := r.authService.RefreshToken(c.Request.Context(), entity.SessionSecurityDTO{
-		RefreshToken: rt,
-		UserAgent:    c.Request.Header.Get("User-Agent"),
-		UserIP:       c.ClientIP(),
-		Fingerprint:  fp,
-	})
-	if err != nil {
-		abortWithError(c, http.StatusBadRequest, err)
-		return
-	}
-
-	c.JSON(http.StatusOK, resp)
+	c.Status(http.StatusOK)
 }

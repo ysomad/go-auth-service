@@ -1,14 +1,5 @@
 basePath: /v1
 definitions:
-  entity.JWT:
-    properties:
-      accessToken:
-        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
-        type: string
-      refreshToken:
-        example: c84f18a2-c6c7-4850-be15-93f9cbaef3b3
-        type: string
-    type: object
   entity.User:
     properties:
       createdAt:
@@ -16,9 +7,6 @@ definitions:
         type: string
       email:
         example: user@mail.com
-        type: string
-      firstName:
-        example: Alex
         type: string
       id:
         example: c84f18a2-c6c7-4850-be15-93f9cbaef3b3
@@ -29,9 +17,6 @@ definitions:
       isArchive:
         example: false
         type: boolean
-      lastName:
-        example: Malykh
-        type: string
       updatedAt:
         example: "2021-08-31T16:55:18.080768Z"
         type: string
@@ -43,16 +28,15 @@ definitions:
     properties:
       email:
         example: user@mail.com
-        type: string
-      fingerprint:
-        example: c84f18a2-c6c7-4850-be15-93f9cbaef3b3
+        maxLength: 255
         type: string
       password:
         example: secret
+        maxLength: 128
+        minLength: 6
         type: string
     required:
     - email
-    - fingerprint
     - password
     type: object
   v1.messageResponse:
@@ -60,18 +44,6 @@ definitions:
       error:
         example: message
         type: string
-    type: object
-  v1.refreshJWTRequest:
-    properties:
-      fingerprint:
-        example: c84f18a2-c6c7-4850-be15-93f9cbaef3b3
-        type: string
-      refreshToken:
-        example: c84f18a2-c6c7-4850-be15-93f9cbaef3b3
-        type: string
-    required:
-    - fingerprint
-    - refreshToken
     type: object
   v1.userArchiveRequest:
     properties:
@@ -88,26 +60,17 @@ definitions:
         type: string
       email:
         example: user@mail.com
+        maxLength: 255
         type: string
       password:
         example: secret
+        maxLength: 128
+        minLength: 6
         type: string
     required:
     - confirmPassword
     - email
     - password
-    type: object
-  v1.userPartialUpdateRequest:
-    properties:
-      firstName:
-        example: Alex
-        type: string
-      lastName:
-        example: Malykh
-        type: string
-      username:
-        example: username
-        type: string
     type: object
   v1.validationErrorResponse:
     properties:
@@ -129,11 +92,10 @@ paths:
     post:
       consumes:
       - application/json
-      description: Create access and refresh tokens using user email and password
+      description: Logs in and returns authentication cookie
       operationId: authLogin
       parameters:
-      - description: To login user email, password and fingerprint as uuid v4 type
-          should be provided
+      - description: To login user email and password should be provided.
         in: body
         name: request
         required: true
@@ -143,9 +105,12 @@ paths:
       - application/json
       responses:
         "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/entity.JWT'
+          description: ""
+          headers:
+            Set-Cookie:
+              description: '`id`=22KWxEi4XlPGqFrMadBFW1qEFWv; Path=v1; `HttpOnly`;
+                `Secure`'
+              type: string
         "400":
           description: Bad Request
           schema:
@@ -154,34 +119,29 @@ paths:
           description: Unprocessable Entity
           schema:
             $ref: '#/definitions/v1.validationErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/v1.messageResponse'
       summary: Login
       tags:
       - auth
-  /auth/refresh:
+  /users:
     post:
       consumes:
       - application/json
-      description: Create new access token
-      operationId: authRefresh
+      description: Register a new user with email and password
+      operationId: userCreate
       parameters:
-      - description: To get new access token, fingerprint and refresh token should
-          be provided
+      - description: To register a new user email and password should be provided
         in: body
         name: request
         required: true
         schema:
-          $ref: '#/definitions/v1.refreshJWTRequest'
+          $ref: '#/definitions/v1.userCreateRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/entity.JWT'
+            $ref: '#/definitions/entity.User'
         "400":
           description: Bad Request
           schema:
@@ -194,15 +154,21 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/v1.messageResponse'
-      summary: Refresh access token
+      summary: Register
       tags:
-      - auth
-  /users:
+      - users
+  /users/{user_id}:
     get:
       consumes:
       - application/json
       description: Receive user data
       operationId: userGet
+      parameters:
+      - description: User ID
+        in: path
+        name: user_id
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -222,82 +188,10 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/v1.messageResponse'
-      security:
-      - Bearer: []
       summary: Get
       tags:
       - users
-    patch:
-      consumes:
-      - application/json
-      description: Update user data partially
-      operationId: userPartialUpdate
-      parameters:
-      - description: Provide at least one user field to update user data
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/v1.userPartialUpdateRequest'
-      produces:
-      - application/json
-      responses:
-        "204":
-          description: ""
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/v1.messageResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/v1.messageResponse'
-        "422":
-          description: Unprocessable Entity
-          schema:
-            $ref: '#/definitions/v1.validationErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/v1.messageResponse'
-      security:
-      - Bearer: []
-      summary: Partial update
-      tags:
-      - users
-    post:
-      consumes:
-      - application/json
-      description: Create a new user with email and password
-      operationId: userCreate
-      parameters:
-      - description: To create a new user email and password should be provided
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/v1.userCreateRequest'
-      produces:
-      - application/json
-      responses:
-        "204":
-          description: ""
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/v1.messageResponse'
-        "422":
-          description: Unprocessable Entity
-          schema:
-            $ref: '#/definitions/v1.validationErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/v1.messageResponse'
-      summary: Create
-      tags:
-      - users
-  /users/archive:
+  /users/{user_id}/archive:
     patch:
       consumes:
       - application/json
@@ -310,6 +204,11 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/v1.userArchiveRequest'
+      - description: User ID
+        in: path
+        name: user_id
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -331,14 +230,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/v1.messageResponse'
-      security:
-      - Bearer: []
       summary: Archive/Restore
       tags:
       - users
-securityDefinitions:
-  Bearer:
-    in: header
-    name: Authorization
-    type: apiKey
 swagger: "2.0"

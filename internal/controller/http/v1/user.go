@@ -1,33 +1,32 @@
 package v1
 
 import (
-	"github.com/ysomad/go-auth-service/internal/entity"
-	"github.com/ysomad/go-auth-service/pkg/auth"
+	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 
+	"github.com/ysomad/go-auth-service/internal/entity"
 	"github.com/ysomad/go-auth-service/internal/service"
 	"github.com/ysomad/go-auth-service/pkg/validation"
 )
 
 type userRoutes struct {
-	validator   validation.Validator
+	validation.Validator
 	userService service.User
 }
 
-func newUserRoutes(handler *gin.RouterGroup, t validation.Validator, u service.User, j auth.JWT) {
-	r := &userRoutes{t, u}
+func newUserRoutes(handler *gin.RouterGroup, v validation.Validator, u service.User, s service.Session) {
+	r := &userRoutes{v, u}
 
 	h := handler.Group("/users")
 	{
-		h.POST("", r.create)
+		h.POST("", r.register)
 
-		authenticated := h.Group("/", authMiddleware(j))
+		authenticated := h.Group("/", sessionMiddleware(s))
 		{
-			authenticated.GET("", r.getUser)
-			authenticated.PATCH("", r.partialUpdate)
-			authenticated.PATCH("archive", r.archive)
+			authenticated.GET(":userID", r.getUser)
+			authenticated.PATCH("archive/:userID", r.archive)
 		}
 	}
 }
@@ -38,31 +37,32 @@ type userCreateRequest struct {
 	ConfirmPassword string `json:"confirmPassword" example:"secret" binding:"required,eqfield=Password"`
 }
 
-// @Summary     Create
-// @Description Create a new user with email and password
+// @Summary     Register
+// @Description Register a new user with email and password
 // @ID          userCreate
 // @Tags  	    users
 // @Accept      json
 // @Produce     json
-// @Param       request body userCreateRequest true "To create a new user email and password should be provided"
-// @Success     204
+// @Param       request body userCreateRequest true "To register a new user email and password should be provided"
+// @Success     200 {object} entity.User
 // @Failure     400,500 {object} messageResponse
 // @Failure		422 {object} validationErrorResponse
 // @Router      /users [post]
-func (r *userRoutes) create(c *gin.Context) {
+func (r *userRoutes) register(c *gin.Context) {
 	var req userCreateRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
-		abortWithValidationError(c, http.StatusUnprocessableEntity, r.validator.TranslateAll(err))
+		abortWithValidationError(c, http.StatusUnprocessableEntity, r.TranslateError(err))
 		return
 	}
 
-	if err := r.userService.Create(c.Request.Context(), req.Email, req.Password); err != nil {
+	user, err := r.userService.Register(c.Request.Context(), req.Email, req.Password)
+	if err != nil {
 		abortWithError(c, http.StatusBadRequest, err)
 		return
 	}
 
-	c.Status(http.StatusNoContent)
+	c.JSON(http.StatusOK, user)
 }
 
 type userArchiveRequest struct {
@@ -79,73 +79,23 @@ type userArchiveRequest struct {
 // @Success     204
 // @Failure     400,401,500 {object} messageResponse
 // @Failure		422 {object} validationErrorResponse
-// @Router      /users/archive [patch]
-// @Security    Bearer
+// @Param       user_id path string true "User ID"
+// @Router      /users/{user_id}/archive [patch]
 func (r *userRoutes) archive(c *gin.Context) {
 	var req userArchiveRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
-		abortWithValidationError(c, http.StatusUnprocessableEntity, r.validator.TranslateAll(err))
+		abortWithValidationError(c, http.StatusUnprocessableEntity, r.TranslateError(err))
 		return
 	}
 
-	id, err := getUserID(c)
-	if err != nil {
-		abortWithError(c, http.StatusUnauthorized, err)
+	userID, found := c.Params.Get("userID")
+	if !found {
+		abortWithError(c, http.StatusUnauthorized, errors.New("URL param is empty"))
 		return
 	}
 
-	if err = r.userService.Archive(c.Request.Context(), id, *req.IsArchive); err != nil {
-		abortWithError(c, http.StatusBadRequest, err)
-		return
-	}
-
-	c.Status(http.StatusNoContent)
-}
-
-type userPartialUpdateRequest struct {
-	Username  string `json:"username" example:"username" binding:"omitempty,alphanum,gte=4,lte=32"`
-	FirstName string `json:"firstName" example:"Alex"  binding:"omitempty,alpha,lte=50"`
-	LastName  string `json:"lastName" example:"Malykh" binding:"omitempty,alpha,lte=50"`
-}
-
-// @Summary     Partial update
-// @Description Update user data partially
-// @ID         	userPartialUpdate
-// @Tags  	    users
-// @Accept      json
-// @Produce     json
-// @Param       request body userPartialUpdateRequest true "Provide at least one user field to update user data"
-// @Success     204
-// @Failure     400,401,500 {object} messageResponse
-// @Failure		422 {object} validationErrorResponse
-// @Router      /users [patch]
-// @Security    Bearer
-func (r *userRoutes) partialUpdate(c *gin.Context) {
-	var req userPartialUpdateRequest
-
-	if err := c.ShouldBindJSON(&req); err != nil {
-		abortWithValidationError(c, http.StatusUnprocessableEntity, r.validator.TranslateAll(err))
-		return
-	}
-
-	id, err := getUserID(c)
-	if err != nil {
-		abortWithError(c, http.StatusUnauthorized, err)
-		return
-	}
-
-	cols := entity.UpdateColumns{
-		"username":   req.Username,
-		"first_name": req.FirstName,
-		"last_name":  req.LastName,
-	}
-	if err = cols.Validate(); err != nil {
-		abortWithError(c, http.StatusUnprocessableEntity, err)
-		return
-	}
-
-	if err = r.userService.PartialUpdate(c.Request.Context(), id, cols); err != nil {
+	if err := r.userService.Archive(c.Request.Context(), userID, *req.IsArchive); err != nil {
 		abortWithError(c, http.StatusBadRequest, err)
 		return
 	}
@@ -161,16 +111,16 @@ func (r *userRoutes) partialUpdate(c *gin.Context) {
 // @Produce     json
 // @Failure     400,401,500 {object} messageResponse
 // @Success     200 {object} entity.User
-// @Router      /users [get]
-// @Security    Bearer
+// @Param       user_id path string true "User ID"
+// @Router      /users/{user_id} [get]
 func (r *userRoutes) getUser(c *gin.Context) {
-	id, err := getUserID(c)
-	if err != nil {
-		abortWithError(c, http.StatusUnauthorized, err)
+	userID, found := c.Params.Get("userID")
+	if !found {
+		abortWithError(c, http.StatusUnauthorized, entity.ErrUnauthorized)
 		return
 	}
 
-	u, err := r.userService.GetByID(c.Request.Context(), id)
+	u, err := r.userService.FindByID(c.Request.Context(), userID)
 	if err != nil {
 		abortWithError(c, http.StatusBadRequest, err)
 		return

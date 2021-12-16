@@ -25,7 +25,7 @@ var doc = `{
     "paths": {
         "/auth/login": {
             "post": {
-                "description": "Create access and refresh tokens using user email and password",
+                "description": "Logs in and returns authentication cookie",
                 "consumes": [
                     "application/json"
                 ],
@@ -39,7 +39,7 @@ var doc = `{
                 "operationId": "authLogin",
                 "parameters": [
                     {
-                        "description": "To login user email, password and fingerprint as uuid v4 type should be provided",
+                        "description": "To login user email and password should be provided.",
                         "name": "request",
                         "in": "body",
                         "required": true,
@@ -50,9 +50,12 @@ var doc = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/entity.JWT"
+                        "description": "",
+                        "headers": {
+                            "Set-Cookie": {
+                                "type": "string",
+                                "description": "` + "`" + `id` + "`" + `=22KWxEi4XlPGqFrMadBFW1qEFWv; Path=v1; ` + "`" + `HttpOnly` + "`" + `; ` + "`" + `Secure` + "`" + `"
+                            }
                         }
                     },
                     "400": {
@@ -66,19 +69,13 @@ var doc = `{
                         "schema": {
                             "$ref": "#/definitions/v1.validationErrorResponse"
                         }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/v1.messageResponse"
-                        }
                     }
                 }
             }
         },
-        "/auth/refresh": {
+        "/users": {
             "post": {
-                "description": "Create new access token",
+                "description": "Register a new user with email and password",
                 "consumes": [
                     "application/json"
                 ],
@@ -86,18 +83,18 @@ var doc = `{
                     "application/json"
                 ],
                 "tags": [
-                    "auth"
+                    "users"
                 ],
-                "summary": "Refresh access token",
-                "operationId": "authRefresh",
+                "summary": "Register",
+                "operationId": "userCreate",
                 "parameters": [
                     {
-                        "description": "To get new access token, fingerprint and refresh token should be provided",
+                        "description": "To register a new user email and password should be provided",
                         "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/v1.refreshJWTRequest"
+                            "$ref": "#/definitions/v1.userCreateRequest"
                         }
                     }
                 ],
@@ -105,7 +102,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/entity.JWT"
+                            "$ref": "#/definitions/entity.User"
                         }
                     },
                     "400": {
@@ -129,13 +126,8 @@ var doc = `{
                 }
             }
         },
-        "/users": {
+        "/users/{user_id}": {
             "get": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
                 "description": "Receive user data",
                 "consumes": [
                     "application/json"
@@ -148,6 +140,15 @@ var doc = `{
                 ],
                 "summary": "Get",
                 "operationId": "userGet",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "user_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -174,122 +175,10 @@ var doc = `{
                         }
                     }
                 }
-            },
-            "post": {
-                "description": "Create a new user with email and password",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "users"
-                ],
-                "summary": "Create",
-                "operationId": "userCreate",
-                "parameters": [
-                    {
-                        "description": "To create a new user email and password should be provided",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/v1.userCreateRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": ""
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/v1.messageResponse"
-                        }
-                    },
-                    "422": {
-                        "description": "Unprocessable Entity",
-                        "schema": {
-                            "$ref": "#/definitions/v1.validationErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/v1.messageResponse"
-                        }
-                    }
-                }
-            },
-            "patch": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "description": "Update user data partially",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "users"
-                ],
-                "summary": "Partial update",
-                "operationId": "userPartialUpdate",
-                "parameters": [
-                    {
-                        "description": "Provide at least one user field to update user data",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/v1.userPartialUpdateRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": ""
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/v1.messageResponse"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/v1.messageResponse"
-                        }
-                    },
-                    "422": {
-                        "description": "Unprocessable Entity",
-                        "schema": {
-                            "$ref": "#/definitions/v1.validationErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/v1.messageResponse"
-                        }
-                    }
-                }
             }
         },
-        "/users/archive": {
+        "/users/{user_id}/archive": {
             "patch": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
                 "description": "Archive or restore user",
                 "consumes": [
                     "application/json"
@@ -311,6 +200,13 @@ var doc = `{
                         "schema": {
                             "$ref": "#/definitions/v1.userArchiveRequest"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "user_id",
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -346,19 +242,6 @@ var doc = `{
         }
     },
     "definitions": {
-        "entity.JWT": {
-            "type": "object",
-            "properties": {
-                "accessToken": {
-                    "type": "string",
-                    "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
-                },
-                "refreshToken": {
-                    "type": "string",
-                    "example": "c84f18a2-c6c7-4850-be15-93f9cbaef3b3"
-                }
-            }
-        },
         "entity.User": {
             "type": "object",
             "properties": {
@@ -369,10 +252,6 @@ var doc = `{
                 "email": {
                     "type": "string",
                     "example": "user@mail.com"
-                },
-                "firstName": {
-                    "type": "string",
-                    "example": "Alex"
                 },
                 "id": {
                     "type": "string",
@@ -385,10 +264,6 @@ var doc = `{
                 "isArchive": {
                     "type": "boolean",
                     "example": false
-                },
-                "lastName": {
-                    "type": "string",
-                    "example": "Malykh"
                 },
                 "updatedAt": {
                     "type": "string",
@@ -404,20 +279,18 @@ var doc = `{
             "type": "object",
             "required": [
                 "email",
-                "fingerprint",
                 "password"
             ],
             "properties": {
                 "email": {
                     "type": "string",
+                    "maxLength": 255,
                     "example": "user@mail.com"
-                },
-                "fingerprint": {
-                    "type": "string",
-                    "example": "c84f18a2-c6c7-4850-be15-93f9cbaef3b3"
                 },
                 "password": {
                     "type": "string",
+                    "maxLength": 128,
+                    "minLength": 6,
                     "example": "secret"
                 }
             }
@@ -428,23 +301,6 @@ var doc = `{
                 "error": {
                     "type": "string",
                     "example": "message"
-                }
-            }
-        },
-        "v1.refreshJWTRequest": {
-            "type": "object",
-            "required": [
-                "fingerprint",
-                "refreshToken"
-            ],
-            "properties": {
-                "fingerprint": {
-                    "type": "string",
-                    "example": "c84f18a2-c6c7-4850-be15-93f9cbaef3b3"
-                },
-                "refreshToken": {
-                    "type": "string",
-                    "example": "c84f18a2-c6c7-4850-be15-93f9cbaef3b3"
                 }
             }
         },
@@ -474,28 +330,14 @@ var doc = `{
                 },
                 "email": {
                     "type": "string",
+                    "maxLength": 255,
                     "example": "user@mail.com"
                 },
                 "password": {
                     "type": "string",
+                    "maxLength": 128,
+                    "minLength": 6,
                     "example": "secret"
-                }
-            }
-        },
-        "v1.userPartialUpdateRequest": {
-            "type": "object",
-            "properties": {
-                "firstName": {
-                    "type": "string",
-                    "example": "Alex"
-                },
-                "lastName": {
-                    "type": "string",
-                    "example": "Malykh"
-                },
-                "username": {
-                    "type": "string",
-                    "example": "username"
                 }
             }
         },
@@ -512,13 +354,6 @@ var doc = `{
                     }
                 }
             }
-        }
-    },
-    "securityDefinitions": {
-        "Bearer": {
-            "type": "apiKey",
-            "name": "Authorization",
-            "in": "header"
         }
     }
 }`
@@ -574,5 +409,5 @@ func (s *s) ReadDoc() string {
 }
 
 func init() {
-	swag.Register(swag.Name, &s{})
+	swag.Register("swagger", &s{})
 }

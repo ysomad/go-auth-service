@@ -2,26 +2,27 @@ package entity
 
 import (
 	"errors"
-	"github.com/google/uuid"
-	"golang.org/x/crypto/bcrypt"
+	"fmt"
+	"strings"
 	"time"
+
+	"github.com/ysomad/go-auth-service/pkg/util"
+	"golang.org/x/crypto/bcrypt"
 )
 
 var (
-	ErrUserUniqueViolation    = errors.New("user with given email or username already exists")
-	ErrUserNotFound           = errors.New("user not found")
-	ErrUserInvalidCredentials = errors.New("invalid email or password")
-	ErrPartialUpdate          = errors.New("provide at least one field to update resource partially")
+	ErrUserUniqueViolation   = errors.New("user with given email already exist")
+	ErrUserNotFound          = errors.New("user not found")
+	ErrUserEmptyCredentials  = errors.New("empty email, username or password")
+	ErrUserIncorrectPassword = errors.New("incorrect password")
 )
 
 // User represents user data model
 type User struct {
-	ID          uuid.UUID `json:"id" example:"c84f18a2-c6c7-4850-be15-93f9cbaef3b3"`
+	ID          string    `json:"id" example:"c84f18a2-c6c7-4850-be15-93f9cbaef3b3"`
 	Email       string    `json:"email" example:"user@mail.com"`
-	Username    *string   `json:"username,omitempty" example:"username"`
+	Username    string    `json:"username" example:"username"`
 	Password    string    `json:"-" example:"secret"`
-	FirstName   *string   `json:"firstName,omitempty" example:"Alex"`
-	LastName    *string   `json:"lastName,omitempty" example:"Malykh"`
 	CreatedAt   time.Time `json:"createdAt" example:"2021-08-31T16:55:18.080768Z"`
 	UpdatedAt   time.Time `json:"updatedAt" example:"2021-08-31T16:55:18.080768Z"`
 	IsActive    bool      `json:"isActive" example:"true"`
@@ -29,38 +30,43 @@ type User struct {
 	IsSuperuser bool      `json:"-"`
 }
 
-func (u *User) ComparePassword(password string) error {
+func (u User) ComparePassword(password string) error {
 	if err := bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(password)); err != nil {
-		return ErrUserInvalidCredentials
+		return fmt.Errorf("bcrypt.CompareHashAndPassword: %w", ErrUserIncorrectPassword)
 	}
 
 	return nil
 }
 
-type UserCredentialsDTO struct {
-	Email    string
-	Password string
+// UserSensitiveData is a data transfer object contains sensitive data.
+type UserSensitiveData struct {
+	email        string
+	username     string
+	passwordHash string
 }
 
-type UserPartialUpdateDTO struct {
-	ID        uuid.UUID
-	Username  string
-	FirstName string
-	LastName  string
+func (u *UserSensitiveData) Email() string {
+	return u.email
 }
 
-type UpdateColumns map[string]interface{}
+func (u *UserSensitiveData) Username() string {
+	return u.username
+}
 
-func (c UpdateColumns) Validate() error {
-	for k, v := range c {
-		if v == "" || v == nil {
-			delete(c, k)
-		}
+func (u *UserSensitiveData) PasswordHash() string {
+	return u.passwordHash
+}
+
+func NewUserSensitiveData(email, hash string) (UserSensitiveData, error) {
+	if email == "" || hash == "" {
+		return UserSensitiveData{}, ErrUserEmptyCredentials
 	}
 
-	if len(c) == 0 {
-		return ErrPartialUpdate
-	}
+	emailUsername := strings.Split(email, "@")[0]
 
-	return nil
+	return UserSensitiveData{
+		email:        email,
+		username:     fmt.Sprintf("%s_%s", emailUsername, util.RandomString(4)),
+		passwordHash: hash,
+	}, nil
 }

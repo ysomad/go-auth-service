@@ -10,7 +10,6 @@ import (
 )
 
 func main() {
-	// Configuration
 	var cfg config.Config
 
 	err := cleanenv.ReadConfig("./config/config.yml", &cfg)
@@ -18,6 +17,5 @@ func main() {
 		log.Fatalf("Config error: %s", err)
 	}
 
-	// Run
 	app.Run(&cfg)
 }

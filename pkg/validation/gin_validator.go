@@ -2,6 +2,7 @@ package validation
 
 import (
 	"errors"
+
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/locales/en"
 	ut "github.com/go-playground/universal-translator"
@@ -11,7 +12,7 @@ import (
 
 type Validator interface {
 	ValidateVar(val interface{}, tag string) error
-	TranslateAll(err error) map[string]string
+	TranslateError(err error) map[string]string
 }
 
 type ginValidator struct {
@@ -42,7 +43,7 @@ func (v *ginValidator) register() error {
 }
 
 // TranslateAll returns translated validation errors received from gin.c.ShouldBindJSON err
-func (v *ginValidator) TranslateAll(err error) map[string]string {
+func (v *ginValidator) TranslateError(err error) map[string]string {
 	_ = v.register()
 
 	return err.(validator.ValidationErrors).Translate(v.trans)

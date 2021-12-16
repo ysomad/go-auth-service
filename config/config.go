@@ -4,12 +4,15 @@ import "time"
 
 type (
 	Config struct {
-		App   `yaml:"app"`
-		HTTP  `yaml:"http"`
-		Log   `yaml:"logger"`
-		PG    `yaml:"postgres"`
-		Redis `yaml:"redis"`
-		JWT   `yaml:"jwt"`
+		App     `yaml:"app"`
+		HTTP    `yaml:"http"`
+		Log     `yaml:"logger"`
+		PG      `yaml:"postgres"`
+		MongoDB `yaml:"mongodb"`
+		Cache   `yaml:"cache"`
+		Redis   `yaml:"redis"`
+		Session `yaml:"session"`
+		JWT     `yaml:"jwt"`
 	}
 
 	App struct {
@@ -27,7 +30,18 @@ type (
 
 	PG struct {
 		PoolMax int    `env-required:"true" yaml:"pool_max" env:"PG_POOL_MAX"`
-		URL     string `env-required:"true" env:"PG_URL"`
+		URI     string `env-required:"true" env:"PG_URL"`
+	}
+
+	MongoDB struct {
+		URI      string `env-required:"true" env:"MONGO_URI"`
+		Username string `env-required:"true" env:"MONGO_USER"`
+		Password string `env-required:"true" env:"MONGO_PASS"`
+		Database string `env-required:"true" yaml:"database" env:"MONGO_DATABASE"`
+	}
+
+	Cache struct {
+		TTL time.Duration `env-required:"true" yaml:"ttl" env:"CACHE_TTL"`
 	}
 
 	Redis struct {
@@ -35,9 +49,12 @@ type (
 		Password string `env-required:"true" env:"REDIS_PASSWORD"`
 	}
 
+	Session struct {
+		TTL time.Duration `env-required:"true" yaml:"ttl" env:"SESSION_TTL"`
+	}
+
 	JWT struct {
-		AccessTokenTTL  time.Duration `env-required:"true" yaml:"access_token_ttl" env:"ACCESS_TOKEN_TTL"`
-		RefreshTokenTTL time.Duration `env-required:"true" yaml:"refresh_token_ttl" env:"REFRESH_TOKEN_TTL"`
-		SigningKey      string        `env-required:"true" yaml:"signing_key" env:"SIGNING_KEY"`
+		TTL        time.Duration `env-required:"true" yaml:"ttl" env:"JWT_TTL"`
+		SigningKey string        `env-required:"true" yaml:"signing_key" env:"SIGNING_KEY"`
 	}
 )

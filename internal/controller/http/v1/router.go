@@ -2,9 +2,9 @@
 package v1
 
 import (
-	"github.com/ysomad/go-auth-service/pkg/auth"
-	"github.com/ysomad/go-auth-service/pkg/validation"
 	"net/http"
+
+	"github.com/ysomad/go-auth-service/pkg/validation"
 
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
@@ -21,11 +21,12 @@ import (
 // @version     1.0
 // @host        0.0.0.0:8080
 // @BasePath    /v1
-// @securityDefinitions.apikey Bearer
-// @in header
-// @name Authorization
-
-func NewRouter(handler *gin.Engine, t validation.Validator, u service.User, a service.Auth, j auth.JWT) {
+func SetupRoutes(
+	handler *gin.Engine,
+	v validation.Validator,
+	u service.User,
+	s service.Session,
+) {
 	// Options
 	handler.Use(gin.Logger())
 	handler.Use(gin.Recovery())
@@ -40,7 +41,7 @@ func NewRouter(handler *gin.Engine, t validation.Validator, u service.User, a se
 	// Routers
 	h := handler.Group("/v1")
 	{
-		newUserRoutes(h, t, u, j)
-		newAuthRoutes(h, t, a)
+		newUserRoutes(h, v, u, s)
+		newAuthRoutes(h, v, s)
 	}
 }

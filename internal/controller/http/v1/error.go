@@ -1,7 +1,13 @@
 package v1
 
 import (
+	"errors"
+
 	"github.com/gin-gonic/gin"
+)
+
+var (
+	ErrLogin = errors.New("an error occurred while logging in")
 )
 
 type messageResponse struct {

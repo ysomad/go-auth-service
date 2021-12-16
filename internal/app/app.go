@@ -1,38 +1,44 @@
-// Package app configures and runs application.
 package app
 
 import (
 	"fmt"
-	"github.com/go-redis/redis/v8"
-	"github.com/ysomad/go-auth-service/pkg/auth"
-	"github.com/ysomad/go-auth-service/pkg/validation"
 	"os"
 	"os/signal"
 	"syscall"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-redis/redis/v8"
 
 	"github.com/ysomad/go-auth-service/config"
+
 	v1 "github.com/ysomad/go-auth-service/internal/controller/http/v1"
 	"github.com/ysomad/go-auth-service/internal/service"
-	"github.com/ysomad/go-auth-service/internal/service/repo"
+	"github.com/ysomad/go-auth-service/internal/service/repository"
+
 	"github.com/ysomad/go-auth-service/pkg/httpserver"
 	"github.com/ysomad/go-auth-service/pkg/logger"
+	"github.com/ysomad/go-auth-service/pkg/mongodb"
 	"github.com/ysomad/go-auth-service/pkg/postgres"
+	"github.com/ysomad/go-auth-service/pkg/validation"
 )
 
 // Run creates objects via constructors.
 func Run(cfg *config.Config) {
 	l := logger.New(cfg.Log.Level)
 
-	// Repository
-
 	// Postgres
-	pg, err := postgres.New(cfg.PG.URL, postgres.MaxPoolSize(cfg.PG.PoolMax))
+	pg, err := postgres.New(cfg.PG.URI, postgres.MaxPoolSize(cfg.PG.PoolMax))
 	if err != nil {
 		l.Fatal(fmt.Errorf("app - Run - postgres.New: %w", err))
 	}
 	defer pg.Close()
+
+	// MongoDB
+	mcli, err := mongodb.NewClient(cfg.MongoDB.URI, cfg.MongoDB.Username, cfg.MongoDB.Password)
+	if err != nil {
+		l.Fatal(fmt.Errorf("app - Run - mongodb.NewClient: %w", err))
+	}
+	mdb := mcli.Database(cfg.MongoDB.Database)
 
 	// Redis
 	rdb := redis.NewClient(&redis.Options{
@@ -42,16 +48,20 @@ func Run(cfg *config.Config) {
 	})
 
 	// Service
-	userRepo := repo.NewUserRepo(pg)
+	cacheRepo := repository.NewCacheRepo(rdb)
+	userRepo := repository.NewUserRepo(pg)
+	sessionRepo := repository.NewSessionRepo(mdb)
 
-	jwtManager, err := auth.NewJWTManager(cfg.JWT.SigningKey, cfg.JWT.AccessTokenTTL)
-	if err != nil {
-		l.Fatal(fmt.Errorf("app - Run - auth.NewTokenManager: %w", err))
-	}
+	userService := service.NewUserService(userRepo, cacheRepo, cfg.Cache.TTL)
+	sessionService := service.NewSessionService(
+		userRepo,
+		sessionRepo,
+		cacheRepo,
+		cfg.Cache.TTL,
+		cfg.Session.TTL,
+	)
 
-	userService := service.NewUserService(userRepo)
-	authService := service.NewAuthService(repo.NewSessionRepo(rdb), userRepo, jwtManager, cfg.JWT.RefreshTokenTTL)
-
+	// TODO: refactor
 	// Validation translator
 	trans, err := validation.NewGinValidator()
 	if err != nil {
@@ -60,7 +70,7 @@ func Run(cfg *config.Config) {
 
 	// HTTP Server
 	handler := gin.New()
-	v1.NewRouter(handler, trans, userService, authService, jwtManager)
+	v1.SetupRoutes(handler, trans, userService, sessionService)
 	httpServer := httpserver.New(handler, httpserver.Port(cfg.HTTP.Port))
 
 	// Waiting signal

@@ -12,7 +12,15 @@ logger:
 postgres:
   pool_max: 2
 
+mongodb:
+  database: 'authService'
+
+cache:
+  ttl: 30s
+
+session:
+  ttl: 1m
+
 jwt:
-  access_token_ttl: 15m
-  refresh_token_ttl: 60m
+  ttl: 15m
   signing_key: 'secret'
