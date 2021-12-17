@@ -336,7 +336,7 @@ var doc = `{
                 "password": {
                     "type": "string",
                     "maxLength": 128,
-                    "minLength": 6,
+                    "minLength": 8,
                     "example": "secret"
                 }
             }

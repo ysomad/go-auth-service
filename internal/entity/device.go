@@ -30,7 +30,7 @@ func NewDevice(userAgent string, ip string) (Device, error) {
 	}
 
 	return Device{
-		UserAgent: ua.UA(),
+		UserAgent: userAgent,
 		UserIP:    ip,
 	}, nil
 }

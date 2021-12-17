@@ -28,7 +28,7 @@ func NewSessionRepo(db *mongo.Database) *sessionRepo {
 func (r *sessionRepo) Create(ctx context.Context, s entity.Session) error {
 	ttlIndex := mongo.IndexModel{
 		Keys:    bsonx.Doc{{Key: "createdAt", Value: bsonx.Int32(1)}},
-		Options: options.Index().SetExpireAfterSeconds(int32(s.TTL.Seconds())),
+		Options: options.Index().SetExpireAfterSeconds(int32(s.TTL)),
 	}
 
 	_, err := r.Indexes().CreateOne(ctx, ttlIndex)

@@ -19,15 +19,14 @@ var (
 
 // User represents user data model
 type User struct {
-	ID          string    `json:"id" example:"c84f18a2-c6c7-4850-be15-93f9cbaef3b3"`
-	Email       string    `json:"email" example:"user@mail.com"`
-	Username    string    `json:"username" example:"username"`
-	Password    string    `json:"-" example:"secret"`
-	CreatedAt   time.Time `json:"createdAt" example:"2021-08-31T16:55:18.080768Z"`
-	UpdatedAt   time.Time `json:"updatedAt" example:"2021-08-31T16:55:18.080768Z"`
-	IsActive    bool      `json:"isActive" example:"true"`
-	IsArchive   bool      `json:"isArchive" example:"false"`
-	IsSuperuser bool      `json:"-"`
+	ID        string    `json:"id" example:"c84f18a2-c6c7-4850-be15-93f9cbaef3b3"`
+	Email     string    `json:"email" example:"user@mail.com"`
+	Username  string    `json:"username" example:"username"`
+	Password  string    `json:"-" example:"secret"`
+	CreatedAt time.Time `json:"createdAt" example:"2021-08-31T16:55:18.080768Z"`
+	UpdatedAt time.Time `json:"updatedAt" example:"2021-08-31T16:55:18.080768Z"`
+	IsActive  bool      `json:"isActive" example:"true"`
+	IsArchive bool      `json:"isArchive" example:"false"`
 }
 
 func (u User) ComparePassword(password string) error {

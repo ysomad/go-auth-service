@@ -21,12 +21,7 @@ import (
 // @version     1.0
 // @host        0.0.0.0:8080
 // @BasePath    /v1
-func SetupRoutes(
-	handler *gin.Engine,
-	v validation.Validator,
-	u service.User,
-	s service.Session,
-) {
+func SetupRoutes(handler *gin.Engine, v validation.Validator, u service.User, s service.Session) {
 	// Options
 	handler.Use(gin.Logger())
 	handler.Use(gin.Recovery())

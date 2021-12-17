@@ -16,13 +16,13 @@ var (
 
 // Session represents refresh token session for JWT authentication
 type Session struct {
-	ID        string        `bson:"_id" redis:"id"`
-	UserID    string        `bson:"userID" redis:"userID"`
-	UserAgent string        `bson:"userAgent" redis:"userAgent"`
-	UserIP    string        `bson:"userIP" redis:"userIP"`
-	TTL       time.Duration `bson:"ttl" redis:"ttl"`
-	ExpiresAt int64         `bson:"expiresAt" redis:"expiresAt"`
-	CreatedAt time.Time     `bson:"createdAt" redis:"createdAt"`
+	ID        string    `bson:"_id" redis:"id"`
+	UserID    string    `bson:"userID" redis:"userID"`
+	UserAgent string    `bson:"userAgent" redis:"userAgent"`
+	UserIP    string    `bson:"userIP" redis:"userIP"`
+	TTL       int       `bson:"ttl" redis:"ttl"`
+	ExpiresAt int64     `bson:"expiresAt" redis:"expiresAt"`
+	CreatedAt time.Time `bson:"createdAt" redis:"createdAt"`
 }
 
 func NewSession(uid string, userAgent string, ip string, ttl time.Duration) (Session, error) {
@@ -39,7 +39,7 @@ func NewSession(uid string, userAgent string, ip string, ttl time.Duration) (Ses
 		UserID:    uid,
 		UserAgent: userAgent,
 		UserIP:    ip,
-		TTL:       ttl,
+		TTL:       int(ttl.Seconds()),
 		ExpiresAt: now.Add(ttl).Unix(),
 		CreatedAt: now,
 	}, nil

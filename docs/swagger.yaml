@@ -65,7 +65,7 @@ definitions:
       password:
         example: secret
         maxLength: 128
-        minLength: 6
+        minLength: 8
         type: string
     required:
     - confirmPassword

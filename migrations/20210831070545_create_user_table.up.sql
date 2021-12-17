@@ -7,5 +7,4 @@ create table if not exists users (
     updated_at timestamp with time zone default current_timestamp not null,
     is_active boolean default true not null,
     is_archive boolean default false not null,
-    is_superuser boolean default false not null
 );

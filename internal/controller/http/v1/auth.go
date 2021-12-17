@@ -65,7 +65,7 @@ func (r *authRoutes) login(c *gin.Context) {
 	}
 
 	// Set httponly secure cookie with session id
-	c.SetCookie(sessionIDKey, sess.ID, int(sess.TTL.Seconds()), "v1", "", true, true)
+	c.SetCookie(sessionIDKey, sess.ID, sess.TTL, "v1", "", true, true)
 
 	c.Status(http.StatusOK)
 }
