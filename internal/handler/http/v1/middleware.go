@@ -4,16 +4,18 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 
-	"github.com/ysomad/go-auth-service/internal/entity"
+	"github.com/ysomad/go-auth-service/internal/domain"
 	"github.com/ysomad/go-auth-service/internal/service"
 )
 
 func sessionMiddleware(s service.Session) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		sid, err := c.Cookie(sessionIDKey)
+		sid, err := c.Cookie("id") // TODO: refactor
 		if err != nil {
-			abortWithError(c, http.StatusUnauthorized, entity.ErrUnauthorized)
+			// TODO: return generic err pkg httperror
+			abortWithError(c, http.StatusUnauthorized, domain.ErrUnauthorized)
 			return
 		}
 
@@ -21,15 +23,17 @@ func sessionMiddleware(s service.Session) gin.HandlerFunc {
 
 		ctx := c.Request.Context()
 
-		sess, err := s.Find(ctx, sid)
+		sess, err := s.Get(ctx, sid)
 		if err != nil {
-			abortWithError(c, http.StatusUnauthorized, entity.ErrSessionExpired)
+			// TODO: return generic err pkg httperror
+			abortWithError(c, http.StatusUnauthorized, domain.ErrSessionExpired)
 			return
 		}
 
-		d, err := entity.NewDevice(c.Request.Header.Get("User-Agent"), c.ClientIP())
+		d, err := domain.NewDevice(c.Request.Header.Get("User-Agent"), c.ClientIP())
 		if err != nil {
-			abortWithError(c, http.StatusUnauthorized, entity.ErrSessionExpired)
+			// TODO: return generic err pkg httperror
+			abortWithError(c, http.StatusUnauthorized, domain.ErrSessionExpired)
 			return
 		}
 
@@ -38,7 +42,8 @@ func sessionMiddleware(s service.Session) gin.HandlerFunc {
 			// TODO: send notification that someone logged in on new device
 			s.Terminate(ctx, sid)
 
-			abortWithError(c, http.StatusUnauthorized, entity.ErrSessionExpired)
+			// TODO: return generic err pkg httperror
+			abortWithError(c, http.StatusUnauthorized, domain.ErrSessionExpired)
 			return
 		}
 
@@ -46,19 +51,21 @@ func sessionMiddleware(s service.Session) gin.HandlerFunc {
 	}
 }
 
-/*
-func getUserID(c *gin.Context) (uuid.UUID, error) {
-	idStr := c.GetString("user")
+func accountID(c *gin.Context) (string, error) {
+	aid := c.GetString("user") // TODO: refactor
 
-	id, err := uuid.Parse(idStr)
+	_, err := uuid.Parse(aid)
 	if err != nil {
-		return uuid.UUID{}, err
+		// TODO: return generic err pkg httperror
+		return "", err
 	}
 
-	return id, nil
+	return aid, nil
 }
 
-func jwtMiddleware(jwt auth.JWT) gin.HandlerFunc {
+// TODO: implement token middleware
+/*
+func tokenMiddleware(jwt auth.JWT) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		header := c.GetHeader("Authorization")
 		if len(header) == 0 {

@@ -11,7 +11,7 @@ import (
 
 	"github.com/ysomad/go-auth-service/config"
 
-	v1 "github.com/ysomad/go-auth-service/internal/controller/http/v1"
+	v1 "github.com/ysomad/go-auth-service/internal/handler/http/v1"
 	"github.com/ysomad/go-auth-service/internal/service"
 	"github.com/ysomad/go-auth-service/internal/service/repository"
 
@@ -49,10 +49,10 @@ func Run(cfg *config.Config) {
 
 	// Service
 	cacheRepo := repository.NewCacheRepo(rdb)
-	userRepo := repository.NewUserRepo(pg)
+	userRepo := repository.NewAccountRepo(pg)
 	sessionRepo := repository.NewSessionRepo(mdb)
 
-	userService := service.NewUserService(userRepo, cacheRepo, cfg.Cache.TTL)
+	userService := service.NewAccountService(userRepo, cacheRepo, cfg.Cache.TTL)
 	sessionService := service.NewSessionService(
 		userRepo,
 		sessionRepo,

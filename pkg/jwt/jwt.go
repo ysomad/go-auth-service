@@ -5,17 +5,19 @@ import (
 	"time"
 
 	jwtlib "github.com/golang-jwt/jwt"
-	"github.com/google/uuid"
 )
 
+// TODO: rename package to token
+
 var (
+	// TODO: move to constants
 	ErrEmptySigningKey         = errors.New("empty signing key")
 	ErrClaims                  = errors.New("error getting claims from token")
 	ErrUnexpectedSigningMethod = errors.New("unexpected signing method")
 )
 
 type JWT interface {
-	New(sub uuid.UUID) (string, error)
+	New(sub string) (string, error)
 	Validate(jwt string) (string, error)
 }
 
@@ -35,17 +37,17 @@ func NewJWTManager(signingKey string, ttl time.Duration) (jwtManager, error) {
 	}, nil
 }
 
-// New creates new JWT token with claims and subject
-func (m jwtManager) New(sub uuid.UUID) (string, error) {
+// New creates new JWT token with claims and subject in payload.
+func (m jwtManager) New(sub string) (string, error) {
 	token := jwtlib.NewWithClaims(jwtlib.SigningMethodHS256, jwtlib.StandardClaims{
-		Subject:   sub.String(),
+		Subject:   sub,
 		ExpiresAt: time.Now().Add(m.ttl).Unix(),
 	})
 
 	return token.SignedString([]byte(m.signingKey))
 }
 
-// Validate parses and validating JWT token, returns user id from it
+// Validate parses and validating JWT token, returns payload subject.
 func (m jwtManager) Validate(jwt string) (string, error) {
 	token, err := jwtlib.Parse(jwt, func(token *jwtlib.Token) (i interface{}, err error) {
 		if _, ok := token.Method.(*jwtlib.SigningMethodHMAC); !ok {
