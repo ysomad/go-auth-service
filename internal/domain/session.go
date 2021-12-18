@@ -1,7 +1,6 @@
-package entity
+package domain
 
 import (
-	"encoding/json"
 	"errors"
 	"time"
 
@@ -17,34 +16,36 @@ var (
 // Session represents refresh token session for JWT authentication
 type Session struct {
 	ID        string    `bson:"_id" redis:"id"`
-	UserID    string    `bson:"userID" redis:"userID"`
+	AccountID string    `bson:"accountID" redis:"accountID"`
 	UserAgent string    `bson:"userAgent" redis:"userAgent"`
-	UserIP    string    `bson:"userIP" redis:"userIP"`
+	ClientIP  string    `bson:"clientIP" redis:"clientIP"`
 	TTL       int       `bson:"ttl" redis:"ttl"`
 	ExpiresAt int64     `bson:"expiresAt" redis:"expiresAt"`
 	CreatedAt time.Time `bson:"createdAt" redis:"createdAt"`
 }
 
-func NewSession(uid string, userAgent string, ip string, ttl time.Duration) (Session, error) {
+func NewSession(aid string, userAgent string, ip string, ttl time.Duration) (Session, error) {
 	// TODO: add validation
 
 	id, err := util.UniqueString(32)
 	if err != nil {
+		// TODO: return generic err pkg/httperror
 		return Session{}, err
 	}
 
 	now := time.Now()
 	return Session{
 		ID:        id,
-		UserID:    uid,
+		AccountID: aid,
 		UserAgent: userAgent,
-		UserIP:    ip,
+		ClientIP:  ip,
 		TTL:       int(ttl.Seconds()),
 		ExpiresAt: now.Add(ttl).Unix(),
 		CreatedAt: now,
 	}, nil
 }
 
+/*
 func (s Session) MarshalBinary() ([]byte, error) {
 	return json.Marshal(s)
 }
@@ -52,3 +53,21 @@ func (s Session) MarshalBinary() ([]byte, error) {
 func (s *Session) UnmarshalBinary(data []byte) error {
 	return json.Unmarshal(data, s)
 }
+*/
+
+// SessionCookie represents data transfer object which
+// contains data needed to create a cookie.
+type SessionCookie struct {
+	id  string
+	ttl int
+}
+
+func NewSessionCookie(sid string, ttl int) SessionCookie {
+	return SessionCookie{
+		id:  sid,
+		ttl: ttl,
+	}
+}
+
+func (s SessionCookie) ID() string { return s.id }
+func (s SessionCookie) TTL() int   { return s.ttl }
