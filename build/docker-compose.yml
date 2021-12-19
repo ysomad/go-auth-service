@@ -3,6 +3,7 @@ services:
 
   postgres:
     container_name: postgres
+    network_mode: host
     image: postgres
     volumes:
       - pg-data:/var/lib/postgresql/data
@@ -15,6 +16,7 @@ services:
 
   mongodb:
     container_name: mongodb
+    network_mode: host
     image : mongo
     restart: always
     ports:
@@ -31,6 +33,7 @@ services:
   redis:
     container_name: redis
     image: redis:alpine
+    network_mode: host
     command: redis-server --requirepass secret
     ports:
       - "6379:6379"
