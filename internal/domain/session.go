@@ -18,7 +18,7 @@ type Session struct {
 	ID        string    `bson:"_id" redis:"id"`
 	AccountID string    `bson:"accountID" redis:"accountID"`
 	UserAgent string    `bson:"userAgent" redis:"userAgent"`
-	ClientIP  string    `bson:"clientIP" redis:"clientIP"`
+	IP        string    `bson:"IP" redis:"IP"`
 	TTL       int       `bson:"ttl" redis:"ttl"`
 	ExpiresAt int64     `bson:"expiresAt" redis:"expiresAt"`
 	CreatedAt time.Time `bson:"createdAt" redis:"createdAt"`
@@ -38,7 +38,7 @@ func NewSession(aid string, userAgent string, ip string, ttl time.Duration) (Ses
 		ID:        id,
 		AccountID: aid,
 		UserAgent: userAgent,
-		ClientIP:  ip,
+		IP:        ip,
 		TTL:       int(ttl.Seconds()),
 		ExpiresAt: now.Add(ttl).Unix(),
 		CreatedAt: now,

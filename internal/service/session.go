@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/ysomad/go-auth-service/internal/domain"
-	"github.com/ysomad/go-auth-service/internal/entity"
 	"github.com/ysomad/go-auth-service/internal/service/repository"
 )
 
@@ -37,7 +36,7 @@ func (s *sessionService) Create(ctx context.Context, aid string,
 
 	// TODO: generic errors pkg/httperror
 
-	sess, err := domain.NewSession(aid, d.UserAgent, d.UserIP, s.sessionTTL)
+	sess, err := domain.NewSession(aid, d.UserAgent, d.IP, s.sessionTTL)
 	if err != nil {
 		return domain.Session{}, err
 	}
@@ -76,7 +75,7 @@ func (s *sessionService) Get(ctx context.Context, sid string) (domain.Session, e
 	return sess, nil
 }
 
-func (s *sessionService) GetAll(ctx context.Context, aid string) ([]entity.Session, error) {
+func (s *sessionService) GetAll(ctx context.Context, aid string) ([]domain.Session, error) {
 	// TODO: add caching list of user sessions
 	// TODO: refactor
 

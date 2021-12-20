@@ -30,7 +30,7 @@ type (
 
 	PG struct {
 		PoolMax int    `env-required:"true" yaml:"pool_max" env:"PG_POOL_MAX"`
-		URI     string `env-required:"true" env:"PG_URL"`
+		URL     string `env-required:"true" env:"PG_URL"`
 	}
 
 	MongoDB struct {

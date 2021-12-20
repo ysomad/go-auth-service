@@ -12,11 +12,11 @@ import (
 
 type authHandler struct {
 	validation.Validator
-	session service.Session
+	auth service.Auth
 }
 
-func newAuthHandler(handler *gin.RouterGroup, v validation.Validator, s service.Session) {
-	h := &authHandler{v, s}
+func newAuthHandler(handler *gin.RouterGroup, v validation.Validator, s service.Session, a service.Auth) {
+	h := &authHandler{v, a}
 
 	g := handler.Group("/auth")
 	{
@@ -50,7 +50,7 @@ func (h *authHandler) login(c *gin.Context) {
 		return
 	}
 
-	s, err := h.session.EmailLogin(c.Request.Context(), r.Email, r.Password, d)
+	cookie, err := h.auth.EmailLogin(c.Request.Context(), r.Email, r.Password, d)
 	if err != nil {
 		abortWithError(c, http.StatusBadRequest, err)
 		return
@@ -58,20 +58,16 @@ func (h *authHandler) login(c *gin.Context) {
 
 	// Set httponly secure cookie with session id
 	// TODO: refactor
-	c.SetCookie("id", s.ID, s.TTL, "v1", "", true, true)
+	c.SetCookie("id", cookie.ID(), cookie.TTL(), "v1", "", true, true)
 
 	c.Status(http.StatusOK)
 }
 
 func (h *authHandler) logout(c *gin.Context) {
-	panic("implement")
-
 	c.Status(http.StatusNoContent)
 }
 
 func (h *authHandler) token(c *gin.Context) {
-	panic("implement")
-
 	var t string
 
 	c.JSON(http.StatusOK, t)

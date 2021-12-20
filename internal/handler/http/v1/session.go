@@ -17,33 +17,27 @@ type sessionHandler struct {
 func newSessionHandler(handler *gin.RouterGroup, v validation.Validator, s service.Session) {
 	h := &sessionHandler{v, s}
 
-	g := handler.Group("/auth")
+	g := handler.Group("/sessions")
 	{
 		authenticated := g.Group("/", sessionMiddleware(s))
 		{
+			authenticated.DELETE(":sessionID", h.terminate)
 			authenticated.GET("", h.get)
-			authenticated.DELETE("", h.terminate)
 			authenticated.DELETE("", h.terminateAll)
 		}
 	}
 }
 
 func (h *sessionHandler) get(c *gin.Context) {
-	panic("implement")
-
 	var sessions []string
 
 	c.JSON(http.StatusOK, sessions)
 }
 
 func (h *sessionHandler) terminate(c *gin.Context) {
-	panic("implement")
-
 	c.Status(http.StatusNoContent)
 }
 
 func (h *sessionHandler) terminateAll(c *gin.Context) {
-	panic("implement")
-
 	c.Status(http.StatusNoContent)
 }
