@@ -2,6 +2,7 @@
 package v1
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -10,7 +11,9 @@ import (
 	"github.com/ysomad/go-auth-service/pkg/validation"
 )
 
-func SetupHandlers(handler *gin.Engine, v validation.Validator, a service.Account, s service.Session) {
+const _path = "/v1"
+
+func SetupHandlers(handler *gin.Engine, v validation.Validator, acc service.Account, s service.Session, a service.Auth) {
 	// Options
 	handler.Use(gin.Logger())
 	handler.Use(gin.Recovery())
@@ -18,11 +21,14 @@ func SetupHandlers(handler *gin.Engine, v validation.Validator, a service.Accoun
 	// K8s probe
 	handler.GET("/healthz", func(c *gin.Context) { c.Status(http.StatusOK) })
 
+	// Swagger UI
+	handler.Static(fmt.Sprintf("%s/swagger/", _path), "third_party/swaggerui")
+
 	// Resource handlers
-	h := handler.Group("/v1")
+	h := handler.Group(_path)
 	{
-		newAccountHandler(h, v, a, s)
+		newAccountHandler(h, v, acc, s)
 		newSessionHandler(h, v, s)
-		newAuthHandler(h, v, s)
+		newAuthHandler(h, v, s, a)
 	}
 }

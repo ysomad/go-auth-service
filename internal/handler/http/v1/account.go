@@ -15,16 +15,16 @@ type accountHandler struct {
 }
 
 func newAccountHandler(handler *gin.RouterGroup, v validation.Validator, u service.Account, s service.Session) {
-	r := &accountHandler{v, u}
+	h := &accountHandler{v, u}
 
-	h := handler.Group("/users")
+	g := handler.Group("/accounts")
 	{
-		h.POST("", r.create)
+		g.POST("", h.create)
 
-		authenticated := h.Group("/", sessionMiddleware(s))
+		authenticated := g.Group("/", sessionMiddleware(s))
 		{
-			authenticated.GET("", r.get)
-			authenticated.DELETE("", r.archive)
+			authenticated.GET("", h.get)
+			authenticated.DELETE("", h.archive)
 		}
 	}
 }
@@ -44,13 +44,12 @@ func (h *accountHandler) create(c *gin.Context) {
 		return
 	}
 
-	acc, err := h.account.Create(c.Request.Context(), r.Email, r.Password)
-	if err != nil {
+	if err := h.account.Create(c.Request.Context(), r.Email, r.Password); err != nil {
 		abortWithError(c, http.StatusBadRequest, err)
 		return
 	}
 
-	c.JSON(http.StatusCreated, acc)
+	c.Status(http.StatusCreated)
 }
 
 func (h *accountHandler) archive(c *gin.Context) {

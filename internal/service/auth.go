@@ -19,11 +19,7 @@ func NewAuthService(a Account, s Session) *authService {
 	}
 }
 
-func (s *authService) EmailLogin(ctx context.Context, email, password string,
-	d domain.Device) (domain.SessionCookie, error) {
-
-	// TODO: make errors generic pkg/httperror
-
+func (s *authService) EmailLogin(ctx context.Context, email, password string, d domain.Device) (domain.SessionCookie, error) {
 	acc, err := s.accountService.GetByEmail(ctx, email)
 	if err != nil {
 		return domain.SessionCookie{}, fmt.Errorf("sessionService - LoginWithEmail - userRepo.FindByEmail: %w", err)
@@ -51,7 +47,5 @@ func (s *authService) Logout(ctx context.Context, sid string) error {
 }
 
 func (s *authService) GetAccessToken(ctx context.Context, aid string) (domain.Token, error) {
-	panic("implement")
-
 	return domain.Token{}, nil
 }

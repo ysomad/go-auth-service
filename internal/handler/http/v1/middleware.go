@@ -38,7 +38,7 @@ func sessionMiddleware(s service.Session) gin.HandlerFunc {
 		}
 
 		// Check current request device vs session device
-		if sess.UserIP != d.UserIP || sess.UserAgent != d.UserAgent {
+		if sess.IP != d.IP || sess.UserAgent != d.UserAgent {
 			// TODO: send notification that someone logged in on new device
 			s.Terminate(ctx, sid)
 

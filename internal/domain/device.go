@@ -16,7 +16,7 @@ var (
 // Device represents data transfer object with user device data
 type Device struct {
 	UserAgent string
-	UserIP    string
+	IP        string
 }
 
 func NewDevice(userAgent string, ip string) (Device, error) {
@@ -34,6 +34,6 @@ func NewDevice(userAgent string, ip string) (Device, error) {
 
 	return Device{
 		UserAgent: userAgent,
-		UserIP:    ip,
+		IP:        ip,
 	}, nil
 }

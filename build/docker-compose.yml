@@ -28,7 +28,7 @@ services:
       - MONGO_INITDB_ROOT_USERNAME=admin
       - MONGO_INITDB_ROOT_PASSWORD=secret
     volumes:
-      - ./.data/db:/data/db
+      - ./build/.data/db:/data/db
 
   redis:
     container_name: redis

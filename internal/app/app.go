@@ -27,7 +27,7 @@ func Run(cfg *config.Config) {
 	l := logger.New(cfg.Log.Level)
 
 	// Postgres
-	pg, err := postgres.New(cfg.PG.URI, postgres.MaxPoolSize(cfg.PG.PoolMax))
+	pg, err := postgres.New(cfg.PG.URL, postgres.MaxPoolSize(cfg.PG.PoolMax))
 	if err != nil {
 		l.Fatal(fmt.Errorf("app - Run - postgres.New: %w", err))
 	}
@@ -49,17 +49,18 @@ func Run(cfg *config.Config) {
 
 	// Service
 	cacheRepo := repository.NewCacheRepo(rdb)
-	userRepo := repository.NewAccountRepo(pg)
+	accountRepo := repository.NewAccountRepo(pg)
 	sessionRepo := repository.NewSessionRepo(mdb)
 
-	userService := service.NewAccountService(userRepo, cacheRepo, cfg.Cache.TTL)
+	accountService := service.NewAccountService(accountRepo, cacheRepo, cfg.Cache.TTL)
 	sessionService := service.NewSessionService(
-		userRepo,
+		accountRepo,
 		sessionRepo,
 		cacheRepo,
 		cfg.Cache.TTL,
 		cfg.Session.TTL,
 	)
+	authService := service.NewAuthService(accountService, sessionService)
 
 	// TODO: refactor
 	// Validation translator
@@ -70,7 +71,7 @@ func Run(cfg *config.Config) {
 
 	// HTTP Server
 	handler := gin.New()
-	v1.SetupRoutes(handler, trans, userService, sessionService)
+	v1.SetupHandlers(handler, trans, accountService, sessionService, authService)
 	httpServer := httpserver.New(handler, httpserver.Port(cfg.HTTP.Port))
 
 	// Waiting signal
