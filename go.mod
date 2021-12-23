@@ -16,7 +16,6 @@ require (
 	github.com/jackc/pgconn v1.10.0
 	github.com/jackc/pgerrcode v0.0.0-20201024163028-a0d42d470451
 	github.com/jackc/pgx/v4 v4.13.0
-	github.com/mssola/user_agent v0.5.3
 	github.com/rs/zerolog v1.24.0
 	go.mongodb.org/mongo-driver v1.8.1
 	golang.org/x/crypto v0.0.0-20210817164053-32db794688a5

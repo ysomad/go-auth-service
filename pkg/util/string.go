@@ -10,7 +10,7 @@ const chars = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 // UniqueString generates random string using
 // Cryptographically Secure Pseudorandom number.
 func UniqueString(length int) (string, error) {
-	bytes := make([]byte, 32)
+	bytes := make([]byte, length)
 	if _, err := cryptoRand.Read(bytes); err != nil {
 		return "", err
 	}

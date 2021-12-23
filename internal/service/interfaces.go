@@ -24,7 +24,7 @@ type (
 
 	AccountRepo interface {
 		// Create account with given credentials.
-		Create(ctx context.Context, cred domain.AccountCredentials) error
+		Create(ctx context.Context, a domain.Account) error
 
 		// FindByID account in DB.
 		FindByID(ctx context.Context, aid string) (domain.Account, error)
@@ -87,10 +87,11 @@ type (
 		Set(ctx context.Context, key string, val interface{}, ttl time.Duration) error
 
 		// Add the given key/value to cache ONLY IF the key does not already exist.
-		Add(ctx context.Context, key string, value interface{}, ttl time.Duration) error
+		Add(ctx context.Context, key string, val interface{}, ttl time.Duration) error
 
 		// Get content associated with the given key from cache.
 		// Decoding it into the given pointer.
+		// Returns flag which indicates that value by the given key is found or not.
 		Get(ctx context.Context, key string, pointer interface{}) error
 
 		// Delete the given key from cache.

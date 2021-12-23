@@ -1,16 +1,15 @@
 package domain
 
 import (
-	"errors"
+	"fmt"
 	"time"
 
+	apperrors "github.com/ysomad/go-auth-service/pkg/errors"
 	"github.com/ysomad/go-auth-service/pkg/util"
 )
 
-var (
-	ErrSessionNotFound = errors.New("session not found")
-	ErrSessionExpired  = errors.New("session expired")
-	ErrUnauthorized    = errors.New("unauthorized")
+const (
+	SessionCookieKey = "id"
 )
 
 // Session represents refresh token session for JWT authentication
@@ -25,12 +24,9 @@ type Session struct {
 }
 
 func NewSession(aid string, userAgent string, ip string, ttl time.Duration) (Session, error) {
-	// TODO: add validation
-
 	id, err := util.UniqueString(32)
 	if err != nil {
-		// TODO: return generic err pkg/httperror
-		return Session{}, err
+		return Session{}, fmt.Errorf("utils.UniqueString: %w", apperrors.ErrSessionNotCreated)
 	}
 
 	now := time.Now()
@@ -44,16 +40,6 @@ func NewSession(aid string, userAgent string, ip string, ttl time.Duration) (Ses
 		CreatedAt: now,
 	}, nil
 }
-
-/*
-func (s Session) MarshalBinary() ([]byte, error) {
-	return json.Marshal(s)
-}
-
-func (s *Session) UnmarshalBinary(data []byte) error {
-	return json.Unmarshal(data, s)
-}
-*/
 
 // SessionCookie represents data transfer object which
 // contains data needed to create a cookie.

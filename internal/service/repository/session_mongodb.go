@@ -2,7 +2,6 @@ package repository
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -11,12 +10,13 @@ import (
 	"go.mongodb.org/mongo-driver/x/bsonx"
 
 	"github.com/ysomad/go-auth-service/internal/domain"
+	apperrors "github.com/ysomad/go-auth-service/pkg/errors"
 )
 
 const (
-	_sessCollection   = "sessions"
-	_sessAccountIDKey = "accountID"
-	_sessIDKey        = "_id"
+	sessionCollection   = "sessions"
+	sessionAccountIDKey = "accountID"
+	sessionIDKey        = "_id"
 )
 
 type sessionRepo struct {
@@ -24,11 +24,10 @@ type sessionRepo struct {
 }
 
 func NewSessionRepo(db *mongo.Database) *sessionRepo {
-	return &sessionRepo{db.Collection(_sessCollection)}
+	return &sessionRepo{db.Collection(sessionCollection)}
 }
 
 func (r *sessionRepo) Create(ctx context.Context, s domain.Session) error {
-	// TODO: generic errors
 	ttlIndex := mongo.IndexModel{
 		Keys:    bsonx.Doc{{Key: "createdAt", Value: bsonx.Int32(1)}},
 		Options: options.Index().SetExpireAfterSeconds(int32(s.TTL)),
@@ -48,12 +47,12 @@ func (r *sessionRepo) Create(ctx context.Context, s domain.Session) error {
 }
 
 func (r *sessionRepo) Get(ctx context.Context, sid string) (domain.Session, error) {
-	// TODO: generic errors
 	var s domain.Session
 
-	if err := r.FindOne(ctx, bson.M{_sessIDKey: sid}).Decode(&s); err != nil {
-		if errors.Is(err, mongo.ErrNoDocuments) {
-			return domain.Session{}, fmt.Errorf("r.FindOne.Decode: %w", domain.ErrSessionNotFound)
+	if err := r.FindOne(ctx, bson.M{sessionIDKey: sid}).Decode(&s); err != nil {
+
+		if err == mongo.ErrNoDocuments {
+			return domain.Session{}, fmt.Errorf("r.FindOne.Decode: %w", apperrors.ErrSessionNotFound)
 		}
 
 		return domain.Session{}, fmt.Errorf("r.FindOne.Decode: %w", err)
@@ -63,8 +62,7 @@ func (r *sessionRepo) Get(ctx context.Context, sid string) (domain.Session, erro
 }
 
 func (r *sessionRepo) GetAll(ctx context.Context, aid string) ([]domain.Session, error) {
-	// TODO: generic errors
-	cursor, err := r.Find(ctx, bson.M{_sessAccountIDKey: bson.M{"$eq": aid}})
+	cursor, err := r.Find(ctx, bson.M{sessionAccountIDKey: bson.M{"$eq": aid}})
 	if err != nil {
 		return nil, fmt.Errorf("r.Find: %w", err)
 	}
@@ -79,8 +77,7 @@ func (r *sessionRepo) GetAll(ctx context.Context, aid string) ([]domain.Session,
 }
 
 func (r *sessionRepo) Delete(ctx context.Context, sid string) error {
-	// TODO: generic errors
-	_, err := r.DeleteOne(ctx, bson.M{_sessIDKey: sid})
+	_, err := r.DeleteOne(ctx, bson.M{sessionIDKey: sid})
 	if err != nil {
 		return fmt.Errorf("r.DeleteOne: %w", err)
 	}
@@ -89,8 +86,7 @@ func (r *sessionRepo) Delete(ctx context.Context, sid string) error {
 }
 
 func (r *sessionRepo) DeleteAll(ctx context.Context, uid string) error {
-	// TODO: generic errors
-	_, err := r.DeleteMany(ctx, bson.M{_sessAccountIDKey: uid})
+	_, err := r.DeleteMany(ctx, bson.M{sessionAccountIDKey: uid})
 	if err != nil {
 		return fmt.Errorf("r.DeleteMany: %w", err)
 	}
