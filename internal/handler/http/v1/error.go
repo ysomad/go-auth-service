@@ -13,11 +13,11 @@ var (
 )
 
 type messageResponse struct {
-	Error string `json:"error" example:"message"`
+	Error string `json:"error"`
 }
 
 type validationErrorResponse struct {
-	Errors map[string]string `json:"error" example:"ModelName.FieldName:validation error message"`
+	Errors map[string]string `json:"error"`
 }
 
 func abortWithError(c *gin.Context, code int, err error) {

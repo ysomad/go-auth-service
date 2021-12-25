@@ -8,12 +8,14 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/ysomad/go-auth-service/internal/service"
+
+	"github.com/ysomad/go-auth-service/pkg/logger"
 	"github.com/ysomad/go-auth-service/pkg/validation"
 )
 
-const _path = "/v1"
+const apiPath = "/v1"
 
-func SetupHandlers(handler *gin.Engine, v validation.Validator, acc service.Account, s service.Session, a service.Auth) {
+func SetupHandlers(handler *gin.Engine, l logger.Interface, v validation.Validator, acc service.Account, sess service.Session, auth service.Auth) {
 	// Options
 	handler.Use(gin.Logger())
 	handler.Use(gin.Recovery())
@@ -22,13 +24,13 @@ func SetupHandlers(handler *gin.Engine, v validation.Validator, acc service.Acco
 	handler.GET("/healthz", func(c *gin.Context) { c.Status(http.StatusOK) })
 
 	// Swagger UI
-	handler.Static(fmt.Sprintf("%s/swagger/", _path), "third_party/swaggerui")
+	handler.Static(fmt.Sprintf("%s/swagger/", apiPath), "third_party/swaggerui")
 
 	// Resource handlers
-	h := handler.Group(_path)
+	h := handler.Group(apiPath)
 	{
-		newAccountHandler(h, v, acc, s)
-		newSessionHandler(h, v, s)
-		newAuthHandler(h, v, s, a)
+		newAccountHandler(h, l, v, acc, sess)
+		newSessionHandler(h, l, v, sess)
+		newAuthHandler(h, l, v, sess, auth)
 	}
 }

@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -8,34 +9,29 @@ import (
 
 	"github.com/ysomad/go-auth-service/internal/domain"
 	"github.com/ysomad/go-auth-service/internal/service"
+
+  "github.com/ysomad/go-auth-service/pkg/logger"
 )
 
-func sessionMiddleware(s service.Session) gin.HandlerFunc {
+func sessionMiddleware(log logger.Interface, s service.Session) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		sid, err := c.Cookie("id") // TODO: refactor
+		// TODO: refactor
+		sid, err := c.Cookie("id")
 		if err != nil {
-			// TODO: return generic err pkg httperror
-			abortWithError(c, http.StatusUnauthorized, domain.ErrUnauthorized)
+			abortWithError(c, http.StatusUnauthorized, err)
 			return
 		}
-
-		// TODO: add session id validation
 
 		ctx := c.Request.Context()
 
 		sess, err := s.Get(ctx, sid)
 		if err != nil {
 			// TODO: return generic err pkg httperror
-			abortWithError(c, http.StatusUnauthorized, domain.ErrSessionExpired)
+			abortWithError(c, http.StatusUnauthorized, err)
 			return
 		}
 
-		d, err := domain.NewDevice(c.Request.Header.Get("User-Agent"), c.ClientIP())
-		if err != nil {
-			// TODO: return generic err pkg httperror
-			abortWithError(c, http.StatusUnauthorized, domain.ErrSessionExpired)
-			return
-		}
+		d := domain.NewDevice(c.Request.Header.Get("User-Agent"), c.ClientIP())
 
 		// Check current request device vs session device
 		if sess.IP != d.IP || sess.UserAgent != d.UserAgent {
@@ -43,21 +39,21 @@ func sessionMiddleware(s service.Session) gin.HandlerFunc {
 			s.Terminate(ctx, sid)
 
 			// TODO: return generic err pkg httperror
-			abortWithError(c, http.StatusUnauthorized, domain.ErrSessionExpired)
+			abortWithError(c, http.StatusUnauthorized, err)
 			return
 		}
 
+		c.Set("aid", sess.AccountID)
 		c.Next()
 	}
 }
 
 func accountID(c *gin.Context) (string, error) {
-	aid := c.GetString("user") // TODO: refactor
+	aid := c.GetString("aid")
 
 	_, err := uuid.Parse(aid)
 	if err != nil {
-		// TODO: return generic err pkg httperror
-		return "", err
+		return "", fmt.Errorf("uuid.Parse: %w", err)
 	}
 
 	return aid, nil

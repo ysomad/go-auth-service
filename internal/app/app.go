@@ -71,7 +71,7 @@ func Run(cfg *config.Config) {
 
 	// HTTP Server
 	handler := gin.New()
-	v1.SetupHandlers(handler, trans, accountService, sessionService, authService)
+	v1.SetupHandlers(handler, l, trans, accountService, sessionService, authService)
 	httpServer := httpserver.New(handler, httpserver.Port(cfg.HTTP.Port))
 
 	// Waiting signal

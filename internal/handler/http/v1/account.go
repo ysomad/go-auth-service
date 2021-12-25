@@ -1,27 +1,33 @@
 package v1
 
 import (
+	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 
 	"github.com/ysomad/go-auth-service/internal/service"
+
+	apperrors "github.com/ysomad/go-auth-service/pkg/errors"
+	"github.com/ysomad/go-auth-service/pkg/logger"
 	"github.com/ysomad/go-auth-service/pkg/validation"
 )
 
 type accountHandler struct {
+	log logger.Interface
 	validation.Validator
-	account service.Account
+	accountService service.Account
 }
 
-func newAccountHandler(handler *gin.RouterGroup, v validation.Validator, u service.Account, s service.Session) {
-	h := &accountHandler{v, u}
+func newAccountHandler(handler *gin.RouterGroup, l logger.Interface, v validation.Validator, u service.Account, s service.Session) {
+	h := &accountHandler{l, v, u}
 
 	g := handler.Group("/accounts")
 	{
 		g.POST("", h.create)
 
-		authenticated := g.Group("/", sessionMiddleware(s))
+		authenticated := g.Group("/", sessionMiddleware(l, s))
 		{
 			authenticated.GET("", h.get)
 			authenticated.DELETE("", h.archive)
@@ -30,22 +36,33 @@ func newAccountHandler(handler *gin.RouterGroup, v validation.Validator, u servi
 }
 
 type accountCreateRequest struct {
-	Email           string `json:"email" example:"account@mail.com" binding:"required,email,lte=255"`
-	Password        string `json:"password" example:"secret" binding:"required,gte=8,lte=128"`
-	ConfirmPassword string `json:"confirmPassword" example:"secret" binding:"required,eqfield=Password"`
+	Email           string `json:"email" binding:"required,email,lte=255"`
+	Password        string `json:"password" binding:"required,gte=8,lte=128"`
+	ConfirmPassword string `json:"confirmPassword" binding:"required,eqfield=Password"`
 }
 
 func (h *accountHandler) create(c *gin.Context) {
-	// TODO: fix
 	var r accountCreateRequest
 
 	if err := c.ShouldBindJSON(&r); err != nil {
-		abortWithValidationError(c, http.StatusUnprocessableEntity, h.TranslateError(err))
+		abortWithValidationError(c, http.StatusBadRequest, h.TranslateError(err))
 		return
 	}
 
-	if err := h.account.Create(c.Request.Context(), r.Email, r.Password); err != nil {
-		abortWithError(c, http.StatusBadRequest, err)
+	if err := h.accountService.Create(c.Request.Context(), r.Email, r.Password); err != nil {
+		h.log.Error(fmt.Errorf("http - v1 - account - create: %w", err))
+
+		if errors.Is(err, apperrors.ErrAccountAlreadyExist) {
+			abortWithError(c, http.StatusConflict, apperrors.ErrAccountAlreadyExist)
+			return
+		}
+
+		if errors.Is(err, apperrors.ErrAccountPasswordNotGenerated) {
+			c.Status(http.StatusInternalServerError)
+			return
+		}
+
+		c.Status(http.StatusInternalServerError)
 		return
 	}
 
@@ -53,26 +70,46 @@ func (h *accountHandler) create(c *gin.Context) {
 }
 
 func (h *accountHandler) archive(c *gin.Context) {
-	// TODO: fix
-	// get account id from context
-	var aid string
+	aid, err := accountID(c)
+	if err != nil {
+		h.log.Error(fmt.Errorf("http - v1 - auth - archive - accountID: %w", err))
+		c.Status(http.StatusUnauthorized)
+		return
+	}
 
-	if err := h.account.Archive(c.Request.Context(), aid); err != nil {
-		abortWithError(c, http.StatusBadRequest, err)
+	if err := h.accountService.Archive(c.Request.Context(), aid); err != nil {
+		h.log.Error(fmt.Errorf("http - v1 - auth - archive: %w", err))
+
+		if errors.Is(err, apperrors.ErrAccountNotFound) {
+			c.Status(http.StatusUnauthorized)
+			return
+		}
+
+		c.Status(http.StatusInternalServerError)
 		return
 	}
 
 	c.Status(http.StatusNoContent)
 }
 
-func (r *accountHandler) get(c *gin.Context) {
-	// TODO: fix
-	// get account id from context
-	var aid string
-
-	acc, err := r.account.GetByID(c.Request.Context(), aid)
+func (h *accountHandler) get(c *gin.Context) {
+	aid, err := accountID(c)
 	if err != nil {
-		abortWithError(c, http.StatusBadRequest, err)
+		h.log.Error(fmt.Errorf("http - v1 - auth - archive - accountID: %w", err))
+		c.Status(http.StatusUnauthorized)
+		return
+	}
+
+	acc, err := h.accountService.GetByID(c.Request.Context(), aid)
+	if err != nil {
+		h.log.Error(fmt.Errorf("http - v1 - auth - get - h.accountService.GetByID: %w", err))
+
+		if errors.Is(err, apperrors.ErrAccountNotFound) {
+			c.Status(http.StatusUnauthorized)
+			return
+		}
+
+		c.Status(http.StatusInternalServerError)
 		return
 	}
 
