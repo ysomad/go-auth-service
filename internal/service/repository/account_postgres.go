@@ -42,7 +42,8 @@ func (r *accountRepo) Create(ctx context.Context, acc domain.Account) error {
 		var pgErr *pgconn.PgError
 
 		if errors.As(err, &pgErr) {
-			if pgErr.Code == pgerrcode.UniqueViolation {
+			
+      if pgErr.Code == pgerrcode.UniqueViolation {
 				return fmt.Errorf("r.Pool.Exec: %w", apperrors.ErrAccountAlreadyExist)
 			}
 		}

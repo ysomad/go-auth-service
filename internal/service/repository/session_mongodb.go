@@ -24,7 +24,7 @@ type sessionRepo struct {
 }
 
 func NewSessionRepo(db *mongo.Database) *sessionRepo {
-	return &sessionRepo{db.Collection(sessionCollection)}
+	return &sessionRepo{db.Collection(_sessCollection)}
 }
 
 func (r *sessionRepo) Create(ctx context.Context, s domain.Session) error {

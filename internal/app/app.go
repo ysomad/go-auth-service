@@ -10,6 +10,7 @@ import (
 	"github.com/go-redis/redis/v8"
 
 	"github.com/ysomad/go-auth-service/config"
+
 	v1 "github.com/ysomad/go-auth-service/internal/handler/http/v1"
 	"github.com/ysomad/go-auth-service/internal/service"
 	"github.com/ysomad/go-auth-service/internal/service/repository"

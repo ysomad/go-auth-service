@@ -9,7 +9,8 @@ import (
 
 	"github.com/ysomad/go-auth-service/internal/domain"
 	"github.com/ysomad/go-auth-service/internal/service"
-	"github.com/ysomad/go-auth-service/pkg/logger"
+
+  "github.com/ysomad/go-auth-service/pkg/logger"
 )
 
 func sessionMiddleware(log logger.Interface, s service.Session) gin.HandlerFunc {

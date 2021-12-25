@@ -46,6 +46,6 @@ func (s *authService) Logout(ctx context.Context, sid string) error {
 }
 
 func (s *authService) GetAccessToken(ctx context.Context, aid string) (domain.Token, error) {
-	// TODO: implement
+  panic("implement")
 	return domain.Token{}, nil
 }

@@ -79,14 +79,11 @@ func (h *authHandler) login(c *gin.Context) {
 
 func (h *authHandler) logout(c *gin.Context) {
 	panic("implement")
-
 	c.Status(http.StatusNoContent)
 }
 
 func (h *authHandler) token(c *gin.Context) {
 	var t string
-
 	panic("implement")
-
 	c.JSON(http.StatusOK, t)
 }

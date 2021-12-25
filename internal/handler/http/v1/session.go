@@ -6,7 +6,8 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/ysomad/go-auth-service/internal/service"
-	"github.com/ysomad/go-auth-service/pkg/logger"
+	
+  "github.com/ysomad/go-auth-service/pkg/logger"
 	"github.com/ysomad/go-auth-service/pkg/validation"
 )
 
