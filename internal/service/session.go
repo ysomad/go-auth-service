@@ -65,8 +65,8 @@ func (s *sessionService) Terminate(ctx context.Context, sid string) error {
 	return nil
 }
 
-func (s *sessionService) TerminateAll(ctx context.Context, uid string) error {
-	if err := s.sessionRepo.DeleteAll(ctx, uid); err != nil {
+func (s *sessionService) TerminateAll(ctx context.Context, aid, currSid string) error {
+	if err := s.sessionRepo.DeleteAll(ctx, aid, currSid); err != nil {
 		return fmt.Errorf("sessionService - TerminateAll - s.sessionRepo.DeleteAll: %w", err)
 	}
 

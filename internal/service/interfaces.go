@@ -62,8 +62,8 @@ type (
 		// Terminate sessions by id.
 		Terminate(ctx context.Context, sid string) error
 
-		// TerminateAll account sessions using provided account id.
-		TerminateAll(ctx context.Context, aid string) error
+		// TerminateAll account sessions excluding current one.
+		TerminateAll(ctx context.Context, aid, currSid string) error
 	}
 
 	SessionRepo interface {
@@ -79,7 +79,7 @@ type (
 		// Delete session by id.
 		Delete(ctx context.Context, sid string) error
 
-		// DeleteAll account sessions by provided account id.
-		DeleteAll(ctx context.Context, aid string) error
+		// DeleteAll account sessions by provided account id excluding current session.
+		DeleteAll(ctx context.Context, aid, currSid string) error
 	}
 )

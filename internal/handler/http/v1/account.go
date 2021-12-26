@@ -96,7 +96,14 @@ func (h *accountHandler) archive(c *gin.Context) {
 		return
 	}
 
-	if err := h.sessionService.TerminateAll(c.Request.Context(), aid); err != nil {
+	sid, err := sessionID(c)
+	if err != nil {
+		h.log.Error(fmt.Errorf("http - v1 - auth - archive - sessionID: %w", err))
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	if err := h.sessionService.TerminateAll(c.Request.Context(), aid, sid); err != nil {
 		h.log.Error(fmt.Errorf("http - v1 - auth - archive: %w", err))
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return

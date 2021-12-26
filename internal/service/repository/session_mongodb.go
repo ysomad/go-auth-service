@@ -85,8 +85,13 @@ func (r *sessionRepo) Delete(ctx context.Context, sid string) error {
 	return nil
 }
 
-func (r *sessionRepo) DeleteAll(ctx context.Context, uid string) error {
-	_, err := r.DeleteMany(ctx, bson.M{sessionAccountIDKey: uid})
+func (r *sessionRepo) DeleteAll(ctx context.Context, aid, currSid string) error {
+	filter := bson.M{
+		sessionAccountIDKey: aid,
+		sessionIDKey:        bson.M{"$ne": currSid},
+	}
+
+	_, err := r.DeleteMany(ctx, filter)
 	if err != nil {
 		return fmt.Errorf("r.DeleteMany: %w", err)
 	}

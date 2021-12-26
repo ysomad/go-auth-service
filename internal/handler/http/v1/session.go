@@ -56,7 +56,7 @@ func (h *sessionHandler) get(c *gin.Context) {
 }
 
 func (h *sessionHandler) terminate(c *gin.Context) {
-	contextSid, err := sessionID(c)
+	currentSid, err := sessionID(c)
 	if err != nil {
 		h.log.Error("http - v1 - session - terminate - sessionID: %w", err)
 		c.AbortWithStatus(http.StatusUnauthorized)
@@ -65,7 +65,7 @@ func (h *sessionHandler) terminate(c *gin.Context) {
 
 	sid := c.Param("sessionID")
 
-	if contextSid == sid {
+	if currentSid == sid {
 		abortWithError(c, http.StatusBadRequest, apperrors.ErrSessionNotTerminated)
 		return
 	}
@@ -80,6 +80,26 @@ func (h *sessionHandler) terminate(c *gin.Context) {
 }
 
 func (h *sessionHandler) terminateAll(c *gin.Context) {
-	panic("implement")
+	currentSid, err := sessionID(c)
+	if err != nil {
+		h.log.Error("http - v1 - session - terminateAll - sessionID: %w", err)
+		c.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
+
+	aid, err := accountID(c)
+	if err != nil {
+		h.log.Error("http - v1 - session - terminateAll - accountID: %w", err)
+		c.AbortWithStatus(http.StatusUnauthorized)
+		return
+
+	}
+
+	if err := h.sessionService.TerminateAll(c.Request.Context(), aid, currentSid); err != nil {
+		h.log.Error("http - v1 - session - terminateAll: %w", err)
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
 	c.Status(http.StatusNoContent)
 }
