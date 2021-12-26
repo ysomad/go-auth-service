@@ -22,5 +22,5 @@ session:
   ttl: 60m
 
 jwt:
-  ttl: 15m
+  ttl: 1m
   signing_key: 'secret'

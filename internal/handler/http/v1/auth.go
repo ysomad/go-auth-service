@@ -94,8 +94,38 @@ func (h *authHandler) logout(c *gin.Context) {
 	c.Status(http.StatusNoContent)
 }
 
+type tokenRequest struct {
+	Password string `json:"password" binding:"required,gte=6,lte=128"`
+}
+
 func (h *authHandler) token(c *gin.Context) {
-	var t string
-	panic("implement")
-	c.JSON(http.StatusOK, t)
+	var r tokenRequest
+
+	if err := c.ShouldBindJSON(&r); err != nil {
+		h.log.Info(err.Error())
+		abortWithValidationError(c, http.StatusBadRequest, h.TranslateError(err))
+		return
+	}
+
+	aid, err := accountID(c)
+	if err != nil {
+		h.log.Error(fmt.Errorf("http - v1 - auth - token - accountID: %w", err))
+		c.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
+
+	token, err := h.authService.NewAccessToken(c.Request.Context(), aid, r.Password)
+	if err != nil {
+		h.log.Error(fmt.Errorf("http - v1 - auth - token: %w", err))
+
+		if errors.Is(err, apperrors.ErrAccountIncorrectPassword) {
+			c.AbortWithStatus(http.StatusForbidden)
+			return
+		}
+
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	c.JSON(http.StatusOK, token)
 }

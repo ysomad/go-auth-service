@@ -15,6 +15,7 @@ import (
 	"github.com/ysomad/go-auth-service/internal/service"
 	"github.com/ysomad/go-auth-service/internal/service/repository"
 
+	"github.com/ysomad/go-auth-service/pkg/auth"
 	"github.com/ysomad/go-auth-service/pkg/httpserver"
 	"github.com/ysomad/go-auth-service/pkg/logger"
 	"github.com/ysomad/go-auth-service/pkg/mongodb"
@@ -60,7 +61,13 @@ func Run(cfg *config.Config) {
 		cfg.Cache.TTL,
 		cfg.Session.TTL,
 	)
-	authService := service.NewAuthService(accountService, sessionService)
+
+	tokenManager, err := auth.NewTokenManager(cfg.JWT.SigningKey, cfg.JWT.TTL)
+	if err != nil {
+		l.Fatal(fmt.Errorf("app - Run - auth.NewTokenManager: %w", err))
+	}
+
+	authService := service.NewAuthService(accountService, sessionService, tokenManager)
 
 	// TODO: refactor
 	// Validation translator

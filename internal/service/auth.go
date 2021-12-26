@@ -5,17 +5,20 @@ import (
 	"fmt"
 
 	"github.com/ysomad/go-auth-service/internal/domain"
+	"github.com/ysomad/go-auth-service/pkg/auth"
 )
 
 type authService struct {
 	accountService Account
 	sessionService Session
+	tokenManager   auth.TokenManager
 }
 
-func NewAuthService(a Account, s Session) *authService {
+func NewAuthService(a Account, s Session, t auth.TokenManager) *authService {
 	return &authService{
 		accountService: a,
 		sessionService: s,
+		tokenManager:   t,
 	}
 }
 
@@ -45,7 +48,31 @@ func (s *authService) Logout(ctx context.Context, sid string) error {
 	return nil
 }
 
-func (s *authService) GetAccessToken(ctx context.Context, aid string) (domain.Token, error) {
-  panic("implement")
-	return domain.Token{}, nil
+func (s *authService) NewAccessToken(ctx context.Context, aid, password string) (domain.Token, error) {
+	acc, err := s.accountService.GetByID(ctx, aid)
+	if err != nil {
+		return domain.Token{}, fmt.Errorf("authService - NewAccessToken - s.accountService.GetByID: %w", err)
+	}
+
+	if err := acc.CompareHashAndPassword(password); err != nil {
+		return domain.Token{}, fmt.Errorf("authService - NewAccessToken - acc.CompareHashAndPassword: %w", err)
+	}
+
+	token, err := s.tokenManager.NewJWT(aid)
+	if err != nil {
+		return domain.Token{}, fmt.Errorf("authService - NewAccessToken - s.tokenManager.NewJWT: %w", err)
+	}
+
+	return domain.Token{
+		AccessToken: token,
+	}, nil
+}
+
+func (s *authService) ParseAccessToken(ctx context.Context, token string) (string, error) {
+	aid, err := s.tokenManager.ParseJWT(token)
+	if err != nil {
+		return "", fmt.Errorf("authService - ParseAccessToken - s.tokenManager.ParseJWT: %w", err)
+	}
+
+	return aid, nil
 }

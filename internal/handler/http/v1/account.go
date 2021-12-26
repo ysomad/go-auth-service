@@ -18,19 +18,24 @@ type accountHandler struct {
 	log logger.Interface
 	validation.Validator
 	accountService service.Account
+	sessionService service.Session
 }
 
-func newAccountHandler(handler *gin.RouterGroup, l logger.Interface, v validation.Validator, u service.Account, s service.Session) {
-	h := &accountHandler{l, v, u}
+func newAccountHandler(handler *gin.RouterGroup, l logger.Interface, v validation.Validator,
+	acc service.Account, sess service.Session, auth service.Auth) {
+
+	h := &accountHandler{l, v, acc, sess}
 
 	g := handler.Group("/accounts")
 	{
 		g.POST("", h.create)
 
-		authenticated := g.Group("/", sessionMiddleware(l, s))
+		authenticated := g.Group("/", sessionMiddleware(l, sess))
 		{
 			authenticated.GET("", h.get)
-			authenticated.DELETE("", h.archive)
+
+			secure := authenticated.Group("/", tokenMiddleware(l, auth))
+			secure.DELETE("", h.archive)
 		}
 	}
 }
@@ -85,6 +90,12 @@ func (h *accountHandler) archive(c *gin.Context) {
 			return
 		}
 
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	if err := h.sessionService.TerminateAll(c.Request.Context(), aid); err != nil {
+		h.log.Error(fmt.Errorf("http - v1 - auth - archive: %w", err))
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}

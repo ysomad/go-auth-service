@@ -44,7 +44,10 @@ type (
 		Logout(ctx context.Context, sid string) error
 
 		// GetAccessToken generates JWT token which must be used to complete protected operations.
-		GetAccessToken(ctx context.Context, aid string) (domain.Token, error)
+		NewAccessToken(ctx context.Context, aid, password string) (domain.Token, error)
+
+		// ParseAccessToken parses and validates JWT access token, returns subject from payload.
+		ParseAccessToken(ctx context.Context, token string) (string, error)
 	}
 
 	Session interface {

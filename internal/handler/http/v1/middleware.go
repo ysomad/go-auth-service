@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 
@@ -13,6 +14,38 @@ import (
 	"github.com/ysomad/go-auth-service/pkg/errors"
 	"github.com/ysomad/go-auth-service/pkg/logger"
 )
+
+func tokenMiddleware(log logger.Interface, authService service.Auth) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		aid, err := accountID(c)
+		if err != nil {
+			log.Error(fmt.Errorf("http - v1 - middleware - tokenMiddleware - accountID: %w", err))
+			c.AbortWithStatus(http.StatusUnauthorized)
+			return
+		}
+
+		token, found := c.GetQuery("token")
+		if !found || token == "" {
+			c.AbortWithStatus(http.StatusForbidden)
+			return
+		}
+
+		sub, err := authService.ParseAccessToken(context.Background(), token)
+		if err != nil {
+			log.Error(fmt.Errorf("http - v1 - middleware - tokenMiddleware - authService.ParseAccessToken: %w", err))
+			c.AbortWithStatus(http.StatusForbidden)
+			return
+		}
+
+		// sub - account id from token payload, aid - account id from context
+		if sub != aid {
+			c.AbortWithStatus(http.StatusForbidden)
+			return
+		}
+
+		c.Next()
+	}
+}
 
 func sessionMiddleware(log logger.Interface, sessionService service.Session) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -69,40 +102,3 @@ func sessionID(c *gin.Context) (string, error) {
 
 	return sid, nil
 }
-
-// TODO: implement token middleware
-/*
-func tokenMiddleware(jwt auth.JWT) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		header := c.GetHeader("Authorization")
-		if len(header) == 0 {
-			abortWithError(c, http.StatusUnauthorized, errors.New("authorization header is empty"))
-			return
-		}
-
-		fields := strings.Fields(header)
-		if len(fields) < 2 {
-			abortWithError(c, http.StatusUnauthorized, errors.New("invalid authorization header format"))
-			return
-		}
-
-		authType := strings.ToLower(fields[0])
-		if authType != "bearer" {
-			abortWithError(c, http.StatusUnauthorized, errors.New("unsupported authorization type"))
-			return
-		}
-
-		accessToken := fields[1]
-		userID, err := jwt.Validate(accessToken)
-		if err != nil {
-			abortWithError(c, http.StatusUnauthorized, err)
-			return
-		}
-
-		c.Set("user", userID)
-		c.Next()
-	}
-}
-
-
-*/
