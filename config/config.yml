@@ -16,10 +16,10 @@ mongodb:
   database: 'authService'
 
 cache:
-  ttl: 30s
+  ttl: 1m
 
 session:
-  ttl: 1m
+  ttl: 60m
 
 jwt:
   ttl: 15m

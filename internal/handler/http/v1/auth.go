@@ -17,8 +17,8 @@ import (
 
 type authHandler struct {
 	validation.Validator
-	log  logger.Interface
-	auth service.Auth
+	log         logger.Interface
+	authService service.Auth
 }
 
 func newAuthHandler(handler *gin.RouterGroup, l logger.Interface, v validation.Validator, s service.Session, a service.Auth) {
@@ -50,7 +50,7 @@ func (h *authHandler) login(c *gin.Context) {
 		return
 	}
 
-	cookie, err := h.auth.EmailLogin(
+	cookie, err := h.authService.EmailLogin(
 		c.Request.Context(),
 		r.Email,
 		r.Password,
@@ -69,16 +69,28 @@ func (h *authHandler) login(c *gin.Context) {
 			return
 		}
 
-		c.Status(http.StatusInternalServerError)
+		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 
-	c.SetCookie(domain.SessionCookieKey, cookie.ID(), cookie.TTL(), apiPath, "", true, true)
+	c.SetCookie(domain.SessionCookieKey, cookie.ID(), cookie.TTL(), apiPath, "", false, true) // TODO: set Secure to True
 	c.Status(http.StatusOK)
 }
 
 func (h *authHandler) logout(c *gin.Context) {
-	panic("implement")
+	sid, err := sessionID(c)
+	if err != nil {
+		h.log.Error(fmt.Errorf("http - v1 - auth - logout - sessionID: %w", err))
+		c.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
+
+	if err := h.authService.Logout(c.Request.Context(), sid); err != nil {
+		h.log.Error(fmt.Errorf("http - v1 - auth - logout: %w", err))
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
 	c.Status(http.StatusNoContent)
 }
 

@@ -58,11 +58,11 @@ func (h *accountHandler) create(c *gin.Context) {
 		}
 
 		if errors.Is(err, apperrors.ErrAccountPasswordNotGenerated) {
-			c.Status(http.StatusInternalServerError)
+			c.AbortWithStatus(http.StatusInternalServerError)
 			return
 		}
 
-		c.Status(http.StatusInternalServerError)
+		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 
@@ -73,7 +73,7 @@ func (h *accountHandler) archive(c *gin.Context) {
 	aid, err := accountID(c)
 	if err != nil {
 		h.log.Error(fmt.Errorf("http - v1 - auth - archive - accountID: %w", err))
-		c.Status(http.StatusUnauthorized)
+		c.AbortWithStatus(http.StatusUnauthorized)
 		return
 	}
 
@@ -81,11 +81,11 @@ func (h *accountHandler) archive(c *gin.Context) {
 		h.log.Error(fmt.Errorf("http - v1 - auth - archive: %w", err))
 
 		if errors.Is(err, apperrors.ErrAccountNotFound) {
-			c.Status(http.StatusUnauthorized)
+			c.AbortWithStatus(http.StatusUnauthorized)
 			return
 		}
 
-		c.Status(http.StatusInternalServerError)
+		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 
@@ -96,22 +96,24 @@ func (h *accountHandler) get(c *gin.Context) {
 	aid, err := accountID(c)
 	if err != nil {
 		h.log.Error(fmt.Errorf("http - v1 - auth - archive - accountID: %w", err))
-		c.Status(http.StatusUnauthorized)
+		c.AbortWithStatus(http.StatusUnauthorized)
 		return
 	}
 
 	acc, err := h.accountService.GetByID(c.Request.Context(), aid)
 	if err != nil {
-		h.log.Error(fmt.Errorf("http - v1 - auth - get - h.accountService.GetByID: %w", err))
+		h.log.Error(fmt.Errorf("http - v1 - auth - get: %w", err))
 
 		if errors.Is(err, apperrors.ErrAccountNotFound) {
-			c.Status(http.StatusUnauthorized)
+			c.AbortWithStatus(http.StatusUnauthorized)
 			return
 		}
 
-		c.Status(http.StatusInternalServerError)
+		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
+
+	acc.Sanitize()
 
 	c.JSON(http.StatusOK, acc)
 }

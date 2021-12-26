@@ -10,24 +10,25 @@ import (
 	"github.com/ysomad/go-auth-service/internal/domain"
 	"github.com/ysomad/go-auth-service/internal/service"
 
-  "github.com/ysomad/go-auth-service/pkg/logger"
+	"github.com/ysomad/go-auth-service/pkg/errors"
+	"github.com/ysomad/go-auth-service/pkg/logger"
 )
 
-func sessionMiddleware(log logger.Interface, s service.Session) gin.HandlerFunc {
+func sessionMiddleware(log logger.Interface, sessionService service.Session) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// TODO: refactor
 		sid, err := c.Cookie("id")
 		if err != nil {
-			abortWithError(c, http.StatusUnauthorized, err)
+			log.Error(fmt.Errorf("http - v1 - middleware - sessionMiddleware - c.Cookie: %w", err))
+			c.AbortWithStatus(http.StatusUnauthorized)
 			return
 		}
 
 		ctx := c.Request.Context()
 
-		sess, err := s.Get(ctx, sid)
+		sess, err := sessionService.Get(ctx, sid)
 		if err != nil {
-			// TODO: return generic err pkg httperror
-			abortWithError(c, http.StatusUnauthorized, err)
+			log.Error(fmt.Errorf("http - v1 - middleware - sessionMiddleware - s.Get: %w", err))
+			c.AbortWithStatus(http.StatusUnauthorized)
 			return
 		}
 
@@ -36,13 +37,13 @@ func sessionMiddleware(log logger.Interface, s service.Session) gin.HandlerFunc 
 		// Check current request device vs session device
 		if sess.IP != d.IP || sess.UserAgent != d.UserAgent {
 			// TODO: send notification that someone logged in on new device
-			s.Terminate(ctx, sid)
+			sessionService.Terminate(ctx, sid)
 
-			// TODO: return generic err pkg httperror
-			abortWithError(c, http.StatusUnauthorized, err)
+			c.Status(http.StatusUnauthorized)
 			return
 		}
 
+		c.Set("sid", sess.ID)
 		c.Set("aid", sess.AccountID)
 		c.Next()
 	}
@@ -57,6 +58,16 @@ func accountID(c *gin.Context) (string, error) {
 	}
 
 	return aid, nil
+}
+
+func sessionID(c *gin.Context) (string, error) {
+	sid := c.GetString("sid")
+
+	if sid == "" {
+		return "", errors.ErrSessionNotFound
+	}
+
+	return sid, nil
 }
 
 // TODO: implement token middleware
