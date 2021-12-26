@@ -12,4 +12,3 @@ $ make run
 
 ## Links
 - [Evrone Go clean template](https://github.com/evrone/go-clean-template)
-- [Token-Based Authentication](https://gist.github.com/zmts/802dc9c3510d79fd40f9dc38a12bccfc)
