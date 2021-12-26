@@ -39,7 +39,7 @@ func SetupHandlers(
 	h := handler.Group(apiPath)
 	{
 		newAccountHandler(h, l, v, cfg.Session, acc, sess, auth)
-		newSessionHandler(h, l, v, sess)
+		newSessionHandler(h, l, v, sess, auth)
 		newAuthHandler(h, l, v, cfg.Session, sess, auth)
 	}
 }

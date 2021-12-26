@@ -2,14 +2,9 @@ package errors
 
 import "errors"
 
-const (
-	SessionNotFound   = "session not found"
-	SessionExpired    = "session expired"
-	SessionNotCreated = "error occured during session creation"
-)
-
 var (
-	ErrSessionNotFound   = errors.New(SessionNotFound)
-	ErrSessionExpired    = errors.New(SessionExpired)
-	ErrSessionNotCreated = errors.New(SessionNotCreated)
+	ErrSessionNotFound      = errors.New("session not found")
+	ErrSessionExpired       = errors.New("session expired")
+	ErrSessionNotCreated    = errors.New("error occured during session creation")
+	ErrSessionNotTerminated = errors.New("current session cannot be terminated, use logout instead")
 )

@@ -8,6 +8,7 @@ import (
 
 	"github.com/ysomad/go-auth-service/internal/service"
 
+	apperrors "github.com/ysomad/go-auth-service/pkg/errors"
 	"github.com/ysomad/go-auth-service/pkg/logger"
 	"github.com/ysomad/go-auth-service/pkg/validation"
 )
@@ -18,16 +19,20 @@ type sessionHandler struct {
 	sessionService service.Session
 }
 
-func newSessionHandler(handler *gin.RouterGroup, l logger.Interface, v validation.Validator, s service.Session) {
-	h := &sessionHandler{l, v, s}
+func newSessionHandler(handler *gin.RouterGroup, l logger.Interface, v validation.Validator,
+	sess service.Session, auth service.Auth) {
+
+	h := &sessionHandler{l, v, sess}
 
 	g := handler.Group("/sessions")
 	{
-		authenticated := g.Group("/", sessionMiddleware(l, s))
+		authenticated := g.Group("/", sessionMiddleware(l, sess))
 		{
-			authenticated.DELETE(":sessionID", h.terminate)
 			authenticated.GET("", h.get)
-			authenticated.DELETE("", h.terminateAll)
+
+			secure := authenticated.Group("/", tokenMiddleware(l, auth))
+			secure.DELETE(":sessionID", h.terminate)
+			secure.DELETE("", h.terminateAll)
 		}
 	}
 }
@@ -51,7 +56,26 @@ func (h *sessionHandler) get(c *gin.Context) {
 }
 
 func (h *sessionHandler) terminate(c *gin.Context) {
-	panic("implement")
+	contextSid, err := sessionID(c)
+	if err != nil {
+		h.log.Error("http - v1 - session - terminate - sessionID: %w", err)
+		c.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
+
+	sid := c.Param("sessionID")
+
+	if contextSid == sid {
+		abortWithError(c, http.StatusBadRequest, apperrors.ErrSessionNotTerminated)
+		return
+	}
+
+	if err := h.sessionService.Terminate(c.Request.Context(), sid); err != nil {
+		h.log.Error(fmt.Errorf("http - v1 - session - terminate - h.sessionService.Terminate: %w", err))
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
 	c.Status(http.StatusNoContent)
 }
 
