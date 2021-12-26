@@ -98,6 +98,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+        "403":
+          description: Access denied.
         "500":
           description: Internal Server Error.
       security:
@@ -151,12 +153,6 @@ paths:
       summary: Logout
       description: Terminate current session.
       operationId: authLogout
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/LoginRequest'
-        required: true
       responses:
         "204":
           description: Successful operation.
@@ -191,11 +187,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/AccessTokenResponse'
         "400":
-          description: Invalid password.
+          description: Invalid request body.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/ValidationErrorResponse'
+        "403":
+          description: Invalid password.
         "401":
           description: Unauthorized.
           content:
@@ -414,11 +412,7 @@ components:
       properties:
         accessToken:
           type: string
-          description: JWT token contains User ID as subject in payload
-        expiresAt:
-          type: integer
-          description: Unix timestamp
-          format: int64
+          description: JWT token contains Account ID as subject in payload
     ErrorResponse:
       type: object
       properties:
