@@ -14,7 +14,7 @@ info:
 servers:
 - url: https://virtserver.swaggerhub.com/ysomad/Authservice/1.0.0
   description: SwaggerHub API Auto Mocking
-- url: http://0.0.0.0:8080/v1
+- url: http://localhost:8080/v1
   description: Local server
 tags:
 - name: account
@@ -43,12 +43,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-        "404":
-          description: Account not found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+        "500":
+          description: Internal Server Error.
       security:
       - cookieAuth: []
     post:
@@ -72,12 +68,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ValidationErrorResponse'
-        "403":
+        "409":
           description: Account with given credentials already exists.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+        "500":
+          description: Internal Server Error.
     delete:
       tags:
       - account
@@ -96,18 +94,14 @@ paths:
       responses:
         "204":
           description: Successful operation.
-        "400":
-          description: Invalid request body.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ValidationErrorResponse'
         "401":
           description: Unauthorized.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+        "500":
+          description: Internal Server Error.
       security:
       - cookieAuth: []
   /auth/login:
@@ -138,12 +132,20 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ValidationErrorResponse'
-        "404":
-          description: User not found.
+        "401":
+          description: Invalid email or password.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+        "404":
+          description: Account not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "500":
+          description: Internal Server Error.
   /auth/logout:
     post:
       tags:
@@ -166,6 +168,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+        "500":
+          description: Internal Server Error.
       security:
       - cookieAuth: []
   /auth/token:
@@ -200,6 +204,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+        "500":
+          description: Internal Server Error.
       security:
       - cookieAuth: []
   /sessions:
@@ -221,6 +227,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+        "500":
+          description: Internal Server Error.
       security:
       - cookieAuth: []
     delete:
@@ -253,6 +261,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+        "500":
+          description: Internal Server Error.
       security:
       - cookieAuth: []
   /sessions/{sessionId}:
@@ -294,12 +304,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-        "404":
-          description: Session not found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+        "500":
+          description: Internal Server Error.
       security:
       - cookieAuth: []
 components:
