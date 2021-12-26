@@ -60,18 +60,9 @@ func (s *accountService) GetByID(ctx context.Context, aid string) (domain.Accoun
 func (s *accountService) GetByEmail(ctx context.Context, email string) (domain.Account, error) {
 	var acc domain.Account
 
-	if err := s.cacheRepo.Get(ctx, email, &acc); err == nil {
-		return acc, nil
-	}
-
 	acc, err := s.accountRepo.FindByEmail(ctx, email)
 	if err != nil {
 		return domain.Account{}, fmt.Errorf("accountService - GetByEmail - s.accountRepo.FindByEmail: %w", err)
-	}
-
-	// TODO: do not return on error when setting to cache
-	if err = s.cacheRepo.Set(ctx, email, acc, s.cacheTTL); err != nil {
-		return domain.Account{}, fmt.Errorf("accountService - GetByEmail - s.cacheRepo.Set: %w", err)
 	}
 
 	return acc, nil
