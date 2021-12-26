@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"github.com/ysomad/go-auth-service/config"
 	"github.com/ysomad/go-auth-service/internal/service"
 
 	"github.com/ysomad/go-auth-service/pkg/logger"
@@ -19,6 +20,7 @@ func SetupHandlers(
 	handler *gin.Engine,
 	l logger.Interface,
 	v validation.Validator,
+	cfg config.Config,
 	acc service.Account,
 	sess service.Session,
 	auth service.Auth,
@@ -36,8 +38,8 @@ func SetupHandlers(
 	// Resource handlers
 	h := handler.Group(apiPath)
 	{
-		newAccountHandler(h, l, v, acc, sess, auth)
+		newAccountHandler(h, l, v, cfg.Session, acc, sess, auth)
 		newSessionHandler(h, l, v, sess)
-		newAuthHandler(h, l, v, sess, auth)
+		newAuthHandler(h, l, v, cfg.Session, sess, auth)
 	}
 }

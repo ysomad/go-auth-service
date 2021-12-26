@@ -13,20 +13,14 @@ type sessionService struct {
 
 	sessionRepo SessionRepo
 	sessionTTL  time.Duration
-
-	cacheRepo CacheRepo
-	cacheTTL  time.Duration
 }
 
-func NewSessionService(a AccountRepo, s SessionRepo, c CacheRepo,
-	cacheTTL time.Duration, sessionTTL time.Duration) *sessionService {
+func NewSessionService(a AccountRepo, s SessionRepo, sessionTTL time.Duration) *sessionService {
 
 	return &sessionService{
 		accountRepo: a,
 		sessionRepo: s,
-		cacheRepo:   c,
 		sessionTTL:  sessionTTL,
-		cacheTTL:    cacheTTL,
 	}
 }
 
@@ -46,18 +40,9 @@ func (s *sessionService) Create(ctx context.Context, aid string, d domain.Device
 func (s *sessionService) Get(ctx context.Context, sid string) (domain.Session, error) {
 	var sess domain.Session
 
-	if err := s.cacheRepo.Get(ctx, sid, &sess); err == nil {
-		return sess, nil
-	}
-
 	sess, err := s.sessionRepo.Get(ctx, sid)
 	if err != nil {
 		return domain.Session{}, fmt.Errorf("sessionService - Get - s.sessionRepo.Get: %w", err)
-	}
-
-	// TODO: do not return error on cache set
-	if err = s.cacheRepo.Set(ctx, sid, sess, s.cacheTTL); err != nil {
-		return domain.Session{}, fmt.Errorf("sessionService - Get - s.cacheRepo.Set: %w", err)
 	}
 
 	return sess, nil
@@ -73,10 +58,6 @@ func (s *sessionService) GetAll(ctx context.Context, aid string) ([]domain.Sessi
 }
 
 func (s *sessionService) Terminate(ctx context.Context, sid string) error {
-	if err := s.cacheRepo.Delete(ctx, sid); err != nil {
-		return fmt.Errorf("sessionService - Terminate - s.cacheRepo.Delete: %w", err)
-	}
-
 	if err := s.sessionRepo.Delete(ctx, sid); err != nil {
 		return fmt.Errorf("sessionService - Terminate - s.sessionRepo.Delete: %w", err)
 	}

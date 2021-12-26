@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"github.com/ysomad/go-auth-service/config"
 	"github.com/ysomad/go-auth-service/internal/service"
 
 	apperrors "github.com/ysomad/go-auth-service/pkg/errors"
@@ -17,14 +18,15 @@ import (
 type accountHandler struct {
 	log logger.Interface
 	validation.Validator
+	sessionCfg     config.Session
 	accountService service.Account
 	sessionService service.Session
 }
 
-func newAccountHandler(handler *gin.RouterGroup, l logger.Interface, v validation.Validator,
+func newAccountHandler(handler *gin.RouterGroup, l logger.Interface, v validation.Validator, cfg config.Session,
 	acc service.Account, sess service.Session, auth service.Auth) {
 
-	h := &accountHandler{l, v, acc, sess}
+	h := &accountHandler{l, v, cfg, acc, sess}
 
 	g := handler.Group("/accounts")
 	{
@@ -99,6 +101,16 @@ func (h *accountHandler) archive(c *gin.Context) {
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
+
+	c.SetCookie(
+		h.sessionCfg.CookieKey,
+		"",
+		-1,
+		apiPath,
+		h.sessionCfg.CookieDomain,
+		h.sessionCfg.CookieSecure,
+		h.sessionCfg.CookieHttpOnly,
+	)
 
 	c.Status(http.StatusNoContent)
 }

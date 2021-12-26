@@ -7,7 +7,6 @@ import (
 	"syscall"
 
 	"github.com/gin-gonic/gin"
-	"github.com/go-redis/redis/v8"
 
 	"github.com/ysomad/go-auth-service/config"
 
@@ -24,7 +23,7 @@ import (
 )
 
 // Run creates objects via constructors.
-func Run(cfg *config.Config) {
+func Run(cfg config.Config) {
 	l := logger.New(cfg.Log.Level)
 
 	// Postgres
@@ -42,25 +41,20 @@ func Run(cfg *config.Config) {
 	mdb := mcli.Database(cfg.MongoDB.Database)
 
 	// Redis
-	rdb := redis.NewClient(&redis.Options{
-		Addr:     cfg.Redis.Addr,
-		Password: cfg.Redis.Password,
-		DB:       0,
-	})
+	/*
+		rdb := redis.NewClient(&redis.Options{
+			Addr:     cfg.Redis.Addr,
+			Password: cfg.Redis.Password,
+			DB:       0,
+		})
+	*/
 
 	// Service
-	cacheRepo := repository.NewCacheRepo(rdb)
 	accountRepo := repository.NewAccountRepo(pg)
 	sessionRepo := repository.NewSessionRepo(mdb)
 
-	accountService := service.NewAccountService(accountRepo, cacheRepo, cfg.Cache.TTL)
-	sessionService := service.NewSessionService(
-		accountRepo,
-		sessionRepo,
-		cacheRepo,
-		cfg.Cache.TTL,
-		cfg.Session.TTL,
-	)
+	accountService := service.NewAccountService(accountRepo)
+	sessionService := service.NewSessionService(accountRepo, sessionRepo, cfg.Session.TTL)
 
 	tokenManager, err := auth.NewTokenManager(cfg.JWT.SigningKey, cfg.JWT.TTL)
 	if err != nil {
@@ -71,14 +65,14 @@ func Run(cfg *config.Config) {
 
 	// TODO: refactor
 	// Validation translator
-	trans, err := validation.NewGinValidator()
+	v, err := validation.NewGinValidator()
 	if err != nil {
 		l.Fatal(fmt.Errorf("app - Run - validation.NewGinValidator: %w", err))
 	}
 
 	// HTTP Server
 	handler := gin.New()
-	v1.SetupHandlers(handler, l, trans, accountService, sessionService, authService)
+	v1.SetupHandlers(handler, l, v, cfg, accountService, sessionService, authService)
 	httpServer := httpserver.New(handler, httpserver.Port(cfg.HTTP.Port))
 
 	// Waiting signal

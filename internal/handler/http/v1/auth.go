@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"github.com/ysomad/go-auth-service/config"
 	"github.com/ysomad/go-auth-service/internal/domain"
 	"github.com/ysomad/go-auth-service/internal/service"
 
@@ -16,13 +17,16 @@ import (
 )
 
 type authHandler struct {
+	log logger.Interface
 	validation.Validator
-	log         logger.Interface
+	sessionCfg  config.Session
 	authService service.Auth
 }
 
-func newAuthHandler(handler *gin.RouterGroup, l logger.Interface, v validation.Validator, s service.Session, a service.Auth) {
-	h := &authHandler{v, l, a}
+func newAuthHandler(handler *gin.RouterGroup, l logger.Interface, v validation.Validator,
+	cfg config.Session, s service.Session, a service.Auth) {
+
+	h := &authHandler{l, v, cfg, a}
 
 	g := handler.Group("/auth")
 	{
@@ -73,7 +77,16 @@ func (h *authHandler) login(c *gin.Context) {
 		return
 	}
 
-	c.SetCookie(domain.SessionCookieKey, cookie.ID(), cookie.TTL(), apiPath, "", false, true) // TODO: set Secure to True
+	c.SetCookie(
+		h.sessionCfg.CookieKey,
+		cookie.ID(),
+		cookie.TTL(),
+		apiPath,
+		h.sessionCfg.CookieDomain,
+		h.sessionCfg.CookieSecure,
+		h.sessionCfg.CookieHttpOnly,
+	)
+
 	c.Status(http.StatusOK)
 }
 

@@ -8,10 +8,6 @@ import (
 	"github.com/ysomad/go-auth-service/pkg/util"
 )
 
-const (
-	SessionCookieKey = "id"
-)
-
 // Session represents refresh token session for JWT authentication
 type Session struct {
 	ID        string    `bson:"_id" redis:"id"`

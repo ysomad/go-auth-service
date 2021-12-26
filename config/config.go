@@ -50,7 +50,11 @@ type (
 	}
 
 	Session struct {
-		TTL time.Duration `env-required:"true" yaml:"ttl" env:"SESSION_TTL"`
+		TTL            time.Duration `env-required:"true" yaml:"ttl" env:"SESSION_TTL"`
+		CookieKey      string        `env-required:"true" yaml:"cookie_key" env:"SESSION_COOKIE_KEY"`
+		CookieDomain   string        `yaml:"cookie_domain" env:"SESSION_COOKIE_DOMAIN"`
+		CookieSecure   bool          `yaml:"cookie_secure" env:"SESSION_COOKIE_SECURE"`
+		CookieHttpOnly bool          `yaml:"cookie_httponly" env:"SESSION_COOKIE_HTTPONLY"`
 	}
 
 	JWT struct {

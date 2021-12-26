@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"time"
 
 	"github.com/ysomad/go-auth-service/internal/domain"
 )
@@ -82,22 +81,5 @@ type (
 
 		// DeleteAll account sessions by provided account id.
 		DeleteAll(ctx context.Context, aid string) error
-	}
-
-	CacheRepo interface {
-		// Set the given key/value in cache,
-		// overwriting any existing value associated with that key.
-		Set(ctx context.Context, key string, val interface{}, ttl time.Duration) error
-
-		// Add the given key/value to cache ONLY IF the key does not already exist.
-		Add(ctx context.Context, key string, val interface{}, ttl time.Duration) error
-
-		// Get content associated with the given key from cache.
-		// Decoding it into the given pointer.
-		// Returns flag which indicates that value by the given key is found or not.
-		Get(ctx context.Context, key string, pointer interface{}) error
-
-		// Delete the given key from cache.
-		Delete(ctx context.Context, key string) error
 	}
 )

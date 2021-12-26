@@ -20,6 +20,10 @@ cache:
 
 session:
   ttl: 60m
+  cookie_key: 'id'
+  cookie_domain: ''
+  cookie_secure: false
+  cookie_httponly: true
 
 jwt:
   ttl: 1m

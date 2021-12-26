@@ -17,5 +17,5 @@ func main() {
 		log.Fatalf("Config error: %s", err)
 	}
 
-	app.Run(&cfg)
+	app.Run(cfg)
 }
