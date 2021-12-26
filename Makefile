@@ -2,11 +2,11 @@ include .env.example
 export
 
 compose-up:
-	docker-compose -f ./build/docker-compose.yml up --build -d postgres mongodb redis && docker-compose -f ./build/docker-compose.yml logs -f
+	docker-compose up --build -d postgres mongodb redis && docker-compose logs -f
 .PHONY: compose-up
 
 compose-down:
-	docker-compose -f ./build/docker-compose.yml down --remove-orphans
+	docker-compose down --remove-orphans
 .PHONY: compose-down
 
 run:

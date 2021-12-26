@@ -15,11 +15,7 @@
   },
   "servers": [
     {
-      "url": "https://virtserver.swaggerhub.com/ysomad/Authservice/1.0.0",
-      "description": "SwaggerHub API Auto Mocking"
-    },
-    {
-      "url": "http://localhost:8080/v1",
+      "url": "http://0.0.0.0:8080/v1",
       "description": "Local server"
     }
   ],
