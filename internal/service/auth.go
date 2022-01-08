@@ -11,14 +11,14 @@ import (
 type authService struct {
 	accountService Account
 	sessionService Session
-	tokenManager   auth.TokenManager
+	jwtManager     auth.JWTManager
 }
 
-func NewAuthService(a Account, s Session, t auth.TokenManager) *authService {
+func NewAuthService(a Account, s Session, m auth.JWTManager) *authService {
 	return &authService{
 		accountService: a,
 		sessionService: s,
-		tokenManager:   t,
+		jwtManager:     m,
 	}
 }
 
@@ -58,7 +58,7 @@ func (s *authService) NewAccessToken(ctx context.Context, aid, password string) 
 		return domain.Token{}, fmt.Errorf("authService - NewAccessToken - acc.CompareHashAndPassword: %w", err)
 	}
 
-	token, err := s.tokenManager.NewJWT(aid)
+	token, err := s.jwtManager.New(aid)
 	if err != nil {
 		return domain.Token{}, fmt.Errorf("authService - NewAccessToken - s.tokenManager.NewJWT: %w", err)
 	}
@@ -69,7 +69,7 @@ func (s *authService) NewAccessToken(ctx context.Context, aid, password string) 
 }
 
 func (s *authService) ParseAccessToken(ctx context.Context, token string) (string, error) {
-	aid, err := s.tokenManager.ParseJWT(token)
+	aid, err := s.jwtManager.Parse(token)
 	if err != nil {
 		return "", fmt.Errorf("authService - ParseAccessToken - s.tokenManager.ParseJWT: %w", err)
 	}

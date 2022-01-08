@@ -13,29 +13,29 @@ var (
 	ErrUnexpectedSignMethod = errors.New("unexpected signing method")
 )
 
-type TokenManager interface {
-	NewJWT(sub string) (string, error)
-	ParseJWT(accessToken string) (string, error)
+type JWTManager interface {
+	New(sub string) (string, error)
+	Parse(token string) (string, error)
 }
 
-type tokenManager struct {
+type jwtManager struct {
 	signingKey string
 	ttl        time.Duration
 }
 
-func NewTokenManager(signingKey string, ttl time.Duration) (tokenManager, error) {
+func NewJWTManager(signingKey string, ttl time.Duration) (jwtManager, error) {
 	if signingKey == "" {
-		return tokenManager{}, ErrNoSigningKey
+		return jwtManager{}, ErrNoSigningKey
 	}
 
-	return tokenManager{
+	return jwtManager{
 		signingKey: signingKey,
 		ttl:        ttl,
 	}, nil
 }
 
-// NewJWT creates new JWT token with claims and subject in payload
-func (m tokenManager) NewJWT(sub string) (string, error) {
+// New creates new JWT token with claims and subject in payload
+func (m jwtManager) New(sub string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
 		Subject:   sub,
 		ExpiresAt: time.Now().Add(m.ttl).Unix(),
@@ -45,8 +45,8 @@ func (m tokenManager) NewJWT(sub string) (string, error) {
 }
 
 // Parse parses and validating JWT token, returns subject
-func (m tokenManager) ParseJWT(accessToken string) (string, error) {
-	token, err := jwt.Parse(accessToken, func(t *jwt.Token) (i interface{}, err error) {
+func (m jwtManager) Parse(token string) (string, error) {
+	t, err := jwt.Parse(token, func(t *jwt.Token) (i interface{}, err error) {
 		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, ErrUnexpectedSignMethod
 		}
@@ -57,8 +57,8 @@ func (m tokenManager) ParseJWT(accessToken string) (string, error) {
 		return "", err
 	}
 
-	claims, ok := token.Claims.(jwt.MapClaims)
-	if !ok && !token.Valid {
+	claims, ok := t.Claims.(jwt.MapClaims)
+	if !ok && !t.Valid {
 		return "", ErrNoClaims
 	}
 

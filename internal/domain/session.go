@@ -26,13 +26,13 @@ func NewSession(aid string, userAgent string, ip string, ttl time.Duration) (Ses
 	}
 
 	now := time.Now()
+
 	return Session{
 		ID:        id,
 		AccountID: aid,
 		UserAgent: userAgent,
 		IP:        ip,
 		TTL:       int(ttl.Seconds()),
-		ExpiresAt: now.Add(ttl).Unix(),
 		CreatedAt: now,
 	}, nil
 }

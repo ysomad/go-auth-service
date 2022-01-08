@@ -56,7 +56,7 @@ func Run(cfg config.Config) {
 	accountService := service.NewAccountService(accountRepo)
 	sessionService := service.NewSessionService(accountRepo, sessionRepo, cfg.Session.TTL)
 
-	tokenManager, err := auth.NewTokenManager(cfg.JWT.SigningKey, cfg.JWT.TTL)
+	tokenManager, err := auth.NewJWTManager(cfg.JWT.SigningKey, cfg.JWT.TTL)
 	if err != nil {
 		l.Fatal(fmt.Errorf("app - Run - auth.NewTokenManager: %w", err))
 	}
