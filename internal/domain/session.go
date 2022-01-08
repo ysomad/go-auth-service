@@ -13,7 +13,7 @@ type Session struct {
 	ID        string    `json:"id" bson:"_id"`
 	AccountID string    `json:"accountID" bson:"accountID"`
 	UserAgent string    `json:"userAgent" bson:"userAgent"`
-	IP        string    `json:"ip" bson:"IP"`
+	IP        string    `json:"ip" bson:"ip"`
 	TTL       int       `json:"ttl" bson:"ttl"`
 	ExpiresAt int64     `json:"expiresAt" bson:"expiresAt"`
 	CreatedAt time.Time `json:"createdAt" bson:"createdAt"`

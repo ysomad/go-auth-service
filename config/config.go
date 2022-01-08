@@ -4,15 +4,15 @@ import "time"
 
 type (
 	Config struct {
-		App     `yaml:"app"`
-		HTTP    `yaml:"http"`
-		Log     `yaml:"logger"`
-		PG      `yaml:"postgres"`
-		MongoDB `yaml:"mongodb"`
-		Cache   `yaml:"cache"`
-		Redis   `yaml:"redis"`
-		Session `yaml:"session"`
-		JWT     `yaml:"jwt"`
+		App         `yaml:"app"`
+		HTTP        `yaml:"http"`
+		Log         `yaml:"logger"`
+		PG          `yaml:"postgres"`
+		MongoDB     `yaml:"mongodb"`
+		Cache       `yaml:"cache"`
+		Redis       `yaml:"redis"`
+		Session     `yaml:"session"`
+		AccessToken `yaml:"access_token"`
 	}
 
 	App struct {
@@ -57,8 +57,8 @@ type (
 		CookieHttpOnly bool          `yaml:"cookie_httponly" env:"SESSION_COOKIE_HTTPONLY"`
 	}
 
-	JWT struct {
-		TTL        time.Duration `env-required:"true" yaml:"ttl" env:"JWT_TTL"`
-		SigningKey string        `env-required:"true" yaml:"signing_key" env:"SIGNING_KEY"`
+	AccessToken struct {
+		TTL        time.Duration `env-required:"true" yaml:"ttl" env:"ACCESS_TOKEN_TTL"`
+		SigningKey string        `env-required:"true" yaml:"signing_key" env:"ACCESS_TOKEN_SIGNING_KEY"`
 	}
 )

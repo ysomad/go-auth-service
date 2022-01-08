@@ -25,6 +25,6 @@ session:
   cookie_secure: false
   cookie_httponly: true
 
-jwt:
+access_token:
   ttl: 1m
   signing_key: 'secret'

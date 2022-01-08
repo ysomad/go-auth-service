@@ -143,7 +143,5 @@ func (h *accountHandler) get(c *gin.Context) {
 		return
 	}
 
-	acc.Sanitize()
-
 	c.JSON(http.StatusOK, acc)
 }
