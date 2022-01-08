@@ -53,14 +53,7 @@
             }
           },
           "401": {
-            "description": "Unauthorized.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
+            "description": "Unauthorized."
           },
           "500": {
             "description": "Internal Server Error."
@@ -143,14 +136,7 @@
             "description": "Successful operation."
           },
           "401": {
-            "description": "Unauthorized.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
+            "description": "Unauthorized."
           },
           "403": {
             "description": "Access denied."
@@ -208,7 +194,7 @@
             }
           },
           "401": {
-            "description": "Invalid email or password.",
+            "description": "Incorrect email or password.",
             "content": {
               "application/json": {
                 "schema": {
@@ -246,14 +232,7 @@
             "description": "Successful operation."
           },
           "401": {
-            "description": "Unauthorized.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
+            "description": "Unauthorized."
           },
           "500": {
             "description": "Internal Server Error."
@@ -306,17 +285,10 @@
             }
           },
           "401": {
-            "description": "Unauthorized.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
+            "description": "Unauthorized."
           },
           "403": {
-            "description": "Invalid password."
+            "description": "Incorrect password."
           },
           "500": {
             "description": "Internal Server Error."
@@ -348,14 +320,7 @@
             }
           },
           "401": {
-            "description": "Unauthorized.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
+            "description": "Unauthorized."
           },
           "500": {
             "description": "Internal Server Error."
@@ -402,14 +367,7 @@
             }
           },
           "403": {
-            "description": "Access denied.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
+            "description": "Access denied."
           },
           "500": {
             "description": "Internal Server Error."
@@ -469,24 +427,10 @@
             }
           },
           "401": {
-            "description": "Unauthorized.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
+            "description": "Unauthorized."
           },
           "403": {
-            "description": "Access denied.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
+            "description": "Access denied."
           },
           "500": {
             "description": "Internal Server Error."
@@ -597,7 +541,7 @@
           "userAgent": {
             "type": "string"
           },
-          "requestIp": {
+          "ip": {
             "type": "string",
             "format": "ipv4"
           },

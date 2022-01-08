@@ -37,10 +37,6 @@ paths:
                 $ref: '#/components/schemas/Account'
         "401":
           description: Unauthorized.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
         "500":
           description: Internal Server Error.
       security:
@@ -94,10 +90,6 @@ paths:
           description: Successful operation.
         "401":
           description: Unauthorized.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
         "403":
           description: Access denied.
         "500":
@@ -133,7 +125,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ValidationErrorResponse'
         "401":
-          description: Invalid email or password.
+          description: Incorrect email or password.
           content:
             application/json:
               schema:
@@ -158,10 +150,6 @@ paths:
           description: Successful operation.
         "401":
           description: Unauthorized.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
         "500":
           description: Internal Server Error.
       security:
@@ -193,13 +181,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/ValidationErrorResponse'
         "403":
-          description: Invalid password.
+          description: Incorrect password.
         "401":
           description: Unauthorized.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
         "500":
           description: Internal Server Error.
       security:
@@ -219,10 +203,6 @@ paths:
                 $ref: '#/components/schemas/SessionArray'
         "401":
           description: Unauthorized.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
         "500":
           description: Internal Server Error.
       security:
@@ -253,10 +233,6 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
         "403":
           description: Access denied.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
         "500":
           description: Internal Server Error.
       security:
@@ -296,16 +272,8 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
         "401":
           description: Unauthorized.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
         "403":
           description: Access denied.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
         "500":
           description: Internal Server Error.
       security:
@@ -385,7 +353,7 @@ components:
           format: uuid
         userAgent:
           type: string
-        requestIp:
+        ip:
           type: string
           format: ipv4
         ttl:
