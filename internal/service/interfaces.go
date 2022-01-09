@@ -8,8 +8,8 @@ import (
 
 type (
 	Account interface {
-		// Create new account with email and password,
-		Create(ctx context.Context, email, password string) error
+		// Create new account with email and password, returns id of created account.
+		Create(ctx context.Context, email, password string) (string, error)
 
 		// GetByID account.
 		GetByID(ctx context.Context, aid string) (domain.Account, error)
@@ -22,8 +22,8 @@ type (
 	}
 
 	AccountRepo interface {
-		// Create account with given credentials.
-		Create(ctx context.Context, a domain.Account) error
+		// Create account with given credentials, returns id of created account.
+		Create(ctx context.Context, a domain.Account) (string, error)
 
 		// FindByID account in DB.
 		FindByID(ctx context.Context, aid string) (domain.Account, error)
@@ -39,11 +39,14 @@ type (
 		// EmailLogin creates new session using provided account email and password.
 		EmailLogin(ctx context.Context, email, password string, d domain.Device) (domain.SessionCookie, error)
 
+		// GitHubLogin handles OAuth2 login via GitHub.
+		GitHubLogin(ctx context.Context, code string) (domain.SessionCookie, error)
+
 		// Logout logs out session by id.
 		Logout(ctx context.Context, sid string) error
 
-		// GetAccessToken generates JWT token which must be used to complete protected operations.
-		NewAccessToken(ctx context.Context, aid, password string) (domain.Token, error)
+		// NewAccessToken generates JWT token which must be used to complete protected operations.
+		NewAccessToken(ctx context.Context, aid, password string) (string, error)
 
 		// ParseAccessToken parses and validates JWT access token, returns subject from payload.
 		ParseAccessToken(ctx context.Context, token string) (string, error)

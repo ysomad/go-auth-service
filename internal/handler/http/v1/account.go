@@ -56,7 +56,8 @@ func (h *accountHandler) create(c *gin.Context) {
 		return
 	}
 
-	if err := h.accountService.Create(c.Request.Context(), r.Email, r.Password); err != nil {
+	_, err := h.accountService.Create(c.Request.Context(), r.Email, r.Password)
+	if err != nil {
 		h.log.Error(fmt.Errorf("http - v1 - account - create: %w", err))
 
 		if errors.Is(err, apperrors.ErrAccountAlreadyExist) {

@@ -27,31 +27,33 @@ func NewAccountRepo(pg *postgres.Postgres) *accountRepo {
 	return &accountRepo{pg}
 }
 
-func (r *accountRepo) Create(ctx context.Context, acc domain.Account) error {
+func (r *accountRepo) Create(ctx context.Context, acc domain.Account) (string, error) {
 	sql, args, err := r.Builder.
 		Insert(_accTable).
 		Columns("email", "password").
 		Values(acc.Email, acc.PasswordHash).
+		Suffix("RETURNING id").
 		ToSql()
 	if err != nil {
-		return fmt.Errorf("r.Builder.Insert: %w", err)
+		return "", fmt.Errorf("r.Builder.Insert: %w", err)
 	}
 
-	_, err = r.Pool.Exec(ctx, sql, args...)
-	if err != nil {
+	var aid string
+
+	if err = r.Pool.QueryRow(ctx, sql, args...).Scan(&aid); err != nil {
 		var pgErr *pgconn.PgError
 
 		if errors.As(err, &pgErr) {
-			
-      if pgErr.Code == pgerrcode.UniqueViolation {
-				return fmt.Errorf("r.Pool.Exec: %w", apperrors.ErrAccountAlreadyExist)
+
+			if pgErr.Code == pgerrcode.UniqueViolation {
+				return "", fmt.Errorf("r.Pool.Exec: %w", apperrors.ErrAccountAlreadyExist)
 			}
 		}
 
-		return fmt.Errorf("r.Pool.Exec: %w", err)
+		return "", fmt.Errorf("r.Pool.Exec: %w", err)
 	}
 
-	return nil
+	return aid, nil
 }
 
 func (r *accountRepo) FindByID(ctx context.Context, aid string) (domain.Account, error) {

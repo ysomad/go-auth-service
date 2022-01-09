@@ -17,18 +17,19 @@ func NewAccountService(r AccountRepo) *accountService {
 	}
 }
 
-func (s *accountService) Create(ctx context.Context, email, password string) error {
+func (s *accountService) Create(ctx context.Context, email, password string) (string, error) {
 	acc := domain.Account{Email: email}
 
 	if err := acc.GeneratePasswordHash(password); err != nil {
-		return fmt.Errorf("accountService - Create - acc.GeneratePasswordHash: %w", err)
+		return "", fmt.Errorf("accountService - Create - acc.GeneratePasswordHash: %w", err)
 	}
 
-	if err := s.accountRepo.Create(ctx, acc); err != nil {
-		return fmt.Errorf("accountService - Create - s.accountRepo.Create: %w", err)
+	aid, err := s.accountRepo.Create(ctx, acc)
+	if err != nil {
+		return "", fmt.Errorf("accountService - Create - s.accountRepo.Create: %w", err)
 	}
 
-	return nil
+	return aid, nil
 }
 
 func (s *accountService) GetByID(ctx context.Context, aid string) (domain.Account, error) {
