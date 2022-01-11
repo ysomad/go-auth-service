@@ -39,9 +39,6 @@ type (
 		// EmailLogin creates new session using provided account email and password.
 		EmailLogin(ctx context.Context, email, password string, d domain.Device) (domain.SessionCookie, error)
 
-		// GitHubLogin handles OAuth2 login via GitHub.
-		GitHubLogin(ctx context.Context, code string, d domain.Device) (domain.SessionCookie, error)
-
 		// Logout logs out session by id.
 		Logout(ctx context.Context, sid string) error
 
@@ -50,6 +47,17 @@ type (
 
 		// ParseAccessToken parses and validates JWT access token, returns subject from payload.
 		ParseAccessToken(ctx context.Context, token string) (string, error)
+	}
+
+	OAuth interface {
+		// AuthorizeURI returns OAuth authorize URI for given provider.
+		GetAuthorizeURI(ctx context.Context, provider string) (string, error)
+
+		// GitHubLogin handles OAuth2 login via GitHub.
+		GitHubLogin(ctx context.Context, code string, d domain.Device) (domain.SessionCookie, error)
+
+		// GoogleLogin handles OAuth2 login via Google.
+		GoogleLogin(ctx context.Context, code string, d domain.Device) (domain.SessionCookie, error)
 	}
 
 	Session interface {
@@ -66,7 +74,7 @@ type (
 		Terminate(ctx context.Context, sid string) error
 
 		// TerminateAll account sessions excluding current one.
-		TerminateAll(ctx context.Context, aid, currSid string) error
+		TerminateAll(ctx context.Context, aid, sid string) error
 	}
 
 	SessionRepo interface {
@@ -83,6 +91,6 @@ type (
 		Delete(ctx context.Context, sid string) error
 
 		// DeleteAll account sessions by provided account id excluding current session.
-		DeleteAll(ctx context.Context, aid, currSid string) error
+		DeleteAll(ctx context.Context, aid, sid string) error
 	}
 )

@@ -8,12 +8,12 @@ import (
 )
 
 type accountService struct {
-	accountRepo AccountRepo
+	repo AccountRepo
 }
 
 func NewAccountService(r AccountRepo) *accountService {
 	return &accountService{
-		accountRepo: r,
+		repo: r,
 	}
 }
 
@@ -24,7 +24,7 @@ func (s *accountService) Create(ctx context.Context, email, password string) (st
 		return "", fmt.Errorf("accountService - Create - acc.GeneratePasswordHash: %w", err)
 	}
 
-	aid, err := s.accountRepo.Create(ctx, acc)
+	aid, err := s.repo.Create(ctx, acc)
 	if err != nil {
 		return "", fmt.Errorf("accountService - Create - s.accountRepo.Create: %w", err)
 	}
@@ -35,7 +35,7 @@ func (s *accountService) Create(ctx context.Context, email, password string) (st
 func (s *accountService) GetByID(ctx context.Context, aid string) (domain.Account, error) {
 	var acc domain.Account
 
-	acc, err := s.accountRepo.FindByID(ctx, aid)
+	acc, err := s.repo.FindByID(ctx, aid)
 	if err != nil {
 		return domain.Account{}, fmt.Errorf("accountService - GetByID - s.accountRepo.FindByID: %w", err)
 	}
@@ -46,7 +46,7 @@ func (s *accountService) GetByID(ctx context.Context, aid string) (domain.Accoun
 func (s *accountService) GetByEmail(ctx context.Context, email string) (domain.Account, error) {
 	var acc domain.Account
 
-	acc, err := s.accountRepo.FindByEmail(ctx, email)
+	acc, err := s.repo.FindByEmail(ctx, email)
 	if err != nil {
 		return domain.Account{}, fmt.Errorf("accountService - GetByEmail - s.accountRepo.FindByEmail: %w", err)
 	}
@@ -55,7 +55,7 @@ func (s *accountService) GetByEmail(ctx context.Context, email string) (domain.A
 }
 
 func (s *accountService) Archive(ctx context.Context, aid string) error {
-	if err := s.accountRepo.Archive(ctx, aid, true); err != nil {
+	if err := s.repo.Archive(ctx, aid, true); err != nil {
 		return fmt.Errorf("accountService - Archive - s.accountRepo.Archive: %w", err)
 	}
 

@@ -23,7 +23,7 @@ import (
 )
 
 // Run creates objects via constructors.
-func Run(cfg config.Config) {
+func Run(cfg *config.Config) {
 	l := logger.New(cfg.Log.Level)
 
 	// Postgres
@@ -54,14 +54,15 @@ func Run(cfg config.Config) {
 	sessionRepo := repository.NewSessionRepo(mdb)
 
 	accountService := service.NewAccountService(accountRepo)
-	sessionService := service.NewSessionService(accountRepo, sessionRepo, cfg.Session.TTL)
+	sessionService := service.NewSessionService(cfg, sessionRepo)
 
 	tokenManager, err := auth.NewJWTManager(cfg.AccessToken.SigningKey, cfg.AccessToken.TTL)
 	if err != nil {
 		l.Fatal(fmt.Errorf("app - Run - auth.NewTokenManager: %w", err))
 	}
 
-	authService := service.NewAuthService(cfg.Auth, accountService, sessionService, tokenManager)
+	authService := service.NewAuthService(cfg, tokenManager, accountService, sessionService)
+	oauthService := service.NewOAuthService(cfg, accountService, sessionService)
 
 	// TODO: refactor
 	// Validation translator
@@ -72,7 +73,7 @@ func Run(cfg config.Config) {
 
 	// HTTP Server
 	handler := gin.New()
-	v1.SetupHandlers(handler, l, v, cfg, accountService, sessionService, authService)
+	v1.SetupHandlers(handler, l, v, cfg, accountService, sessionService, authService, oauthService)
 	httpServer := httpserver.New(handler, httpserver.Port(cfg.HTTP.Port))
 
 	// Waiting signal

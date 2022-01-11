@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/ysomad/go-auth-service/config"
 	apperrors "github.com/ysomad/go-auth-service/pkg/errors"
 	"github.com/ysomad/go-auth-service/pkg/util"
 )
@@ -42,16 +43,21 @@ func NewSession(aid string, userAgent string, ip string, ttl time.Duration) (Ses
 // SessionCookie represents data transfer object which
 // contains data needed to create a cookie.
 type SessionCookie struct {
-	id  string
-	ttl int
+	ID       string
+	TTL      int
+	Domain   string
+	Secure   bool
+	HTTPOnly bool
+	Key      string
 }
 
-func NewSessionCookie(sid string, ttl int) SessionCookie {
+func NewSessionCookie(sid string, ttl int, cfg *config.Session) SessionCookie {
 	return SessionCookie{
-		id:  sid,
-		ttl: ttl,
+		ID:       sid,
+		TTL:      ttl,
+		Domain:   cfg.CookieDomain,
+		Secure:   cfg.CookieSecure,
+		HTTPOnly: cfg.CookieHTTPOnly,
+		Key:      cfg.CookieKey,
 	}
 }
-
-func (s SessionCookie) ID() string { return s.id }
-func (s SessionCookie) TTL() int   { return s.ttl }

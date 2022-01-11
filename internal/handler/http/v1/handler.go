@@ -21,10 +21,11 @@ func SetupHandlers(
 	handler *gin.Engine,
 	l logger.Interface,
 	v validation.Validator,
-	cfg config.Config,
+	cfg *config.Config,
 	acc service.Account,
 	sess service.Session,
 	auth service.Auth,
+	oauth service.OAuth,
 ) {
 	// Options
 	handler.Use(gin.Logger())
@@ -32,7 +33,7 @@ func SetupHandlers(
 
 	// CORS
 	corsCfg := cors.DefaultConfig()
-	corsCfg.AllowOrigins = []string{"http://localhost:3000"}
+	corsCfg.AllowOrigins = []string{"http://localhost:3000", "https://github.com"}
 	corsCfg.AllowCredentials = true
 
 	handler.Use(cors.New(corsCfg))
@@ -46,8 +47,8 @@ func SetupHandlers(
 	// Resource handlers
 	h := handler.Group(apiPath)
 	{
-		newAccountHandler(h, l, v, cfg.Session, acc, sess, auth)
+		newAccountHandler(h, l, v, &cfg.Session, acc, sess, auth)
 		newSessionHandler(h, l, v, sess, auth)
-		newAuthHandler(h, l, v, cfg, sess, auth)
+		newAuthHandler(h, l, v, sess, auth, oauth)
 	}
 }

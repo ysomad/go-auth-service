@@ -1,6 +1,17 @@
 package config
 
-import "time"
+import (
+	"time"
+
+	"golang.org/x/oauth2"
+	oauth2github "golang.org/x/oauth2/github"
+	oauth2google "golang.org/x/oauth2/google"
+)
+
+const (
+	gh     = "github"
+	google = "google"
+)
 
 type (
 	Config struct {
@@ -11,7 +22,7 @@ type (
 		MongoDB     `yaml:"mongodb"`
 		Cache       `yaml:"cache"`
 		Redis       `yaml:"redis"`
-		Auth        `yaml:"auth"`
+		OAuth       `yaml:"auth"`
 		Session     `yaml:"session"`
 		AccessToken `yaml:"access_token"`
 	}
@@ -50,10 +61,14 @@ type (
 		Password string `env-required:"true" env:"REDIS_PASSWORD"`
 	}
 
-	Auth struct {
+	OAuth struct {
 		GitHubClientID     string `yaml:"github_client_id" env-required:"true" env:"GH_CLIENT_ID"`
 		GitHubClientSecret string `env-required:"true" env:"GH_CLIENT_SECRET"`
 		GitHubScope        string `yaml:"github_scope" env-required:"true" env:"GH_SCOPE"`
+
+		GoogleClientID     string `yaml:"google_client_id" env-required:"true" env:"GOOGLE_CLIENT_ID"`
+		GoogleClientSecret string `env-required:"true" env:"GOOGLE_CLIENT_SECRET"`
+		GoogleScope        string `yaml:"google_scope" env-required:"true" env:"GOOGLE_SCOPE"`
 	}
 
 	Session struct {
@@ -61,7 +76,7 @@ type (
 		CookieKey      string        `env-required:"true" yaml:"cookie_key" env:"SESSION_COOKIE_KEY"`
 		CookieDomain   string        `yaml:"cookie_domain" env:"SESSION_COOKIE_DOMAIN"`
 		CookieSecure   bool          `yaml:"cookie_secure" env:"SESSION_COOKIE_SECURE"`
-		CookieHttpOnly bool          `yaml:"cookie_httponly" env:"SESSION_COOKIE_HTTPONLY"`
+		CookieHTTPOnly bool          `yaml:"cookie_httponly" env:"SESSION_COOKIE_HTTPONLY"`
 	}
 
 	AccessToken struct {
@@ -69,3 +84,33 @@ type (
 		SigningKey string        `env-required:"true" yaml:"signing_key" env:"ACCESS_TOKEN_SIGNING_KEY"`
 	}
 )
+
+func (oa OAuth) Endpoints() map[string]oauth2.Endpoint {
+	return map[string]oauth2.Endpoint{
+		gh:     oauth2github.Endpoint,
+		google: oauth2google.Endpoint,
+	}
+}
+
+func (oa OAuth) Scopes() map[string]string {
+	return map[string]string{
+		gh:     oa.GitHubScope,
+		google: oa.GoogleScope,
+	}
+}
+
+func (oa OAuth) ClientIDs() map[string]string {
+	return map[string]string{
+		gh:     oa.GitHubClientID,
+		google: oa.GoogleClientID,
+	}
+
+}
+
+func (oa OAuth) ClientSecrets() map[string]string {
+	return map[string]string{
+		gh:     oa.GitHubClientSecret,
+		google: oa.GoogleClientSecret,
+	}
+
+}

@@ -4,52 +4,45 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"net/url"
 
 	"github.com/gin-gonic/gin"
-	"golang.org/x/oauth2/github"
 
-	"github.com/ysomad/go-auth-service/config"
 	"github.com/ysomad/go-auth-service/internal/domain"
 	"github.com/ysomad/go-auth-service/internal/service"
 
 	apperrors "github.com/ysomad/go-auth-service/pkg/errors"
 	"github.com/ysomad/go-auth-service/pkg/logger"
-	"github.com/ysomad/go-auth-service/pkg/util"
 	"github.com/ysomad/go-auth-service/pkg/validation"
 )
 
 type authHandler struct {
 	log logger.Interface
 	validation.Validator
-	sessionCfg  config.Session
-	authCfg     config.Auth
-	authService service.Auth
+	authService  service.Auth
+	oauthService service.OAuth
 }
 
-func newAuthHandler(handler *gin.RouterGroup, l logger.Interface, v validation.Validator,
-	cfg config.Config, s service.Session, a service.Auth) {
+func newAuthHandler(handler *gin.RouterGroup, l logger.Interface, v validation.Validator, s service.Session,
+	a service.Auth, oa service.OAuth) {
 
-	h := &authHandler{l, v, cfg.Session, cfg.Auth, a}
+	h := &authHandler{l, v, a, oa}
 
 	g := handler.Group("/auth")
 	{
-		login := g.Group("/login")
+		oauth := g.Group("/oauth")
 		{
-			gh := login.Group("/github")
-			{
-				gh.GET("callback", h.githubCallback)
-				gh.GET("", h.githubLogin)
-			}
-
-			login.POST("", h.login)
+			oauth.GET("", h.getOAuthURI)
+			oauth.POST("github", h.githubLogin)
 		}
 
 		authenticated := g.Group("/", sessionMiddleware(l, s))
 		{
 			authenticated.POST("logout", h.logout)
 			authenticated.POST("token", h.token)
+
 		}
+
+		g.POST("", h.login)
 	}
 }
 
@@ -60,13 +53,13 @@ type loginRequest struct {
 
 func (h *authHandler) setSessionCookie(c *gin.Context, cookie domain.SessionCookie) {
 	c.SetCookie(
-		h.sessionCfg.CookieKey,
-		cookie.ID(),
-		cookie.TTL(),
+		cookie.Key,
+		cookie.ID,
+		cookie.TTL,
 		apiPath,
-		h.sessionCfg.CookieDomain,
-		h.sessionCfg.CookieSecure,
-		h.sessionCfg.CookieHttpOnly,
+		cookie.Domain,
+		cookie.Secure,
+		cookie.HTTPOnly,
 	)
 }
 
@@ -159,33 +152,29 @@ func (h *authHandler) token(c *gin.Context) {
 	c.JSON(http.StatusOK, tokenResponse{token})
 }
 
-func (h *authHandler) githubLogin(c *gin.Context) {
-	s, err := util.UniqueString(32)
-	if err != nil {
-		h.log.Error("http - v1 - auth - githubLogin - util.UniqueString: %w", err)
-		c.AbortWithStatus(http.StatusInternalServerError)
-		return
-	}
-
-	url, err := url.Parse(github.Endpoint.AuthURL)
-	if err != nil {
-		h.log.Error("http - v1 - auth - githubLogin - url.Parse: %w", err)
-		c.AbortWithStatus(http.StatusInternalServerError)
-		return
-	}
-
-	q := url.Query()
-	q.Set("client_id", h.authCfg.GitHubClientID)
-	q.Set("scope", h.authCfg.GitHubScope)
-	q.Set("state", s)
-	url.RawQuery = q.Encode()
-
-	h.log.Error(url.String())
-
-	c.Redirect(http.StatusTemporaryRedirect, url.String())
+type getOAuthURIResponse struct {
+	uri string `json:"uri"`
 }
 
-func (h *authHandler) githubCallback(c *gin.Context) {
+func (h *authHandler) getOAuthURI(c *gin.Context) {
+	provider, found := c.GetQuery("provider")
+	if !found || provider == "" {
+		abortWithError(c, http.StatusBadRequest, apperrors.ErrAuthProviderNotFound)
+		return
+	}
+
+	uri, err := h.oauthService.GetAuthorizeURI(c.Request.Context(), provider)
+	if err != nil {
+		h.log.Error(fmt.Errorf("http - v1 - auth - getOAuthURI: %w", err))
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	c.Redirect(http.StatusTemporaryRedirect, uri)
+	c.JSON(http.StatusOK, getOAuthURIResponse{uri})
+}
+
+func (h *authHandler) githubLogin(c *gin.Context) {
 	cbErr, found := c.GetQuery("error")
 	if found && cbErr != "" {
 		desc, _ := c.GetQuery("error_description")
@@ -207,7 +196,7 @@ func (h *authHandler) githubCallback(c *gin.Context) {
 		return
 	}
 
-	cookie, err := h.authService.GitHubLogin(
+	cookie, err := h.oauthService.GitHubLogin(
 		c.Request.Context(),
 		code,
 		domain.NewDevice(c.Request.Header.Get("User-Agent"), c.ClientIP()),

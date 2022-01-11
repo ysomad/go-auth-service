@@ -18,12 +18,12 @@ import (
 type accountHandler struct {
 	log logger.Interface
 	validation.Validator
-	sessionCfg     config.Session
+	sessionCfg     *config.Session
 	accountService service.Account
 	sessionService service.Session
 }
 
-func newAccountHandler(handler *gin.RouterGroup, l logger.Interface, v validation.Validator, cfg config.Session,
+func newAccountHandler(handler *gin.RouterGroup, l logger.Interface, v validation.Validator, cfg *config.Session,
 	acc service.Account, sess service.Session, auth service.Auth) {
 
 	h := &accountHandler{l, v, cfg, acc, sess}
@@ -44,6 +44,7 @@ func newAccountHandler(handler *gin.RouterGroup, l logger.Interface, v validatio
 
 type accountCreateRequest struct {
 	Email           string `json:"email" binding:"required,email,lte=255"`
+	Username        string `json:"username" binding:"required,alphanum,gte=4,lte=16"`
 	Password        string `json:"password" binding:"required,gte=8,lte=64"`
 	ConfirmPassword string `json:"confirmPassword" binding:"required,eqfield=Password"`
 }
@@ -110,6 +111,7 @@ func (h *accountHandler) archive(c *gin.Context) {
 		return
 	}
 
+	// TODO: refactor to remove session config dependency
 	c.SetCookie(
 		h.sessionCfg.CookieKey,
 		"",
@@ -117,7 +119,7 @@ func (h *accountHandler) archive(c *gin.Context) {
 		apiPath,
 		h.sessionCfg.CookieDomain,
 		h.sessionCfg.CookieSecure,
-		h.sessionCfg.CookieHttpOnly,
+		h.sessionCfg.CookieHTTPOnly,
 	)
 
 	c.Status(http.StatusNoContent)

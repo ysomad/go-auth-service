@@ -30,8 +30,8 @@ func NewAccountRepo(pg *postgres.Postgres) *accountRepo {
 func (r *accountRepo) Create(ctx context.Context, acc domain.Account) (string, error) {
 	sql, args, err := r.Builder.
 		Insert(_accTable).
-		Columns("email", "password").
-		Values(acc.Email, acc.PasswordHash).
+		Columns("username, email, password").
+		Values(acc.Username, acc.Email, acc.PasswordHash).
 		Suffix("RETURNING id").
 		ToSql()
 	if err != nil {
@@ -58,7 +58,7 @@ func (r *accountRepo) Create(ctx context.Context, acc domain.Account) (string, e
 
 func (r *accountRepo) FindByID(ctx context.Context, aid string) (domain.Account, error) {
 	sql, args, err := r.Builder.
-		Select("email, password, created_at, updated_at").
+		Select("username, email, password, created_at, updated_at").
 		From(_accTable).
 		Where(sq.Eq{"id": aid, "is_archive": false}).
 		ToSql()
@@ -69,6 +69,7 @@ func (r *accountRepo) FindByID(ctx context.Context, aid string) (domain.Account,
 	acc := domain.Account{ID: aid}
 
 	if err = r.Pool.QueryRow(ctx, sql, args...).Scan(
+		&acc.Username,
 		&acc.Email,
 		&acc.PasswordHash,
 		&acc.CreatedAt,
@@ -86,7 +87,7 @@ func (r *accountRepo) FindByID(ctx context.Context, aid string) (domain.Account,
 
 func (r *accountRepo) FindByEmail(ctx context.Context, email string) (domain.Account, error) {
 	sql, args, err := r.Builder.
-		Select("id, password, created_at, updated_at").
+		Select("id, username, password, created_at, updated_at").
 		From(_accTable).
 		Where(sq.Eq{"email": email, "is_archive": false}).
 		ToSql()
@@ -98,6 +99,7 @@ func (r *accountRepo) FindByEmail(ctx context.Context, email string) (domain.Acc
 
 	if err = r.Pool.QueryRow(ctx, sql, args...).Scan(
 		&acc.ID,
+		&acc.Username,
 		&acc.PasswordHash,
 		&acc.CreatedAt,
 		&acc.UpdatedAt,
