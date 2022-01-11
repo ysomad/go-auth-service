@@ -11,6 +11,7 @@ type (
 		MongoDB     `yaml:"mongodb"`
 		Cache       `yaml:"cache"`
 		Redis       `yaml:"redis"`
+		Auth        `yaml:"auth"`
 		Session     `yaml:"session"`
 		AccessToken `yaml:"access_token"`
 	}
@@ -47,6 +48,12 @@ type (
 	Redis struct {
 		Addr     string `env-required:"true" env:"REDIS_ADDR"`
 		Password string `env-required:"true" env:"REDIS_PASSWORD"`
+	}
+
+	Auth struct {
+		GitHubClientID     string `yaml:"github_client_id" env-required:"true" env:"GH_CLIENT_ID"`
+		GitHubClientSecret string `env-required:"true" env:"GH_CLIENT_SECRET"`
+		GitHubScope        string `yaml:"github_scope" env-required:"true" env:"GH_SCOPE"`
 	}
 
 	Session struct {

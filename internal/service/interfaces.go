@@ -40,7 +40,7 @@ type (
 		EmailLogin(ctx context.Context, email, password string, d domain.Device) (domain.SessionCookie, error)
 
 		// GitHubLogin handles OAuth2 login via GitHub.
-		GitHubLogin(ctx context.Context, code string) (domain.SessionCookie, error)
+		GitHubLogin(ctx context.Context, code string, d domain.Device) (domain.SessionCookie, error)
 
 		// Logout logs out session by id.
 		Logout(ctx context.Context, sid string) error

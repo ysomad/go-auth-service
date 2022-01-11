@@ -2,6 +2,7 @@ package validation
 
 import (
 	"errors"
+	"strings"
 
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/locales/en"
@@ -9,6 +10,8 @@ import (
 	"github.com/go-playground/validator/v10"
 	enTranslations "github.com/go-playground/validator/v10/translations/en"
 )
+
+// TODO: refactor!!!
 
 type Validator interface {
 	ValidateVar(val interface{}, tag string) error
@@ -46,7 +49,15 @@ func (v *ginValidator) register() error {
 func (v *ginValidator) TranslateError(err error) map[string]string {
 	_ = v.register()
 
-	return err.(validator.ValidationErrors).Translate(v.trans)
+	errs := make(map[string]string)
+
+	for _, err := range err.(validator.ValidationErrors) {
+		field := strings.ToLower(err.Field())
+		errs[field] = err.Translate(v.trans) + "."
+	}
+
+	return errs
+	// return err.(validator.ValidationErrors).Translate(v.trans)
 }
 
 func (v *ginValidator) ValidateVar(val interface{}, tag string) error {

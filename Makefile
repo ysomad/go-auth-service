@@ -1,4 +1,4 @@
-include .env.example
+include .env
 export
 
 compose-up:

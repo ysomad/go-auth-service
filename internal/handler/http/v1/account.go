@@ -44,7 +44,7 @@ func newAccountHandler(handler *gin.RouterGroup, l logger.Interface, v validatio
 
 type accountCreateRequest struct {
 	Email           string `json:"email" binding:"required,email,lte=255"`
-	Password        string `json:"password" binding:"required,gte=8,lte=128"`
+	Password        string `json:"password" binding:"required,gte=8,lte=64"`
 	ConfirmPassword string `json:"confirmPassword" binding:"required,eqfield=Password"`
 }
 
@@ -52,7 +52,7 @@ func (h *accountHandler) create(c *gin.Context) {
 	var r accountCreateRequest
 
 	if err := c.ShouldBindJSON(&r); err != nil {
-		abortWithValidationError(c, http.StatusBadRequest, h.TranslateError(err))
+		c.AbortWithStatusJSON(http.StatusBadRequest, h.TranslateError(err))
 		return
 	}
 

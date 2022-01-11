@@ -12,6 +12,7 @@ import (
 type Session struct {
 	ID        string    `json:"id" bson:"_id"`
 	AccountID string    `json:"accountID" bson:"accountID"`
+	Provider  string    `json:"provider" bson:"provider"` // TODO: store provider in session
 	UserAgent string    `json:"userAgent" bson:"userAgent"`
 	IP        string    `json:"ip" bson:"ip"`
 	TTL       int       `json:"ttl" bson:"ttl"`
@@ -33,6 +34,7 @@ func NewSession(aid string, userAgent string, ip string, ttl time.Duration) (Ses
 		UserAgent: userAgent,
 		IP:        ip,
 		TTL:       int(ttl.Seconds()),
+		ExpiresAt: now.Add(ttl).Unix(),
 		CreatedAt: now,
 	}, nil
 }

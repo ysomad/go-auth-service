@@ -5,7 +5,10 @@ import (
 	mathRand "math/rand"
 )
 
-const chars = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+const (
+	chars   = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	special = " !\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~"
+)
 
 // UniqueString generates random string using
 // Cryptographically Secure Pseudorandom number.
@@ -28,6 +31,17 @@ func RandomString(length int) string {
 
 	for i := range bytes {
 		bytes[i] = chars[mathRand.Intn(len(chars))]
+	}
+
+	return string(bytes)
+}
+
+func RandomSpecialString(length int) string {
+	bytes := make([]byte, length)
+
+	c := chars + special
+	for i := range bytes {
+		bytes[i] = c[mathRand.Intn(len(chars))]
 	}
 
 	return string(bytes)

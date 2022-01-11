@@ -2,20 +2,33 @@ package service
 
 import (
 	"context"
+	"encoding/json"
+	"errors"
 	"fmt"
+	"io/ioutil"
+	"net/http"
 
+	"github.com/google/go-github/github"
+	"golang.org/x/oauth2"
+	oauth2github "golang.org/x/oauth2/github"
+
+	"github.com/ysomad/go-auth-service/config"
 	"github.com/ysomad/go-auth-service/internal/domain"
 	"github.com/ysomad/go-auth-service/pkg/auth"
+	apperrors "github.com/ysomad/go-auth-service/pkg/errors"
+	"github.com/ysomad/go-auth-service/pkg/util"
 )
 
 type authService struct {
+	cfg            config.Auth
 	accountService Account
 	sessionService Session
 	jwtManager     auth.JWTManager
 }
 
-func NewAuthService(a Account, s Session, m auth.JWTManager) *authService {
+func NewAuthService(cfg config.Auth, a Account, s Session, m auth.JWTManager) *authService {
 	return &authService{
+		cfg:            cfg,
 		accountService: a,
 		sessionService: s,
 		jwtManager:     m,
@@ -48,24 +61,22 @@ func (s *authService) Logout(ctx context.Context, sid string) error {
 	return nil
 }
 
-func (s *authService) NewAccessToken(ctx context.Context, aid, password string) (domain.Token, error) {
+func (s *authService) NewAccessToken(ctx context.Context, aid, password string) (string, error) {
 	acc, err := s.accountService.GetByID(ctx, aid)
 	if err != nil {
-		return domain.Token{}, fmt.Errorf("authService - NewAccessToken - s.accountService.GetByID: %w", err)
+		return "", fmt.Errorf("authService - NewAccessToken - s.accountService.GetByID: %w", err)
 	}
 
 	if err := acc.CompareHashAndPassword(password); err != nil {
-		return domain.Token{}, fmt.Errorf("authService - NewAccessToken - acc.CompareHashAndPassword: %w", err)
+		return "", fmt.Errorf("authService - NewAccessToken - acc.CompareHashAndPassword: %w", err)
 	}
 
 	token, err := s.jwtManager.New(aid)
 	if err != nil {
-		return domain.Token{}, fmt.Errorf("authService - NewAccessToken - s.tokenManager.NewJWT: %w", err)
+		return "", fmt.Errorf("authService - NewAccessToken - s.tokenManager.NewJWT: %w", err)
 	}
 
-	return domain.Token{
-		AccessToken: token,
-	}, nil
+	return token, nil
 }
 
 func (s *authService) ParseAccessToken(ctx context.Context, token string) (string, error) {
@@ -75,4 +86,76 @@ func (s *authService) ParseAccessToken(ctx context.Context, token string) (strin
 	}
 
 	return aid, nil
+}
+
+func (s *authService) GitHubLogin(ctx context.Context, code string, d domain.Device) (domain.SessionCookie, error) {
+	// Request access token from github using code
+	req, err := http.NewRequest("POST", oauth2github.Endpoint.TokenURL, nil)
+	if err != nil {
+		return domain.SessionCookie{}, fmt.Errorf("authService - GitHubLogin - http.NewRequest: %w", err)
+	}
+
+	req.Header.Add("Accept", "application/json")
+	q := req.URL.Query()
+	q.Set("client_id", s.cfg.GitHubClientID)
+	q.Set("client_secret", s.cfg.GitHubClientSecret)
+	q.Set("code", code)
+	req.URL.RawQuery = q.Encode()
+
+	c := new(http.Client)
+
+	resp, err := c.Do(req)
+	if err != nil {
+		return domain.SessionCookie{}, fmt.Errorf("authService - GitHubLogin - c.Do: %w", err)
+	}
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return domain.SessionCookie{}, fmt.Errorf("authService - GitHubLogin - ioutil.ReadAll: %w", err)
+	}
+
+	var token oauth2.Token
+
+	if err := json.Unmarshal(body, &token); err != nil {
+		return domain.SessionCookie{}, fmt.Errorf("authService - GitHubLogin - json.Unmarshal: %w", err)
+	}
+
+	ts := oauth2.StaticTokenSource(&token)
+	tc := oauth2.NewClient(ctx, ts)
+
+	gh := github.NewClient(tc)
+
+	ghu, ghr, err := gh.Users.Get(ctx, "")
+	if err != nil {
+		return domain.SessionCookie{}, fmt.Errorf("authService - GitHubLogin - gh.Users.Get: %w", err)
+	}
+
+	if ghr.StatusCode != http.StatusOK {
+		return domain.SessionCookie{}, fmt.Errorf("authService - GitHubLogin - gh.Users.Get: %w", apperrors.ErrAuthGitHubUserNotReceived)
+	}
+
+	// refactor ???
+	var aid string
+
+	acc, err := s.accountService.GetByEmail(ctx, *ghu.Email)
+	if err == nil {
+		aid = acc.ID
+	} else {
+		if !errors.Is(err, apperrors.ErrAccountNotFound) {
+			return domain.SessionCookie{}, fmt.Errorf("authService - GitHubLogin - s.accountService.GetByEmail: %w", err)
+		}
+
+		aid, err = s.accountService.Create(ctx, *ghu.Email, util.RandomSpecialString(16))
+		if err != nil {
+			return domain.SessionCookie{}, fmt.Errorf("authService - GitHubLogin - s.accountService.Create: %w", err)
+		}
+	}
+
+	sess, err := s.sessionService.Create(ctx, aid, d)
+	if err != nil {
+		return domain.SessionCookie{}, fmt.Errorf("authService - GitHubLogin - s.sessionService.Create: %w", err)
+	}
+
+	return domain.NewSessionCookie(sess.ID, sess.TTL), nil
 }

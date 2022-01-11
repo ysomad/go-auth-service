@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 
 	"github.com/ysomad/go-auth-service/config"
@@ -29,6 +30,13 @@ func SetupHandlers(
 	handler.Use(gin.Logger())
 	handler.Use(gin.Recovery())
 
+	// CORS
+	corsCfg := cors.DefaultConfig()
+	corsCfg.AllowOrigins = []string{"http://localhost:3000"}
+	corsCfg.AllowCredentials = true
+
+	handler.Use(cors.New(corsCfg))
+
 	// K8s probe
 	handler.GET("/healthz", func(c *gin.Context) { c.Status(http.StatusOK) })
 
@@ -40,6 +48,6 @@ func SetupHandlers(
 	{
 		newAccountHandler(h, l, v, cfg.Session, acc, sess, auth)
 		newSessionHandler(h, l, v, sess, auth)
-		newAuthHandler(h, l, v, cfg.Session, sess, auth)
+		newAuthHandler(h, l, v, cfg, sess, auth)
 	}
 }

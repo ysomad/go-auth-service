@@ -61,7 +61,7 @@ func Run(cfg config.Config) {
 		l.Fatal(fmt.Errorf("app - Run - auth.NewTokenManager: %w", err))
 	}
 
-	authService := service.NewAuthService(accountService, sessionService, tokenManager)
+	authService := service.NewAuthService(cfg.Auth, accountService, sessionService, tokenManager)
 
 	// TODO: refactor
 	// Validation translator
