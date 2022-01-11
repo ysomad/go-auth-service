@@ -153,7 +153,7 @@ func (h *authHandler) token(c *gin.Context) {
 }
 
 type getOAuthURIResponse struct {
-	uri string `json:"uri"`
+	URI string `json:"uri"`
 }
 
 func (h *authHandler) getOAuthURI(c *gin.Context) {
