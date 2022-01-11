@@ -43,10 +43,9 @@ func newAccountHandler(handler *gin.RouterGroup, l logger.Interface, v validatio
 }
 
 type accountCreateRequest struct {
-	Email           string `json:"email" binding:"required,email,lte=255"`
-	Username        string `json:"username" binding:"required,alphanum,gte=4,lte=16"`
-	Password        string `json:"password" binding:"required,gte=8,lte=64"`
-	ConfirmPassword string `json:"confirmPassword" binding:"required,eqfield=Password"`
+	Email    string `json:"email" binding:"required,email,lte=255"`
+	Username string `json:"username" binding:"required,alphanum,gte=4,lte=16"`
+	Password string `json:"password" binding:"required,gte=8,lte=64"`
 }
 
 func (h *accountHandler) create(c *gin.Context) {
