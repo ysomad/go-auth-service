@@ -8,11 +8,6 @@ import (
 	oauth2google "golang.org/x/oauth2/google"
 )
 
-const (
-	gh     = "github"
-	google = "google"
-)
-
 type (
 	Config struct {
 		App         `yaml:"app"`
@@ -22,7 +17,7 @@ type (
 		MongoDB     `yaml:"mongodb"`
 		Cache       `yaml:"cache"`
 		Redis       `yaml:"redis"`
-		OAuth       `yaml:"oauth"`
+		SocialAuth  `yaml:"social_auth"`
 		Session     `yaml:"session"`
 		AccessToken `yaml:"access_token"`
 	}
@@ -61,7 +56,7 @@ type (
 		Password string `env-required:"true" env:"REDIS_PASSWORD"`
 	}
 
-	OAuth struct {
+	SocialAuth struct {
 		GitHubClientID     string `yaml:"github_client_id" env-required:"true" env:"GH_CLIENT_ID"`
 		GitHubClientSecret string `env-required:"true" env:"GH_CLIENT_SECRET"`
 		GitHubScope        string `yaml:"github_scope" env-required:"true" env:"GH_SCOPE"`
@@ -85,32 +80,32 @@ type (
 	}
 )
 
-func (oa *OAuth) Endpoints() map[string]oauth2.Endpoint {
+func (sa *SocialAuth) Endpoints() map[string]oauth2.Endpoint {
 	return map[string]oauth2.Endpoint{
-		gh:     oauth2github.Endpoint,
-		google: oauth2google.Endpoint,
+		"github": oauth2github.Endpoint,
+		"google": oauth2google.Endpoint,
 	}
 }
 
-func (oa *OAuth) Scopes() map[string]string {
+func (sa *SocialAuth) Scopes() map[string]string {
 	return map[string]string{
-		gh:     oa.GitHubScope,
-		google: oa.GoogleScope,
+		"github": sa.GitHubScope,
+		"google": sa.GoogleScope,
 	}
 }
 
-func (oa *OAuth) ClientIDs() map[string]string {
+func (sa *SocialAuth) ClientIDs() map[string]string {
 	return map[string]string{
-		gh:     oa.GitHubClientID,
-		google: oa.GoogleClientID,
+		"github": sa.GitHubClientID,
+		"google": sa.GoogleClientID,
 	}
 
 }
 
-func (oa *OAuth) ClientSecrets() map[string]string {
+func (sa *SocialAuth) ClientSecrets() map[string]string {
 	return map[string]string{
-		gh:     oa.GitHubClientSecret,
-		google: oa.GoogleClientSecret,
+		"github": sa.GitHubClientSecret,
+		"google": sa.GoogleClientSecret,
 	}
 
 }

@@ -17,14 +17,12 @@ func NewAccountService(r AccountRepo) *accountService {
 	}
 }
 
-func (s *accountService) Create(ctx context.Context, email, password string) (string, error) {
-	acc := domain.Account{Email: email}
-
-	if err := acc.GeneratePasswordHash(password); err != nil {
+func (s *accountService) Create(ctx context.Context, a domain.Account) (string, error) {
+	if err := a.GeneratePasswordHash(); err != nil {
 		return "", fmt.Errorf("accountService - Create - acc.GeneratePasswordHash: %w", err)
 	}
 
-	aid, err := s.repo.Create(ctx, acc)
+	aid, err := s.repo.Create(ctx, a)
 	if err != nil {
 		return "", fmt.Errorf("accountService - Create - s.accountRepo.Create: %w", err)
 	}
@@ -54,7 +52,7 @@ func (s *accountService) GetByEmail(ctx context.Context, email string) (domain.A
 	return acc, nil
 }
 
-func (s *accountService) Archive(ctx context.Context, aid string) error {
+func (s *accountService) Delete(ctx context.Context, aid string) error {
 	if err := s.repo.Archive(ctx, aid, true); err != nil {
 		return fmt.Errorf("accountService - Archive - s.accountRepo.Archive: %w", err)
 	}

@@ -20,8 +20,8 @@ func NewSessionService(cfg *config.Config, s SessionRepo) *sessionService {
 	}
 }
 
-func (s *sessionService) Create(ctx context.Context, aid string, d domain.Device) (domain.Session, error) {
-	sess, err := domain.NewSession(aid, d.UserAgent, d.IP, s.cfg.Session.TTL)
+func (s *sessionService) Create(ctx context.Context, aid, provider string, d domain.Device) (domain.Session, error) {
+	sess, err := domain.NewSession(aid, provider, d.UserAgent, d.IP, s.cfg.Session.TTL)
 	if err != nil {
 		return domain.Session{}, fmt.Errorf("sessionService - Create - domain.NewSession: %w", err)
 	}

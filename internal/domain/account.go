@@ -7,9 +7,8 @@ import (
 	"golang.org/x/crypto/bcrypt"
 
 	apperrors "github.com/ysomad/go-auth-service/pkg/errors"
+	"github.com/ysomad/go-auth-service/pkg/util"
 )
-
-const AccountCacheKey = "acc"
 
 // Account represents user data model
 type Account struct {
@@ -21,10 +20,11 @@ type Account struct {
 	CreatedAt    time.Time `json:"createdAt"`
 	UpdatedAt    time.Time `json:"updatedAt"`
 	IsArchive    bool      `json:"isArchive"`
+	IsVerified   bool      `json:"isVerified"`
 }
 
-func (a *Account) GeneratePasswordHash(password string) error {
-	b, err := bcrypt.GenerateFromPassword([]byte(password), 11)
+func (a *Account) GeneratePasswordHash() error {
+	b, err := bcrypt.GenerateFromPassword([]byte(a.Password), 11)
 	if err != nil {
 		return fmt.Errorf("bcrypt.GenerateFromPassword: %w", apperrors.ErrAccountPasswordNotGenerated)
 	}
@@ -34,10 +34,14 @@ func (a *Account) GeneratePasswordHash(password string) error {
 	return nil
 }
 
-func (a *Account) CompareHashAndPassword(password string) error {
-	if err := bcrypt.CompareHashAndPassword([]byte(a.PasswordHash), []byte(password)); err != nil {
+func (a *Account) CompareHashAndPassword() error {
+	if err := bcrypt.CompareHashAndPassword([]byte(a.PasswordHash), []byte(a.Password)); err != nil {
 		return fmt.Errorf("bcrypt.CompareHashAndPassword: %w", apperrors.ErrAccountIncorrectPassword)
 	}
 
 	return nil
+}
+
+func (a *Account) RandomPassword() {
+	a.Password = util.RandomSpecialString(16)
 }

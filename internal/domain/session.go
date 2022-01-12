@@ -9,6 +9,14 @@ import (
 	"github.com/ysomad/go-auth-service/pkg/util"
 )
 
+// Provider constants to track how user is logged in
+const (
+	ProviderEmail    = "email"
+	ProviderUsername = "username"
+	ProviderGitHub   = "github"
+	ProviderGoogle   = "google"
+)
+
 // Session represents refresh token session for JWT authentication
 type Session struct {
 	ID        string    `json:"id" bson:"_id"`
@@ -21,7 +29,7 @@ type Session struct {
 	CreatedAt time.Time `json:"createdAt" bson:"createdAt"`
 }
 
-func NewSession(aid string, userAgent string, ip string, ttl time.Duration) (Session, error) {
+func NewSession(aid, provider, userAgent, ip string, ttl time.Duration) (Session, error) {
 	id, err := util.UniqueString(32)
 	if err != nil {
 		return Session{}, fmt.Errorf("utils.UniqueString: %w", apperrors.ErrSessionNotCreated)
@@ -32,6 +40,7 @@ func NewSession(aid string, userAgent string, ip string, ttl time.Duration) (Ses
 	return Session{
 		ID:        id,
 		AccountID: aid,
+		Provider:  provider,
 		UserAgent: userAgent,
 		IP:        ip,
 		TTL:       int(ttl.Seconds()),

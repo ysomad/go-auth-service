@@ -25,7 +25,7 @@ func SetupHandlers(
 	acc service.Account,
 	sess service.Session,
 	auth service.Auth,
-	oauth service.OAuth,
+	social service.SocialAuth,
 ) {
 	// Options
 	handler.Use(gin.Logger())
@@ -49,6 +49,6 @@ func SetupHandlers(
 	{
 		newAccountHandler(h, l, v, &cfg.Session, acc, sess, auth)
 		newSessionHandler(h, l, v, sess, auth)
-		newAuthHandler(h, l, v, sess, auth, oauth)
+		newAuthHandler(h, l, v, sess, auth, social)
 	}
 }

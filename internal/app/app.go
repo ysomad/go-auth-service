@@ -62,7 +62,7 @@ func Run(cfg *config.Config) {
 	}
 
 	authService := service.NewAuthService(cfg, tokenManager, accountService, sessionService)
-	oauthService := service.NewOAuthService(cfg, accountService, sessionService)
+	socialAuthService := service.NewSocialAuthService(cfg, accountService, sessionService)
 
 	// TODO: refactor
 	// Validation translator
@@ -73,7 +73,7 @@ func Run(cfg *config.Config) {
 
 	// HTTP Server
 	handler := gin.New()
-	v1.SetupHandlers(handler, l, v, cfg, accountService, sessionService, authService, oauthService)
+	v1.SetupHandlers(handler, l, v, cfg, accountService, sessionService, authService, socialAuthService)
 	httpServer := httpserver.New(handler, httpserver.Port(cfg.HTTP.Port))
 
 	// Waiting signal

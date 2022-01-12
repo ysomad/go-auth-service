@@ -6,9 +6,9 @@ type Device struct {
 	IP        string
 }
 
-func NewDevice(userAgent string, ip string) Device {
+func NewDevice(ua string, ip string) Device {
 	return Device{
-		UserAgent: userAgent,
+		UserAgent: ua,
 		IP:        ip,
 	}
 }

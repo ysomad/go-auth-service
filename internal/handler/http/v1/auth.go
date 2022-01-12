@@ -18,17 +18,19 @@ import (
 type authHandler struct {
 	log logger.Interface
 	validation.Validator
-	authService  service.Auth
-	oauthService service.OAuth
+	authService       service.Auth
+	socialAuthService service.SocialAuth
 }
 
 func newAuthHandler(handler *gin.RouterGroup, l logger.Interface, v validation.Validator, s service.Session,
-	a service.Auth, oa service.OAuth) {
+	a service.Auth, sa service.SocialAuth) {
 
-	h := &authHandler{l, v, a, oa}
+	h := &authHandler{l, v, a, sa}
 
 	g := handler.Group("/auth")
 	{
+		g.POST("login", h.login)
+
 		social := g.Group("/social")
 		{
 			social.GET("", h.getOAuthURI)
@@ -42,7 +44,6 @@ func newAuthHandler(handler *gin.RouterGroup, l logger.Interface, v validation.V
 
 		}
 
-		g.POST("", h.login)
 	}
 }
 
@@ -163,7 +164,7 @@ func (h *authHandler) getOAuthURI(c *gin.Context) {
 		return
 	}
 
-	uri, err := h.oauthService.GetAuthorizeURI(c.Request.Context(), provider)
+	uri, err := h.socialAuthService.GetAuthorizeURI(c.Request.Context(), provider)
 	if err != nil {
 		h.log.Error(fmt.Errorf("http - v1 - auth - getOAuthURI: %w", err))
 		c.AbortWithStatus(http.StatusInternalServerError)
@@ -195,7 +196,7 @@ func (h *authHandler) githubLogin(c *gin.Context) {
 		return
 	}
 
-	cookie, err := h.oauthService.GitHubLogin(
+	cookie, err := h.socialAuthService.GitHubLogin(
 		c.Request.Context(),
 		code,
 		domain.NewDevice(c.Request.Header.Get("User-Agent"), c.ClientIP()),

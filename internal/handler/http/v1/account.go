@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/ysomad/go-auth-service/config"
+	"github.com/ysomad/go-auth-service/internal/domain"
 	"github.com/ysomad/go-auth-service/internal/service"
 
 	apperrors "github.com/ysomad/go-auth-service/pkg/errors"
@@ -56,7 +57,7 @@ func (h *accountHandler) create(c *gin.Context) {
 		return
 	}
 
-	_, err := h.accountService.Create(c.Request.Context(), r.Email, r.Password)
+	_, err := h.accountService.Create(c.Request.Context(), domain.Account{Email: r.Email, Password: r.Password})
 	if err != nil {
 		h.log.Error(fmt.Errorf("http - v1 - account - create: %w", err))
 
@@ -85,7 +86,7 @@ func (h *accountHandler) archive(c *gin.Context) {
 		return
 	}
 
-	if err := h.accountService.Archive(c.Request.Context(), aid); err != nil {
+	if err := h.accountService.Delete(c.Request.Context(), aid); err != nil {
 		h.log.Error(fmt.Errorf("http - v1 - auth - archive: %w", err))
 
 		if errors.Is(err, apperrors.ErrAccountNotFound) {

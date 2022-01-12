@@ -31,11 +31,13 @@ func (s *authService) EmailLogin(ctx context.Context, email, password string, d 
 		return domain.SessionCookie{}, fmt.Errorf("authService - EmailLogin - s.accountService.GetByEmail: %w", err)
 	}
 
-	if err = acc.CompareHashAndPassword(password); err != nil {
+	acc.Password = password
+
+	if err = acc.CompareHashAndPassword(); err != nil {
 		return domain.SessionCookie{}, fmt.Errorf("authService - EmailLogin - acc.CompareHashAndPassword: %w", err)
 	}
 
-	sess, err := s.session.Create(ctx, acc.ID, d)
+	sess, err := s.session.Create(ctx, acc.ID, domain.ProviderEmail, d)
 	if err != nil {
 		return domain.SessionCookie{}, fmt.Errorf("authService - EmailLogin - s.sessionService.Create: %w", err)
 	}
@@ -57,7 +59,9 @@ func (s *authService) NewAccessToken(ctx context.Context, aid, password string) 
 		return "", fmt.Errorf("authService - NewAccessToken - s.accountService.GetByID: %w", err)
 	}
 
-	if err := acc.CompareHashAndPassword(password); err != nil {
+	acc.Password = password
+
+	if err := acc.CompareHashAndPassword(); err != nil {
 		return "", fmt.Errorf("authService - NewAccessToken - acc.CompareHashAndPassword: %w", err)
 	}
 

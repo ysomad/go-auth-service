@@ -5,5 +5,6 @@ create table if not exists accounts(
     password varchar(128) not null,
     created_at timestamp with time zone default current_timestamp not null,
     updated_at timestamp with time zone default current_timestamp not null,
-    is_archive boolean default false not null
+    is_archive boolean default false not null,
+    is_verified boolean default false not null
 );

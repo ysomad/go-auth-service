@@ -8,8 +8,8 @@ import (
 
 type (
 	Account interface {
-		// Create new account with email and password, returns id of created account.
-		Create(ctx context.Context, email, password string) (string, error)
+		// Create new account, username, email and password should be provided, returns account id.
+		Create(ctx context.Context, a domain.Account) (string, error)
 
 		// GetByID account.
 		GetByID(ctx context.Context, aid string) (domain.Account, error)
@@ -17,8 +17,8 @@ type (
 		// GetByEmail account.
 		GetByEmail(ctx context.Context, email string) (domain.Account, error)
 
-		// Archive sets account IsArchive state to true.
-		Archive(ctx context.Context, aid string) error
+		// Delete sets account IsArchive state to true.
+		Delete(ctx context.Context, aid string) error
 	}
 
 	AccountRepo interface {
@@ -49,8 +49,8 @@ type (
 		ParseAccessToken(ctx context.Context, token string) (string, error)
 	}
 
-	OAuth interface {
-		// AuthorizeURI returns OAuth authorize URI for given provider.
+	SocialAuth interface {
+		// GeteAuthorizeURI returns OAuth authorize URI for given provider.
 		GetAuthorizeURI(ctx context.Context, provider string) (string, error)
 
 		// GitHubLogin handles OAuth2 login via GitHub.
@@ -61,8 +61,8 @@ type (
 	}
 
 	Session interface {
-		// Create new session for account with id and device.
-		Create(ctx context.Context, aid string, d domain.Device) (domain.Session, error)
+		// Create new session for account with id and device of given provider.
+		Create(ctx context.Context, aid, provider string, d domain.Device) (domain.Session, error)
 
 		// Get session by id.
 		Get(ctx context.Context, sid string) (domain.Session, error)
