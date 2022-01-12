@@ -203,15 +203,134 @@
               }
             }
           },
-          "404": {
-            "description": "Account not found.",
+          "500": {
+            "description": "Internal Server Error."
+          }
+        }
+      }
+    },
+    "/auth/social": {
+      "get": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Get social authorize uri",
+        "description": "Receive OAuth2 authorize uri of given provider with `state` and `client_id` query parameters",
+        "operationId": "authSocialGetURI",
+        "parameters": [
+          {
+            "name": "provider",
+            "in": "query",
+            "description": "OAuth2 data provider",
+            "required": true,
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "github",
+                "google"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/OAuthUriResponse"
                 }
               }
             }
+          },
+          "500": {
+            "description": "Internal Server Error."
+          }
+        }
+      }
+    },
+    "/auth/social/github": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Login via GitHub",
+        "operationId": "authSocialGitHubCallback",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "query",
+            "description": "OAuth2 authorization code.",
+            "required": true,
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "description": "CSRF token.",
+            "required": true,
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "error",
+            "in": "query",
+            "description": "Authorization error.",
+            "required": false,
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "error_description",
+            "in": "query",
+            "description": "Authorization error description.",
+            "required": false,
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "error_uri",
+            "in": "query",
+            "description": "Link to error documentation",
+            "required": false,
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation.",
+            "headers": {
+              "Set-Cookie": {
+                "style": "simple",
+                "explode": false,
+                "schema": {
+                  "type": "string",
+                  "example": "id=XN6StCMLLT4Ijc1fGhZPj83PJ2gjHrPB; Path=v1; Max-Age=60; HttpOnly; Secure"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found."
           },
           "500": {
             "description": "Internal Server Error."
@@ -225,7 +344,7 @@
           "auth"
         ],
         "summary": "Logout",
-        "description": "Terminate current session.",
+        "description": "Log out from current session",
         "operationId": "authLogout",
         "responses": {
           "204": {
@@ -251,7 +370,7 @@
           "auth"
         ],
         "summary": "Request access token",
-        "description": "Request short live token which can be used to complete protected operations",
+        "description": "Request short live token which can be used to perform protected operations",
         "operationId": "authToken",
         "requestBody": {
           "content": {
@@ -386,7 +505,7 @@
           "session"
         ],
         "summary": "Terminate account session",
-        "description": "To terminate a account session access token should be provided at query param, request it at `/auth/token/`.",
+        "description": "To terminate account session access token should be provided at query parameters, request it at `/auth/token/`.",
         "operationId": "sessionDeleteUser",
         "parameters": [
           {
@@ -454,14 +573,19 @@
             "description": "UUID v4",
             "format": "uuid"
           },
+          "username": {
+            "maxLength": 16,
+            "minLength": 4,
+            "type": "string"
+          },
           "email": {
             "maxLength": 255,
             "type": "string",
             "format": "email"
           },
           "password": {
-            "maxLength": 128,
-            "minLength": 8,
+            "maxLength": 64,
+            "minLength": 4,
             "type": "string",
             "format": "password"
           },
@@ -487,19 +611,18 @@
         ],
         "type": "object",
         "properties": {
+          "username": {
+            "maxLength": 16,
+            "minLength": 4,
+            "type": "string"
+          },
           "email": {
             "maxLength": 255,
             "type": "string",
             "format": "email"
           },
           "password": {
-            "maxLength": 128,
-            "minLength": 8,
-            "type": "string",
-            "format": "password"
-          },
-          "confirmPassword": {
-            "maxLength": 128,
+            "maxLength": 64,
             "minLength": 8,
             "type": "string",
             "format": "password"
@@ -514,13 +637,10 @@
         "type": "object",
         "properties": {
           "email": {
-            "maxLength": 255,
             "type": "string",
             "format": "email"
           },
           "password": {
-            "maxLength": 128,
-            "minLength": 8,
             "type": "string",
             "format": "password"
           }
@@ -574,8 +694,6 @@
         "type": "object",
         "properties": {
           "password": {
-            "maxLength": 128,
-            "minLength": 8,
             "type": "string",
             "format": "password"
           }
@@ -590,10 +708,18 @@
           }
         }
       },
+      "OAuthUriResponse": {
+        "type": "object",
+        "properties": {
+          "uri": {
+            "type": "string"
+          }
+        }
+      },
       "ErrorResponse": {
         "type": "object",
         "properties": {
-          "error": {
+          "message": {
             "type": "string"
           }
         }
@@ -601,15 +727,7 @@
       "ValidationErrorResponse": {
         "type": "object",
         "properties": {
-          "error": {
-            "$ref": "#/components/schemas/ValidationErrorResponse_error"
-          }
-        }
-      },
-      "ValidationErrorResponse_error": {
-        "type": "object",
-        "properties": {
-          "Schema.Field": {
+          "fieldName": {
             "type": "string"
           }
         }

@@ -32,6 +32,8 @@ func NewOAuthService(cfg *config.Config, a Account, s Session) *oauthService {
 }
 
 func (s *oauthService) GetAuthorizeURI(ctx context.Context, provider string) (string, error) {
+	provider = strings.ToLower(provider)
+
 	scope, err := util.UniqueString(32)
 	if err != nil {
 		return "", fmt.Errorf("oauthService - GetAuthorizeURI - util.UniqueString: %w", err)

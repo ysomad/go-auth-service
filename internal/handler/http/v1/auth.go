@@ -29,10 +29,10 @@ func newAuthHandler(handler *gin.RouterGroup, l logger.Interface, v validation.V
 
 	g := handler.Group("/auth")
 	{
-		oauth := g.Group("/oauth")
+		social := g.Group("/social")
 		{
-			oauth.GET("", h.getOAuthURI)
-			oauth.POST("github", h.githubLogin)
+			social.GET("", h.getOAuthURI)
+			social.POST("github", h.githubLogin)
 		}
 
 		authenticated := g.Group("/", sessionMiddleware(l, s))
@@ -170,7 +170,6 @@ func (h *authHandler) getOAuthURI(c *gin.Context) {
 		return
 	}
 
-	c.Redirect(http.StatusTemporaryRedirect, uri)
 	c.JSON(http.StatusOK, getOAuthURIResponse{uri})
 }
 

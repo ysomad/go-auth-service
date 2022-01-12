@@ -18,7 +18,7 @@ mongodb:
 cache:
   ttl: 1m
 
-auth:
+oauth:
   github_client_id: '4965a8fd3a9df8f0f405'
   github_scope: 'read:user,user:email'
 

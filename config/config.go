@@ -22,7 +22,7 @@ type (
 		MongoDB     `yaml:"mongodb"`
 		Cache       `yaml:"cache"`
 		Redis       `yaml:"redis"`
-		OAuth       `yaml:"auth"`
+		OAuth       `yaml:"oauth"`
 		Session     `yaml:"session"`
 		AccessToken `yaml:"access_token"`
 	}
@@ -85,21 +85,21 @@ type (
 	}
 )
 
-func (oa OAuth) Endpoints() map[string]oauth2.Endpoint {
+func (oa *OAuth) Endpoints() map[string]oauth2.Endpoint {
 	return map[string]oauth2.Endpoint{
 		gh:     oauth2github.Endpoint,
 		google: oauth2google.Endpoint,
 	}
 }
 
-func (oa OAuth) Scopes() map[string]string {
+func (oa *OAuth) Scopes() map[string]string {
 	return map[string]string{
 		gh:     oa.GitHubScope,
 		google: oa.GoogleScope,
 	}
 }
 
-func (oa OAuth) ClientIDs() map[string]string {
+func (oa *OAuth) ClientIDs() map[string]string {
 	return map[string]string{
 		gh:     oa.GitHubClientID,
 		google: oa.GoogleClientID,
@@ -107,7 +107,7 @@ func (oa OAuth) ClientIDs() map[string]string {
 
 }
 
-func (oa OAuth) ClientSecrets() map[string]string {
+func (oa *OAuth) ClientSecrets() map[string]string {
 	return map[string]string{
 		gh:     oa.GitHubClientSecret,
 		google: oa.GoogleClientSecret,
