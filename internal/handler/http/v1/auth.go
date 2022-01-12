@@ -33,7 +33,7 @@ func newAuthHandler(handler *gin.RouterGroup, l logger.Interface, v validation.V
 
 		social := g.Group("/social")
 		{
-			social.GET("", h.getOAuthURI)
+			social.GET("", h.socialAuthorizationURL)
 			social.POST("github", h.githubLogin)
 		}
 
@@ -154,24 +154,24 @@ func (h *authHandler) token(c *gin.Context) {
 }
 
 type getOAuthURIResponse struct {
-	URI string `json:"uri"`
+	URL string `json:"url"`
 }
 
-func (h *authHandler) getOAuthURI(c *gin.Context) {
+func (h *authHandler) socialAuthorizationURL(c *gin.Context) {
 	provider, found := c.GetQuery("provider")
 	if !found || provider == "" {
 		abortWithError(c, http.StatusBadRequest, apperrors.ErrAuthProviderNotFound)
 		return
 	}
 
-	uri, err := h.socialAuthService.GetAuthorizeURI(c.Request.Context(), provider)
+	uri, err := h.socialAuthService.AuthorizationURL(c.Request.Context(), provider)
 	if err != nil {
 		h.log.Error(fmt.Errorf("http - v1 - auth - getOAuthURI: %w", err))
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 
-	c.JSON(http.StatusOK, getOAuthURIResponse{uri})
+	c.JSON(http.StatusOK, getOAuthURIResponse{uri.String()})
 }
 
 func (h *authHandler) githubLogin(c *gin.Context) {

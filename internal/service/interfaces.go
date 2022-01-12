@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"net/url"
 
 	"github.com/ysomad/go-auth-service/internal/domain"
 )
@@ -19,6 +20,9 @@ type (
 
 		// Delete sets account IsArchive state to true.
 		Delete(ctx context.Context, aid string) error
+
+		// Verify verifies account using provided code.
+		Verify(ctx context.Context, code string) error
 	}
 
 	AccountRepo interface {
@@ -50,8 +54,9 @@ type (
 	}
 
 	SocialAuth interface {
-		// GeteAuthorizeURI returns OAuth authorize URI for given provider.
-		GetAuthorizeURI(ctx context.Context, provider string) (string, error)
+		// AuthorizationURL returns OAuth authorization URL of given provider with
+		// client id, scope and state query parameters.
+		AuthorizationURL(ctx context.Context, provider string) (*url.URL, error)
 
 		// GitHubLogin handles OAuth2 login via GitHub.
 		GitHubLogin(ctx context.Context, code string, d domain.Device) (domain.SessionCookie, error)

@@ -22,6 +22,8 @@ func (s *accountService) Create(ctx context.Context, a domain.Account) (string, 
 		return "", fmt.Errorf("accountService - Create - acc.GeneratePasswordHash: %w", err)
 	}
 
+	a.IsVerified = true
+
 	aid, err := s.repo.Create(ctx, a)
 	if err != nil {
 		return "", fmt.Errorf("accountService - Create - s.accountRepo.Create: %w", err)
@@ -56,6 +58,12 @@ func (s *accountService) Delete(ctx context.Context, aid string) error {
 	if err := s.repo.Archive(ctx, aid, true); err != nil {
 		return fmt.Errorf("accountService - Archive - s.accountRepo.Archive: %w", err)
 	}
+
+	return nil
+}
+
+func (s *accountService) Verify(ctx context.Context, code string) error {
+	panic("implement")
 
 	return nil
 }

@@ -3,7 +3,7 @@ package errors
 import "errors"
 
 var (
-	ErrAccountAlreadyExist             = errors.New("account with given credentials already exist")
+	ErrAccountAlreadyExist             = errors.New("account with given email or username already exist")
 	ErrAccountNotFound                 = errors.New("account not found")
 	ErrAccountNotArchived              = errors.New("account cannot be archived")
 	ErrAccountIncorrectEmailOrPassword = errors.New("incorrect email or password")

@@ -31,26 +31,26 @@ func NewSocialAuthService(cfg *config.Config, a Account, s Session) *socialAuthS
 	}
 }
 
-func (s *socialAuthService) GetAuthorizeURI(ctx context.Context, provider string) (string, error) {
+func (s *socialAuthService) AuthorizationURL(ctx context.Context, provider string) (*url.URL, error) {
 	provider = strings.ToLower(provider)
 
 	scope, err := util.UniqueString(32)
 	if err != nil {
-		return "", fmt.Errorf("socialAuthService - GetAuthorizeURI - util.UniqueString: %w", err)
+		return nil, fmt.Errorf("socialAuthService - GetAuthorizeURI - util.UniqueString: %w", err)
 	}
 
-	uri, err := url.Parse(s.cfg.Endpoints()[provider].AuthURL)
+	u, err := url.Parse(s.cfg.Endpoints()[provider].AuthURL)
 	if err != nil {
-		return "", fmt.Errorf("socialAuthService - GetAuthorizeURI - url.Parse: %w", err)
+		return nil, fmt.Errorf("socialAuthService - GetAuthorizeURI - url.Parse: %w", err)
 	}
 
-	q := uri.Query()
+	q := u.Query()
 	q.Set("client_id", s.cfg.ClientIDs()[provider])
 	q.Set("scope", s.cfg.Scopes()[provider])
 	q.Set("state", scope)
-	uri.RawQuery = q.Encode()
+	u.RawQuery = q.Encode()
 
-	return uri.String(), nil
+	return u, nil
 }
 
 func (s *socialAuthService) GitHubLogin(ctx context.Context, code string, d domain.Device) (domain.SessionCookie, error) {
@@ -77,7 +77,7 @@ func (s *socialAuthService) GoogleLogin(ctx context.Context, code string, d doma
 	return domain.SessionCookie{}, nil
 }
 
-// --------------------------------------------------------------------------------------------------------------------
+// private methods ----------------------------------------------------------------------------------------------------
 
 // exchangeCode sends OAuth2 authorization code to data provider authorization server in order to
 // get REST API access token which is used to use private provider api.
@@ -130,7 +130,7 @@ func (s *socialAuthService) loginOrSignUp(ctx context.Context, email, username,
 			return domain.SessionCookie{}, fmt.Errorf("s.accountService.GetByEmail: %w", err)
 		}
 
-		acc = domain.Account{Email: email, Username: username}
+		acc = domain.Account{Email: email, Username: username, IsVerified: true}
 		acc.RandomPassword()
 
 		aid, err = s.accountService.Create(ctx, acc)

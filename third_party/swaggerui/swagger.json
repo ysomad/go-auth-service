@@ -214,9 +214,9 @@
         "tags": [
           "auth"
         ],
-        "summary": "Get social authorize uri",
-        "description": "Receive OAuth2 authorize uri of given provider with `state` and `client_id` query parameters",
-        "operationId": "authSocialGetURI",
+        "summary": "Get social authorization url",
+        "description": "Request OAuth2 authorization url of given provider with `state`, `client_id` and `scope` query parameters",
+        "operationId": "authSocialGetURL",
         "parameters": [
           {
             "name": "provider",
@@ -240,7 +240,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/OAuthUriResponse"
+                  "$ref": "#/components/schemas/SocialAuthUrlResponse"
                 }
               }
             }
@@ -708,11 +708,13 @@
           }
         }
       },
-      "OAuthUriResponse": {
+      "SocialAuthUrlResponse": {
         "type": "object",
         "properties": {
-          "uri": {
-            "type": "string"
+          "url": {
+            "type": "string",
+            "format": "url",
+            "example": "https://github.com/login/oauth?client_id=string&scope=string&state=string"
           }
         }
       },

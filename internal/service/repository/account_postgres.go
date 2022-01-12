@@ -27,11 +27,11 @@ func NewAccountRepo(pg *postgres.Postgres) *accountRepo {
 	return &accountRepo{pg}
 }
 
-func (r *accountRepo) Create(ctx context.Context, acc domain.Account) (string, error) {
+func (r *accountRepo) Create(ctx context.Context, a domain.Account) (string, error) {
 	sql, args, err := r.Builder.
 		Insert(_accTable).
 		Columns("username, email, password, is_verified").
-		Values(acc.Username, acc.Email, acc.PasswordHash, acc.IsVerified).
+		Values(a.Username, a.Email, a.PasswordHash, a.IsVerified).
 		Suffix("RETURNING id").
 		ToSql()
 	if err != nil {
@@ -66,7 +66,7 @@ func (r *accountRepo) FindByID(ctx context.Context, aid string) (domain.Account,
 		return domain.Account{}, fmt.Errorf("r.Builder.Select: %w", err)
 	}
 
-	acc := domain.Account{ID: aid}
+	acc := domain.Account{ID: aid, IsVerified: true}
 
 	if err = r.Pool.QueryRow(ctx, sql, args...).Scan(
 		&acc.Username,
@@ -74,7 +74,6 @@ func (r *accountRepo) FindByID(ctx context.Context, aid string) (domain.Account,
 		&acc.PasswordHash,
 		&acc.CreatedAt,
 		&acc.UpdatedAt,
-		&acc.IsVerified,
 	); err != nil {
 		if err == pgx.ErrNoRows {
 			return domain.Account{}, fmt.Errorf("r.Pool.QueryRow.Scan: %w", apperrors.ErrAccountNotFound)
@@ -88,7 +87,7 @@ func (r *accountRepo) FindByID(ctx context.Context, aid string) (domain.Account,
 
 func (r *accountRepo) FindByEmail(ctx context.Context, email string) (domain.Account, error) {
 	sql, args, err := r.Builder.
-		Select("id, username, password, created_at, updated_at, is_verified").
+		Select("id, username, password, created_at, updated_at").
 		From(_accTable).
 		Where(sq.Eq{"email": email, "is_archive": false, "is_verified": true}).
 		ToSql()
@@ -96,7 +95,7 @@ func (r *accountRepo) FindByEmail(ctx context.Context, email string) (domain.Acc
 		return domain.Account{}, fmt.Errorf("r.Builder.Select: %w", err)
 	}
 
-	acc := domain.Account{Email: email}
+	acc := domain.Account{Email: email, IsVerified: true}
 
 	if err = r.Pool.QueryRow(ctx, sql, args...).Scan(
 		&acc.ID,
@@ -104,7 +103,6 @@ func (r *accountRepo) FindByEmail(ctx context.Context, email string) (domain.Acc
 		&acc.PasswordHash,
 		&acc.CreatedAt,
 		&acc.UpdatedAt,
-		&acc.IsVerified,
 	); err != nil {
 		if err == pgx.ErrNoRows {
 			return domain.Account{}, fmt.Errorf("r.Pool.QueryRow.Scan: %w", apperrors.ErrAccountNotFound)

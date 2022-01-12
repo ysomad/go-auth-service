@@ -57,7 +57,10 @@ func (h *accountHandler) create(c *gin.Context) {
 		return
 	}
 
-	_, err := h.accountService.Create(c.Request.Context(), domain.Account{Email: r.Email, Password: r.Password})
+	_, err := h.accountService.Create(
+		c.Request.Context(),
+		domain.Account{Email: r.Email, Username: r.Username, Password: r.Password},
+	)
 	if err != nil {
 		h.log.Error(fmt.Errorf("http - v1 - account - create: %w", err))
 
