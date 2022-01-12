@@ -69,11 +69,6 @@ func (h *accountHandler) create(c *gin.Context) {
 			return
 		}
 
-		if errors.Is(err, apperrors.ErrAccountPasswordNotGenerated) {
-			c.AbortWithStatus(http.StatusInternalServerError)
-			return
-		}
-
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
@@ -91,12 +86,6 @@ func (h *accountHandler) archive(c *gin.Context) {
 
 	if err := h.accountService.Delete(c.Request.Context(), aid); err != nil {
 		h.log.Error(fmt.Errorf("http - v1 - auth - archive: %w", err))
-
-		if errors.Is(err, apperrors.ErrAccountNotFound) {
-			c.AbortWithStatus(http.StatusUnauthorized)
-			return
-		}
-
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
@@ -139,12 +128,6 @@ func (h *accountHandler) get(c *gin.Context) {
 	acc, err := h.accountService.GetByID(c.Request.Context(), aid)
 	if err != nil {
 		h.log.Error(fmt.Errorf("http - v1 - auth - get: %w", err))
-
-		if errors.Is(err, apperrors.ErrAccountNotFound) {
-			c.AbortWithStatus(http.StatusUnauthorized)
-			return
-		}
-
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
