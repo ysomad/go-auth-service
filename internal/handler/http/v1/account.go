@@ -11,7 +11,7 @@ import (
 	"github.com/ysomad/go-auth-service/internal/domain"
 	"github.com/ysomad/go-auth-service/internal/service"
 
-	apperrors "github.com/ysomad/go-auth-service/pkg/errors"
+	"github.com/ysomad/go-auth-service/pkg/apperrors"
 	"github.com/ysomad/go-auth-service/pkg/logger"
 	"github.com/ysomad/go-auth-service/pkg/validation"
 )

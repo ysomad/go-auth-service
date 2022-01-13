@@ -6,7 +6,7 @@ import (
 
 	"github.com/ysomad/go-auth-service/config"
 	"github.com/ysomad/go-auth-service/internal/domain"
-	apperrors "github.com/ysomad/go-auth-service/pkg/errors"
+	"github.com/ysomad/go-auth-service/pkg/apperrors"
 )
 
 type sessionService struct {

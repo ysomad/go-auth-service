@@ -6,8 +6,8 @@ import (
 
 	"golang.org/x/crypto/bcrypt"
 
-	apperrors "github.com/ysomad/go-auth-service/pkg/errors"
-	"github.com/ysomad/go-auth-service/pkg/util"
+	"github.com/ysomad/go-auth-service/pkg/apperrors"
+	"github.com/ysomad/go-auth-service/pkg/utils"
 )
 
 // Account represents user data model
@@ -43,5 +43,5 @@ func (a *Account) CompareHashAndPassword() error {
 }
 
 func (a *Account) RandomPassword() {
-	a.Password = util.RandomSpecialString(16)
+	a.Password = utils.RandomSpecialString(16)
 }

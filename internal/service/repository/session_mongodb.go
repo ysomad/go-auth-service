@@ -10,13 +10,7 @@ import (
 	"go.mongodb.org/mongo-driver/x/bsonx"
 
 	"github.com/ysomad/go-auth-service/internal/domain"
-	apperrors "github.com/ysomad/go-auth-service/pkg/errors"
-)
-
-const (
-	sessionCollection   = "sessions"
-	sessionAccountIDKey = "accountID"
-	sessionIDKey        = "_id"
+	"github.com/ysomad/go-auth-service/pkg/apperrors"
 )
 
 type sessionRepo struct {
@@ -24,7 +18,7 @@ type sessionRepo struct {
 }
 
 func NewSessionRepo(db *mongo.Database) *sessionRepo {
-	return &sessionRepo{db.Collection(sessionCollection)}
+	return &sessionRepo{db.Collection("sessions")}
 }
 
 func (r *sessionRepo) Create(ctx context.Context, s domain.Session) error {
@@ -49,7 +43,7 @@ func (r *sessionRepo) Create(ctx context.Context, s domain.Session) error {
 func (r *sessionRepo) FindByID(ctx context.Context, sid string) (domain.Session, error) {
 	var s domain.Session
 
-	if err := r.FindOne(ctx, bson.M{sessionIDKey: sid}).Decode(&s); err != nil {
+	if err := r.FindOne(ctx, bson.M{"_id": sid}).Decode(&s); err != nil {
 
 		if err == mongo.ErrNoDocuments {
 			return domain.Session{}, fmt.Errorf("r.FindOne.Decode: %w", apperrors.ErrSessionNotFound)
@@ -62,7 +56,7 @@ func (r *sessionRepo) FindByID(ctx context.Context, sid string) (domain.Session,
 }
 
 func (r *sessionRepo) FindAll(ctx context.Context, aid string) ([]domain.Session, error) {
-	cursor, err := r.Find(ctx, bson.M{sessionAccountIDKey: bson.M{"$eq": aid}})
+	cursor, err := r.Find(ctx, bson.M{"accountId": bson.M{"$eq": aid}})
 	if err != nil {
 		return nil, fmt.Errorf("r.Find: %w", err)
 	}
@@ -77,7 +71,7 @@ func (r *sessionRepo) FindAll(ctx context.Context, aid string) ([]domain.Session
 }
 
 func (r *sessionRepo) Delete(ctx context.Context, sid string) error {
-	_, err := r.DeleteOne(ctx, bson.M{sessionIDKey: sid})
+	_, err := r.DeleteOne(ctx, bson.M{"_id": sid})
 	if err != nil {
 		return fmt.Errorf("r.DeleteOne: %w", err)
 	}
@@ -87,8 +81,8 @@ func (r *sessionRepo) Delete(ctx context.Context, sid string) error {
 
 func (r *sessionRepo) DeleteAll(ctx context.Context, aid, currSid string) error {
 	filter := bson.M{
-		sessionAccountIDKey: aid,
-		sessionIDKey:        bson.M{"$ne": currSid},
+		"_id":       bson.M{"$ne": currSid},
+		"accountId": aid,
 	}
 
 	_, err := r.DeleteMany(ctx, filter)

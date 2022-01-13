@@ -9,7 +9,7 @@ import (
 
 	"github.com/ysomad/go-auth-service/internal/service"
 
-	"github.com/ysomad/go-auth-service/pkg/errors"
+	"github.com/ysomad/go-auth-service/pkg/apperrors"
 	"github.com/ysomad/go-auth-service/pkg/logger"
 )
 
@@ -65,7 +65,7 @@ func sessionMiddleware(log logger.Interface, session service.Session) gin.Handle
 		d := service.NewDevice(c.Request.UserAgent(), c.ClientIP())
 
 		if s.IP != d.IP || s.UserAgent != d.UserAgent {
-			log.Error(fmt.Errorf("http - v1 - middleware - sessionMiddleware: %w", errors.ErrSessionMismatchedDevice))
+			log.Error(fmt.Errorf("http - v1 - middleware - sessionMiddleware: %w", apperrors.ErrSessionDeviceMismatch))
 			c.AbortWithStatus(http.StatusUnauthorized)
 			return
 		}
@@ -82,7 +82,7 @@ func accountID(c *gin.Context) (string, error) {
 
 	_, err := uuid.Parse(aid)
 	if err != nil {
-		return "", errors.ErrAccountContextNotFound
+		return "", apperrors.ErrAccountContextNotFound
 	}
 
 	return aid, nil
@@ -93,7 +93,7 @@ func sessionID(c *gin.Context) (string, error) {
 	sid := c.GetString("sid")
 
 	if sid == "" {
-		return "", errors.ErrSessionContextNotFound
+		return "", apperrors.ErrSessionContextNotFound
 	}
 
 	return sid, nil

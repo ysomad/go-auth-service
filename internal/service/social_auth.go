@@ -13,8 +13,8 @@ import (
 
 	"github.com/ysomad/go-auth-service/config"
 	"github.com/ysomad/go-auth-service/internal/domain"
-	apperrors "github.com/ysomad/go-auth-service/pkg/errors"
-	"github.com/ysomad/go-auth-service/pkg/util"
+	"github.com/ysomad/go-auth-service/pkg/apperrors"
+	"github.com/ysomad/go-auth-service/pkg/utils"
 )
 
 // Provider constants to track how user is logged in
@@ -42,7 +42,7 @@ func NewSocialAuthService(cfg *config.Config, a Account, s Session) *socialAuthS
 func (s *socialAuthService) AuthorizationURL(ctx context.Context, provider string) (*url.URL, error) {
 	provider = strings.ToLower(provider)
 
-	scope, err := util.UniqueString(32)
+	scope, err := utils.UniqueString(32)
 	if err != nil {
 		return nil, fmt.Errorf("socialAuthService - GetAuthorizeURI - util.UniqueString: %w", err)
 	}

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	apperrors "github.com/ysomad/go-auth-service/pkg/errors"
-	"github.com/ysomad/go-auth-service/pkg/util"
+	"github.com/ysomad/go-auth-service/pkg/apperrors"
+	"github.com/ysomad/go-auth-service/pkg/utils"
 )
 
 // Session represents refresh token session for JWT authentication
@@ -21,7 +21,7 @@ type Session struct {
 }
 
 func NewSession(aid, provider, userAgent, ip string, ttl time.Duration) (Session, error) {
-	id, err := util.UniqueString(32)
+	id, err := utils.UniqueString(32)
 	if err != nil {
 		return Session{}, fmt.Errorf("utils.UniqueString: %w", apperrors.ErrSessionNotCreated)
 	}

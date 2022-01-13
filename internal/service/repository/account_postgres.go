@@ -13,7 +13,7 @@ import (
 
 	"github.com/ysomad/go-auth-service/internal/domain"
 
-	apperrors "github.com/ysomad/go-auth-service/pkg/errors"
+	"github.com/ysomad/go-auth-service/pkg/apperrors"
 	"github.com/ysomad/go-auth-service/pkg/postgres"
 )
 
