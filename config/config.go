@@ -29,6 +29,7 @@ type (
 
 	HTTP struct {
 		Port string `env-required:"true" yaml:"port" env:"HTTP_PORT"`
+		CORSAllowOrigins string `env-required:"true" yaml:"cors_allow_origins" env:"CORS_ALLOW_ORIGINS"`
 	}
 
 	Log struct {

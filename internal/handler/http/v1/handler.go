@@ -4,6 +4,7 @@ package v1
 import (
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -33,7 +34,7 @@ func SetupHandlers(
 
 	// CORS
 	corsCfg := cors.DefaultConfig()
-	corsCfg.AllowOrigins = []string{"http://localhost:3000", "https://github.com"}
+	corsCfg.AllowOrigins = strings.Split(cfg.HTTP.CORSAllowOrigins, " ")
 	corsCfg.AllowCredentials = true
 
 	handler.Use(cors.New(corsCfg))
