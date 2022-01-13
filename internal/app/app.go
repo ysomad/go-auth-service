@@ -14,8 +14,8 @@ import (
 	"github.com/ysomad/go-auth-service/internal/service"
 	"github.com/ysomad/go-auth-service/internal/service/repository"
 
-	"github.com/ysomad/go-auth-service/pkg/auth"
 	"github.com/ysomad/go-auth-service/pkg/httpserver"
+	"github.com/ysomad/go-auth-service/pkg/jwt"
 	"github.com/ysomad/go-auth-service/pkg/logger"
 	"github.com/ysomad/go-auth-service/pkg/mongodb"
 	"github.com/ysomad/go-auth-service/pkg/postgres"
@@ -56,12 +56,12 @@ func Run(cfg *config.Config) {
 	accountService := service.NewAccountService(accountRepo)
 	sessionService := service.NewSessionService(cfg, sessionRepo)
 
-	tokenManager, err := auth.NewJWTManager(cfg.AccessToken.SigningKey, cfg.AccessToken.TTL)
+	jwt, err := jwt.New(cfg.AccessToken.SigningKey, cfg.AccessToken.TTL)
 	if err != nil {
 		l.Fatal(fmt.Errorf("app - Run - auth.NewTokenManager: %w", err))
 	}
 
-	authService := service.NewAuthService(cfg, tokenManager, accountService, sessionService)
+	authService := service.NewAuthService(cfg, jwt, accountService, sessionService)
 	socialAuthService := service.NewSocialAuthService(cfg, accountService, sessionService)
 
 	// TODO: refactor

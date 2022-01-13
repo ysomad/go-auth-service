@@ -5,17 +5,17 @@ import (
 	"fmt"
 
 	"github.com/ysomad/go-auth-service/config"
-	"github.com/ysomad/go-auth-service/pkg/auth"
+	"github.com/ysomad/go-auth-service/pkg/jwt"
 )
 
 type authService struct {
 	cfg     *config.Config
-	token   auth.JWTManager
+	token   jwt.Token
 	account Account
 	session Session
 }
 
-func NewAuthService(cfg *config.Config, t auth.JWTManager, a Account, s Session) *authService {
+func NewAuthService(cfg *config.Config, t jwt.Token, a Account, s Session) *authService {
 	return &authService{
 		cfg:     cfg,
 		token:   t,
