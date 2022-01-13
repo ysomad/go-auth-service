@@ -11,10 +11,7 @@ import (
 	enTranslations "github.com/go-playground/validator/v10/translations/en"
 )
 
-// TODO: refactor!!!
-
-type Validator interface {
-	ValidateVar(val interface{}, tag string) error
+type Gin interface {
 	TranslateError(err error) map[string]string
 }
 
@@ -45,7 +42,7 @@ func (v *ginValidator) register() error {
 	return nil
 }
 
-// TranslateAll returns translated validation errors received from gin.c.ShouldBindJSON err
+// TranslateError returns translated validation errors received from gin.c.ShouldBindJSON err
 func (v *ginValidator) TranslateError(err error) map[string]string {
 	_ = v.register()
 
@@ -58,8 +55,4 @@ func (v *ginValidator) TranslateError(err error) map[string]string {
 
 	return errs
 	// return err.(validator.ValidationErrors).Translate(v.trans)
-}
-
-func (v *ginValidator) ValidateVar(val interface{}, tag string) error {
-	return v.validate.Var(val, tag)
 }

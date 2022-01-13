@@ -19,7 +19,7 @@ type (
 		GetByEmail(ctx context.Context, email string) (domain.Account, error)
 
 		// Delete sets account IsArchive state to true.
-		Delete(ctx context.Context, aid string) error
+		Delete(ctx context.Context, aid, sid string) (SessionCookie, error)
 
 		// Verify verifies account using provided code.
 		Verify(ctx context.Context, code string) error

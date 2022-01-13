@@ -16,12 +16,12 @@ import (
 
 type authHandler struct {
 	log logger.Interface
-	validation.Validator
+	validation.Gin
 	authService       service.Auth
 	socialAuthService service.SocialAuth
 }
 
-func newAuthHandler(handler *gin.RouterGroup, l logger.Interface, v validation.Validator, s service.Session,
+func newAuthHandler(handler *gin.RouterGroup, l logger.Interface, v validation.Gin, s service.Session,
 	a service.Auth, sa service.SocialAuth) {
 
 	h := &authHandler{l, v, a, sa}
@@ -49,18 +49,6 @@ func newAuthHandler(handler *gin.RouterGroup, l logger.Interface, v validation.V
 type loginRequest struct {
 	Email    string `json:"email" binding:"required,email"`
 	Password string `json:"password" binding:"required"`
-}
-
-func (h *authHandler) setSessionCookie(c *gin.Context, cookie service.SessionCookie) {
-	c.SetCookie(
-		cookie.Key,
-		cookie.ID,
-		cookie.TTL,
-		apiPath,
-		cookie.Domain,
-		cookie.Secure,
-		cookie.HTTPOnly,
-	)
 }
 
 func (h *authHandler) login(c *gin.Context) {
@@ -91,7 +79,7 @@ func (h *authHandler) login(c *gin.Context) {
 		return
 	}
 
-	h.setSessionCookie(c, cookie)
+	setSessionCookie(c, cookie)
 	c.Status(http.StatusOK)
 }
 
@@ -206,6 +194,6 @@ func (h *authHandler) githubLogin(c *gin.Context) {
 		return
 	}
 
-	h.setSessionCookie(c, cookie)
+	setSessionCookie(c, cookie)
 	c.Status(http.StatusOK)
 }

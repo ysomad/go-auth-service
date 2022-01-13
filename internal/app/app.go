@@ -53,8 +53,8 @@ func Run(cfg *config.Config) {
 	accountRepo := repository.NewAccountRepo(pg)
 	sessionRepo := repository.NewSessionRepo(mdb)
 
-	accountService := service.NewAccountService(accountRepo)
 	sessionService := service.NewSessionService(cfg, sessionRepo)
+	accountService := service.NewAccountService(cfg, accountRepo, sessionService)
 
 	jwt, err := jwt.New(cfg.AccessToken.SigningKey, cfg.AccessToken.TTL)
 	if err != nil {
@@ -64,8 +64,6 @@ func Run(cfg *config.Config) {
 	authService := service.NewAuthService(cfg, jwt, accountService, sessionService)
 	socialAuthService := service.NewSocialAuthService(cfg, accountService, sessionService)
 
-	// TODO: refactor
-	// Validation translator
 	v, err := validation.NewGinValidator()
 	if err != nil {
 		l.Fatal(fmt.Errorf("app - Run - validation.NewGinValidator: %w", err))

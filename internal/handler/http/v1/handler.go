@@ -20,7 +20,7 @@ const apiPath = "/v1"
 func SetupHandlers(
 	handler *gin.Engine,
 	l logger.Interface,
-	v validation.Validator,
+	v validation.Gin,
 	cfg *config.Config,
 	acc service.Account,
 	sess service.Session,

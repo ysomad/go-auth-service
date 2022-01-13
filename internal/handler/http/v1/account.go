@@ -18,27 +18,29 @@ import (
 
 type accountHandler struct {
 	log logger.Interface
-	validation.Validator
+	validation.Gin
 	sessionCfg     *config.Session
 	accountService service.Account
 	sessionService service.Session
 }
 
-func newAccountHandler(handler *gin.RouterGroup, l logger.Interface, v validation.Validator, cfg *config.Session,
-	acc service.Account, sess service.Session, auth service.Auth) {
+func newAccountHandler(handler *gin.RouterGroup, l logger.Interface, v validation.Gin, cfg *config.Session,
+	acc service.Account, s service.Session, auth service.Auth) {
 
-	h := &accountHandler{l, v, cfg, acc, sess}
+	h := &accountHandler{l, v, cfg, acc, s}
 
 	g := handler.Group("/accounts")
 	{
 		g.POST("", h.create)
 
-		authenticated := g.Group("/", sessionMiddleware(l, sess))
+		authenticated := g.Group("/", sessionMiddleware(l, s))
 		{
 			authenticated.GET("", h.get)
 
 			secure := authenticated.Group("/", tokenMiddleware(l, auth))
-			secure.DELETE("", h.archive)
+			{
+				secure.DELETE("", h.archive)
+			}
 		}
 	}
 }
@@ -84,12 +86,6 @@ func (h *accountHandler) archive(c *gin.Context) {
 		return
 	}
 
-	if err := h.accountService.Delete(c.Request.Context(), aid); err != nil {
-		h.log.Error(fmt.Errorf("http - v1 - auth - archive: %w", err))
-		c.AbortWithStatus(http.StatusInternalServerError)
-		return
-	}
-
 	sid, err := sessionID(c)
 	if err != nil {
 		h.log.Error(fmt.Errorf("http - v1 - auth - archive - sessionID: %w", err))
@@ -97,23 +93,14 @@ func (h *accountHandler) archive(c *gin.Context) {
 		return
 	}
 
-	if err := h.sessionService.TerminateAll(c.Request.Context(), aid, sid); err != nil {
-		h.log.Error(fmt.Errorf("http - v1 - auth - archive: %w", err))
+	cookie, err := h.accountService.Delete(c.Request.Context(), aid, sid)
+	if err != nil {
+		h.log.Error(fmt.Errorf("http - v1 - auth - archive - h.accountService.Delete: %w", err))
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 
-	// TODO: refactor to remove session config dependency
-	c.SetCookie(
-		h.sessionCfg.CookieKey,
-		"",
-		-1,
-		apiPath,
-		h.sessionCfg.CookieDomain,
-		h.sessionCfg.CookieSecure,
-		h.sessionCfg.CookieHTTPOnly,
-	)
-
+	setSessionCookie(c, cookie)
 	c.Status(http.StatusNoContent)
 }
 

@@ -14,11 +14,11 @@ import (
 
 type sessionHandler struct {
 	log logger.Interface
-	validation.Validator
+	validation.Gin
 	sessionService service.Session
 }
 
-func newSessionHandler(handler *gin.RouterGroup, l logger.Interface, v validation.Validator,
+func newSessionHandler(handler *gin.RouterGroup, l logger.Interface, v validation.Gin,
 	sess service.Session, auth service.Auth) {
 
 	h := &sessionHandler{l, v, sess}
