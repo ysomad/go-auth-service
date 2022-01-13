@@ -9,15 +9,15 @@ import (
 )
 
 type accountService struct {
-	cfg *config.Config
-	repo AccountRepo
+	cfg     *config.Config
+	repo    AccountRepo
 	session Session
 }
 
 func NewAccountService(cfg *config.Config, r AccountRepo, s Session) *accountService {
 	return &accountService{
-		cfg: cfg,
-		repo: r,
+		cfg:     cfg,
+		repo:    r,
 		session: s,
 	}
 }
@@ -36,8 +36,6 @@ func (s *accountService) Create(ctx context.Context, a domain.Account) (string, 
 }
 
 func (s *accountService) GetByID(ctx context.Context, aid string) (domain.Account, error) {
-	var acc domain.Account
-
 	acc, err := s.repo.FindByID(ctx, aid)
 	if err != nil {
 		return domain.Account{}, fmt.Errorf("accountService - GetByID - s.repo.FindByID: %w", err)
@@ -47,8 +45,6 @@ func (s *accountService) GetByID(ctx context.Context, aid string) (domain.Accoun
 }
 
 func (s *accountService) GetByEmail(ctx context.Context, email string) (domain.Account, error) {
-	var acc domain.Account
-
 	acc, err := s.repo.FindByEmail(ctx, email)
 	if err != nil {
 		return domain.Account{}, fmt.Errorf("accountService - GetByEmail - s.repo.FindByEmail: %w", err)

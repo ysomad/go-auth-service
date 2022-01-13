@@ -60,13 +60,13 @@ func (r *accountRepo) FindByID(ctx context.Context, aid string) (domain.Account,
 	sql, args, err := r.Builder.
 		Select("username, email, password, created_at, updated_at").
 		From(_accTable).
-		Where(sq.Eq{"id": aid, "is_archive": false, "is_verified": true}).
+		Where(sq.Eq{"id": aid, "is_archive": false}).
 		ToSql()
 	if err != nil {
 		return domain.Account{}, fmt.Errorf("r.Builder.Select: %w", err)
 	}
 
-	acc := domain.Account{ID: aid, IsVerified: true}
+	acc := domain.Account{ID: aid}
 
 	if err = r.Pool.QueryRow(ctx, sql, args...).Scan(
 		&acc.Username,
@@ -89,13 +89,13 @@ func (r *accountRepo) FindByEmail(ctx context.Context, email string) (domain.Acc
 	sql, args, err := r.Builder.
 		Select("id, username, password, created_at, updated_at").
 		From(_accTable).
-		Where(sq.Eq{"email": email, "is_archive": false, "is_verified": true}).
+		Where(sq.Eq{"email": email, "is_archive": false}).
 		ToSql()
 	if err != nil {
 		return domain.Account{}, fmt.Errorf("r.Builder.Select: %w", err)
 	}
 
-	acc := domain.Account{Email: email, IsVerified: true}
+	acc := domain.Account{Email: email}
 
 	if err = r.Pool.QueryRow(ctx, sql, args...).Scan(
 		&acc.ID,
