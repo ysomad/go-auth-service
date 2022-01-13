@@ -8,7 +8,6 @@ import (
 
 	"github.com/ysomad/go-auth-service/internal/service"
 
-	apperrors "github.com/ysomad/go-auth-service/pkg/errors"
 	"github.com/ysomad/go-auth-service/pkg/logger"
 	"github.com/ysomad/go-auth-service/pkg/validation"
 )
@@ -28,11 +27,13 @@ func newSessionHandler(handler *gin.RouterGroup, l logger.Interface, v validatio
 	{
 		authenticated := g.Group("/", sessionMiddleware(l, sess))
 		{
-			authenticated.GET("", h.get)
-
 			secure := authenticated.Group("/", tokenMiddleware(l, auth))
-			secure.DELETE(":sessionID", h.terminate)
-			secure.DELETE("", h.terminateAll)
+			{
+				secure.DELETE(":sessionID", h.terminate)
+				secure.DELETE("", h.terminateAll)
+			}
+
+			authenticated.GET("", h.get)
 		}
 	}
 }
@@ -56,22 +57,15 @@ func (h *sessionHandler) get(c *gin.Context) {
 }
 
 func (h *sessionHandler) terminate(c *gin.Context) {
-	currentSid, err := sessionID(c)
+	currSid, err := sessionID(c)
 	if err != nil {
 		h.log.Error("http - v1 - session - terminate - sessionID: %w", err)
 		c.AbortWithStatus(http.StatusUnauthorized)
 		return
 	}
 
-	sid := c.Param("sessionID")
-
-	if currentSid == sid {
-		abortWithError(c, http.StatusBadRequest, apperrors.ErrSessionNotTerminated)
-		return
-	}
-
-	if err := h.sessionService.Terminate(c.Request.Context(), sid); err != nil {
-		h.log.Error(fmt.Errorf("http - v1 - session - terminate - h.sessionService.Terminate: %w", err))
+	if err := h.sessionService.Terminate(c.Request.Context(), c.Param("sessionID"), currSid); err != nil {
+		h.log.Error(fmt.Errorf("http - v1 - sessionService - terminate - h.sessionService.Terminate: %w", err))
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
@@ -80,23 +74,23 @@ func (h *sessionHandler) terminate(c *gin.Context) {
 }
 
 func (h *sessionHandler) terminateAll(c *gin.Context) {
-	currentSid, err := sessionID(c)
+	currSid, err := sessionID(c)
 	if err != nil {
-		h.log.Error("http - v1 - session - terminateAll - sessionID: %w", err)
+		h.log.Error("http - v1 - sessionService - terminateAll - sessionID: %w", err)
 		c.AbortWithStatus(http.StatusUnauthorized)
 		return
 	}
 
 	aid, err := accountID(c)
 	if err != nil {
-		h.log.Error("http - v1 - session - terminateAll - accountID: %w", err)
+		h.log.Error("http - v1 - sessionService - terminateAll - accountID: %w", err)
 		c.AbortWithStatus(http.StatusUnauthorized)
 		return
 
 	}
 
-	if err := h.sessionService.TerminateAll(c.Request.Context(), aid, currentSid); err != nil {
-		h.log.Error("http - v1 - session - terminateAll: %w", err)
+	if err := h.sessionService.TerminateAll(c.Request.Context(), aid, currSid); err != nil {
+		h.log.Error("http - v1 - sessionService - terminateAll - h.sessionService.TerminateAll: %w", err)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}

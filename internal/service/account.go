@@ -22,11 +22,9 @@ func (s *accountService) Create(ctx context.Context, a domain.Account) (string, 
 		return "", fmt.Errorf("accountService - Create - acc.GeneratePasswordHash: %w", err)
 	}
 
-	a.IsVerified = true
-
 	aid, err := s.repo.Create(ctx, a)
 	if err != nil {
-		return "", fmt.Errorf("accountService - Create - s.accountRepo.Create: %w", err)
+		return "", fmt.Errorf("accountService - Create - s.repo.Create: %w", err)
 	}
 
 	return aid, nil
@@ -37,7 +35,7 @@ func (s *accountService) GetByID(ctx context.Context, aid string) (domain.Accoun
 
 	acc, err := s.repo.FindByID(ctx, aid)
 	if err != nil {
-		return domain.Account{}, fmt.Errorf("accountService - GetByID - s.accountRepo.FindByID: %w", err)
+		return domain.Account{}, fmt.Errorf("accountService - GetByID - s.repo.FindByID: %w", err)
 	}
 
 	return acc, nil
@@ -48,7 +46,7 @@ func (s *accountService) GetByEmail(ctx context.Context, email string) (domain.A
 
 	acc, err := s.repo.FindByEmail(ctx, email)
 	if err != nil {
-		return domain.Account{}, fmt.Errorf("accountService - GetByEmail - s.accountRepo.FindByEmail: %w", err)
+		return domain.Account{}, fmt.Errorf("accountService - GetByEmail - s.repo.FindByEmail: %w", err)
 	}
 
 	return acc, nil
@@ -56,7 +54,7 @@ func (s *accountService) GetByEmail(ctx context.Context, email string) (domain.A
 
 func (s *accountService) Delete(ctx context.Context, aid string) error {
 	if err := s.repo.Archive(ctx, aid, true); err != nil {
-		return fmt.Errorf("accountService - Archive - s.accountRepo.Archive: %w", err)
+		return fmt.Errorf("accountService - Archive - s.repo.Archive: %w", err)
 	}
 
 	return nil

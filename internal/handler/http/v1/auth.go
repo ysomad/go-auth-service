@@ -7,7 +7,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/ysomad/go-auth-service/internal/domain"
 	"github.com/ysomad/go-auth-service/internal/service"
 
 	apperrors "github.com/ysomad/go-auth-service/pkg/errors"
@@ -52,7 +51,7 @@ type loginRequest struct {
 	Password string `json:"password" binding:"required"`
 }
 
-func (h *authHandler) setSessionCookie(c *gin.Context, cookie domain.SessionCookie) {
+func (h *authHandler) setSessionCookie(c *gin.Context, cookie service.SessionCookie) {
 	c.SetCookie(
 		cookie.Key,
 		cookie.ID,
@@ -77,7 +76,7 @@ func (h *authHandler) login(c *gin.Context) {
 		c.Request.Context(),
 		r.Email,
 		r.Password,
-		domain.NewDevice(c.Request.Header.Get("User-Agent"), c.ClientIP()),
+		service.NewDevice(c.Request.Header.Get("User-Agent"), c.ClientIP()),
 	)
 	if err != nil {
 		h.log.Error(fmt.Errorf("http - v1 - auth - login: %w", err))
@@ -199,7 +198,7 @@ func (h *authHandler) githubLogin(c *gin.Context) {
 	cookie, err := h.socialAuthService.GitHubLogin(
 		c.Request.Context(),
 		code,
-		domain.NewDevice(c.Request.Header.Get("User-Agent"), c.ClientIP()),
+		service.NewDevice(c.Request.Header.Get("User-Agent"), c.ClientIP()),
 	)
 	if err != nil {
 		h.log.Error(fmt.Errorf("http - v1 - auth - githubCallback: %w", err))

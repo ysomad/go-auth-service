@@ -5,78 +5,77 @@ import (
 	"fmt"
 
 	"github.com/ysomad/go-auth-service/config"
-	"github.com/ysomad/go-auth-service/internal/domain"
 	"github.com/ysomad/go-auth-service/pkg/auth"
 )
 
 type authService struct {
 	cfg     *config.Config
-	jwt     auth.JWTManager
+	token   auth.JWTManager
 	account Account
 	session Session
 }
 
-func NewAuthService(cfg *config.Config, jwt auth.JWTManager, a Account, s Session) *authService {
+func NewAuthService(cfg *config.Config, t auth.JWTManager, a Account, s Session) *authService {
 	return &authService{
 		cfg:     cfg,
-		jwt:     jwt,
+		token:   t,
 		account: a,
 		session: s,
 	}
 }
 
-func (s *authService) EmailLogin(ctx context.Context, email, password string, d domain.Device) (domain.SessionCookie, error) {
-	acc, err := s.account.GetByEmail(ctx, email)
+func (s *authService) EmailLogin(ctx context.Context, email, password string, d Device) (SessionCookie, error) {
+	a, err := s.account.GetByEmail(ctx, email)
 	if err != nil {
-		return domain.SessionCookie{}, fmt.Errorf("authService - EmailLogin - s.accountService.GetByEmail: %w", err)
+		return SessionCookie{}, fmt.Errorf("authService - EmailLogin - s.account.GetByEmail: %w", err)
 	}
 
-	acc.Password = password
+	a.Password = password
 
-	if err = acc.CompareHashAndPassword(); err != nil {
-		return domain.SessionCookie{}, fmt.Errorf("authService - EmailLogin - acc.CompareHashAndPassword: %w", err)
+	if err = a.CompareHashAndPassword(); err != nil {
+		return SessionCookie{}, fmt.Errorf("authService - EmailLogin - a.CompareHashAndPassword: %w", err)
 	}
 
-	sess, err := s.session.Create(ctx, acc.ID, domain.ProviderEmail, d)
+	sess, err := s.session.Create(ctx, a.ID, providerEmail, d)
 	if err != nil {
-		return domain.SessionCookie{}, fmt.Errorf("authService - EmailLogin - s.sessionService.Create: %w", err)
+		return SessionCookie{}, fmt.Errorf("authService - EmailLogin - s.session.Create: %w", err)
 	}
 
-	return domain.NewSessionCookie(sess.ID, sess.TTL, &s.cfg.Session), nil
+	return NewSessionCookie(sess.ID, sess.TTL, &s.cfg.Session), nil
 }
 
 func (s *authService) Logout(ctx context.Context, sid string) error {
-	if err := s.session.Terminate(ctx, sid); err != nil {
-		return fmt.Errorf("authService - Logout - s.sessionService.Terminate: %w", err)
+	if err := s.session.Terminate(ctx, sid, ""); err != nil {
+		return fmt.Errorf("authService - Logout - s.session.Terminate: %w", err)
 	}
 
 	return nil
 }
 
 func (s *authService) NewAccessToken(ctx context.Context, aid, password string) (string, error) {
-	acc, err := s.account.GetByID(ctx, aid)
+	a, err := s.account.GetByID(ctx, aid)
 	if err != nil {
-		return "", fmt.Errorf("authService - NewAccessToken - s.accountService.GetByID: %w", err)
+		return "", fmt.Errorf("authService - NewAccessToken - s.account.GetByID: %w", err)
 	}
 
-	acc.Password = password
+	a.Password = password
 
-	if err := acc.CompareHashAndPassword(); err != nil {
-		return "", fmt.Errorf("authService - NewAccessToken - acc.CompareHashAndPassword: %w", err)
+	if err := a.CompareHashAndPassword(); err != nil {
+		return "", fmt.Errorf("authService - NewAccessToken - a.CompareHashAndPassword: %w", err)
 	}
 
-	token, err := s.jwt.New(aid)
+	t, err := s.token.New(aid)
 	if err != nil {
-		return "", fmt.Errorf("authService - NewAccessToken - s.tokenManager.NewJWT: %w", err)
+		return "", fmt.Errorf("authService - NewAccessToken - s.token.New: %w", err)
 	}
 
-	return token, nil
+	return t, nil
 }
 
-func (s *authService) ParseAccessToken(ctx context.Context, token string) (string, error) {
-	aid, err := s.jwt.Parse(token)
+func (s *authService) ParseAccessToken(ctx context.Context, t string) (string, error) {
+	aid, err := s.token.Parse(t)
 	if err != nil {
-		return "", fmt.Errorf("authService - ParseAccessToken - s.tokenManager.ParseJWT: %w", err)
+		return "", fmt.Errorf("authService - ParseAccessToken - s.token.Parse: %w", err)
 	}
 
 	return aid, nil

@@ -46,7 +46,7 @@ func (r *sessionRepo) Create(ctx context.Context, s domain.Session) error {
 	return nil
 }
 
-func (r *sessionRepo) Get(ctx context.Context, sid string) (domain.Session, error) {
+func (r *sessionRepo) FindByID(ctx context.Context, sid string) (domain.Session, error) {
 	var s domain.Session
 
 	if err := r.FindOne(ctx, bson.M{sessionIDKey: sid}).Decode(&s); err != nil {
@@ -61,7 +61,7 @@ func (r *sessionRepo) Get(ctx context.Context, sid string) (domain.Session, erro
 	return s, nil
 }
 
-func (r *sessionRepo) GetAll(ctx context.Context, aid string) ([]domain.Session, error) {
+func (r *sessionRepo) FindAll(ctx context.Context, aid string) ([]domain.Session, error) {
 	cursor, err := r.Find(ctx, bson.M{sessionAccountIDKey: bson.M{"$eq": aid}})
 	if err != nil {
 		return nil, fmt.Errorf("r.Find: %w", err)

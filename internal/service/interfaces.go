@@ -41,16 +41,16 @@ type (
 
 	Auth interface {
 		// EmailLogin creates new session using provided account email and password.
-		EmailLogin(ctx context.Context, email, password string, d domain.Device) (domain.SessionCookie, error)
+		EmailLogin(ctx context.Context, email, password string, d Device) (SessionCookie, error)
 
 		// Logout logs out session by id.
 		Logout(ctx context.Context, sid string) error
 
-		// NewAccessToken generates JWT token which must be used to complete protected operations.
+		// NewAccessToken generates JWT token which must be used to perform protected operations.
 		NewAccessToken(ctx context.Context, aid, password string) (string, error)
 
 		// ParseAccessToken parses and validates JWT access token, returns subject from payload.
-		ParseAccessToken(ctx context.Context, token string) (string, error)
+		ParseAccessToken(ctx context.Context, t string) (string, error)
 	}
 
 	SocialAuth interface {
@@ -59,24 +59,24 @@ type (
 		AuthorizationURL(ctx context.Context, provider string) (*url.URL, error)
 
 		// GitHubLogin handles OAuth2 login via GitHub.
-		GitHubLogin(ctx context.Context, code string, d domain.Device) (domain.SessionCookie, error)
+		GitHubLogin(ctx context.Context, code string, d Device) (SessionCookie, error)
 
 		// GoogleLogin handles OAuth2 login via Google.
-		GoogleLogin(ctx context.Context, code string, d domain.Device) (domain.SessionCookie, error)
+		GoogleLogin(ctx context.Context, code string, d Device) (SessionCookie, error)
 	}
 
 	Session interface {
 		// Create new session for account with id and device of given provider.
-		Create(ctx context.Context, aid, provider string, d domain.Device) (domain.Session, error)
+		Create(ctx context.Context, aid, provider string, d Device) (domain.Session, error)
 
-		// Get session by id.
-		Get(ctx context.Context, sid string) (domain.Session, error)
+		// GetByID session.
+		GetByID(ctx context.Context, sid string) (domain.Session, error)
 
 		// GetAll account sessions using provided account id.
 		GetAll(ctx context.Context, aid string) ([]domain.Session, error)
 
-		// Terminate sessions by id.
-		Terminate(ctx context.Context, sid string) error
+		// Terminate session by id excluding current one.
+		Terminate(ctx context.Context, sid, currSid string) error
 
 		// TerminateAll account sessions excluding current one.
 		TerminateAll(ctx context.Context, aid, sid string) error
@@ -86,11 +86,11 @@ type (
 		// Create new session in DB.
 		Create(ctx context.Context, s domain.Session) error
 
-		// Get session by id.
-		Get(ctx context.Context, sid string) (domain.Session, error)
+		// FindByID session.
+		FindByID(ctx context.Context, sid string) (domain.Session, error)
 
-		// GetAll accounts sessions by provided account id.
-		GetAll(ctx context.Context, aid string) ([]domain.Session, error)
+		// FindAll accounts sessions by provided account id.
+		FindAll(ctx context.Context, aid string) ([]domain.Session, error)
 
 		// Delete session by id.
 		Delete(ctx context.Context, sid string) error

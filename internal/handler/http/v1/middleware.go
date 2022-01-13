@@ -7,14 +7,13 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 
-	"github.com/ysomad/go-auth-service/internal/domain"
 	"github.com/ysomad/go-auth-service/internal/service"
 
 	"github.com/ysomad/go-auth-service/pkg/errors"
 	"github.com/ysomad/go-auth-service/pkg/logger"
 )
 
-func tokenMiddleware(log logger.Interface, authService service.Auth) gin.HandlerFunc {
+func tokenMiddleware(log logger.Interface, auth service.Auth) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		aid, err := accountID(c)
 		if err != nil {
@@ -23,14 +22,14 @@ func tokenMiddleware(log logger.Interface, authService service.Auth) gin.Handler
 			return
 		}
 
-		token, found := c.GetQuery("token")
-		if !found || token == "" {
+		t, found := c.GetQuery("token")
+		if !found || t == "" {
 			log.Error(fmt.Errorf("http - v1 - middleware - tokenMiddleware - c.GetQuery: %w", err))
 			c.AbortWithStatus(http.StatusForbidden)
 			return
 		}
 
-		sub, err := authService.ParseAccessToken(c.Request.Context(), token)
+		sub, err := auth.ParseAccessToken(c.Request.Context(), t)
 		if err != nil {
 			log.Error(fmt.Errorf("http - v1 - middleware - tokenMiddleware - authService.ParseAccessToken: %w", err))
 			c.AbortWithStatus(http.StatusForbidden)
@@ -47,7 +46,7 @@ func tokenMiddleware(log logger.Interface, authService service.Auth) gin.Handler
 	}
 }
 
-func sessionMiddleware(log logger.Interface, sessionService service.Session) gin.HandlerFunc {
+func sessionMiddleware(log logger.Interface, session service.Session) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		sid, err := c.Cookie("id")
 		if err != nil {
@@ -56,43 +55,45 @@ func sessionMiddleware(log logger.Interface, sessionService service.Session) gin
 			return
 		}
 
-		session, err := sessionService.Get(c.Request.Context(), sid)
+		s, err := session.GetByID(c.Request.Context(), sid)
 		if err != nil {
 			log.Error(fmt.Errorf("http - v1 - middleware - sessionMiddleware - s.Get: %w", err))
 			c.AbortWithStatus(http.StatusUnauthorized)
 			return
 		}
 
-		device := domain.NewDevice(c.Request.UserAgent(), c.ClientIP())
+		d := service.NewDevice(c.Request.UserAgent(), c.ClientIP())
 
-		if session.IP != device.IP || session.UserAgent != device.UserAgent {
+		if s.IP != d.IP || s.UserAgent != d.UserAgent {
 			log.Error(fmt.Errorf("http - v1 - middleware - sessionMiddleware: %w", errors.ErrSessionMismatchedDevice))
 			c.AbortWithStatus(http.StatusUnauthorized)
 			return
 		}
 
-		c.Set("sid", session.ID)
-		c.Set("aid", session.AccountID)
+		c.Set("sid", s.ID)
+		c.Set("aid", s.AccountID)
 		c.Next()
 	}
 }
 
+// accountID returns account id from context
 func accountID(c *gin.Context) (string, error) {
 	aid := c.GetString("aid")
 
 	_, err := uuid.Parse(aid)
 	if err != nil {
-		return "", errors.ErrAccountNotInContext
+		return "", errors.ErrAccountContextNotFound
 	}
 
 	return aid, nil
 }
 
+// sessionID return session id from context
 func sessionID(c *gin.Context) (string, error) {
 	sid := c.GetString("sid")
 
 	if sid == "" {
-		return "", errors.ErrSessionNotInContext
+		return "", errors.ErrSessionContextNotFound
 	}
 
 	return sid, nil

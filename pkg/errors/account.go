@@ -9,5 +9,5 @@ var (
 	ErrAccountIncorrectEmailOrPassword = errors.New("incorrect email or password")
 	ErrAccountPasswordNotGenerated     = errors.New("password generation error")
 	ErrAccountIncorrectPassword        = errors.New("incorrect password")
-	ErrAccountNotInContext             = errors.New("account not found in context")
+	ErrAccountContextNotFound          = errors.New("account not found in context")
 )

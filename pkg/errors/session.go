@@ -8,5 +8,5 @@ var (
 	ErrSessionNotCreated       = errors.New("error occured during session creation")
 	ErrSessionNotTerminated    = errors.New("current session cannot be terminated, use logout instead")
 	ErrSessionMismatchedDevice = errors.New("session does not match with device")
-	ErrSessionNotInContext     = errors.New("session not found in context")
+	ErrSessionContextNotFound  = errors.New("session not found in context")
 )
