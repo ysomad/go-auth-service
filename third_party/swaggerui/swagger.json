@@ -1,8 +1,8 @@
 {
   "openapi": "3.0.0",
   "info": {
-    "title": "Authentication and user accounts management service",
-    "description": "Service for managing accounts, users, sessions and authentication.\n",
+    "title": "Authentication and account management service",
+    "description": "Service for managing accounts, sessions and authentication.\n",
     "termsOfService": "http://swagger.io/terms/",
     "contact": {
       "email": "malykhsey@gmail.com"
@@ -129,17 +129,40 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "X-CSRF-Token",
+            "in": "header",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
           "204": {
-            "description": "Successful operation."
+            "description": "Successful operation.",
+            "headers": {
+              "Set-Cookie": {
+                "style": "simple",
+                "explode": false,
+                "schema": {
+                  "type": "string",
+                  "example": "id=; Path=v1; Max-Age=-1; HttpOnly; Secure"
+                }
+              }
+            }
           },
           "401": {
             "description": "Unauthorized."
           },
           "403": {
-            "description": "Access denied."
+            "description": "Invalid or expired access token."
+          },
+          "419": {
+            "description": "Invalid or expired csrf token."
           },
           "500": {
             "description": "Internal Server Error."
@@ -158,6 +181,7 @@
           "auth"
         ],
         "summary": "Login",
+        "description": "Creates new session and sets session id and csrf token in cookies.",
         "operationId": "authLogin",
         "requestBody": {
           "content": {
@@ -179,6 +203,14 @@
                 "schema": {
                   "type": "string",
                   "example": "id=XN6StCMLLT4Ijc1fGhZPj83PJ2gjHrPB; Path=v1; Max-Age=60; HttpOnly; Secure"
+                }
+              },
+              "Sеt-Cookie": {
+                "style": "simple",
+                "explode": false,
+                "schema": {
+                  "type": "string",
+                  "example": "CSRF-Token=XN6StCMLLT4Ijc1fGhZPj83PJ2gjHrPB; Path=v1; Max-Age=60; HttpOnly; Secure"
                 }
               }
             }
@@ -280,39 +312,6 @@
             "schema": {
               "type": "string"
             }
-          },
-          {
-            "name": "error",
-            "in": "query",
-            "description": "Authorization error.",
-            "required": false,
-            "style": "form",
-            "explode": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "error_description",
-            "in": "query",
-            "description": "Authorization error description.",
-            "required": false,
-            "style": "form",
-            "explode": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "error_uri",
-            "in": "query",
-            "description": "Link to error documentation",
-            "required": false,
-            "style": "form",
-            "explode": true,
-            "schema": {
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -325,6 +324,14 @@
                 "schema": {
                   "type": "string",
                   "example": "id=XN6StCMLLT4Ijc1fGhZPj83PJ2gjHrPB; Path=v1; Max-Age=60; HttpOnly; Secure"
+                }
+              },
+              "Sеt-Cookie": {
+                "style": "simple",
+                "explode": false,
+                "schema": {
+                  "type": "string",
+                  "example": "CSRF-Token=XN6StCMLLT4Ijc1fGhZPj83PJ2gjHrPB; Path=v1; Max-Age=60; HttpOnly; Secure"
                 }
               }
             }
@@ -346,12 +353,37 @@
         "summary": "Logout",
         "description": "Log out from current session",
         "operationId": "authLogout",
+        "parameters": [
+          {
+            "name": "X-CSRF-Token",
+            "in": "header",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "204": {
-            "description": "Successful operation."
+            "description": "Successful operation.",
+            "headers": {
+              "Set-Cookie": {
+                "style": "simple",
+                "explode": false,
+                "schema": {
+                  "type": "string",
+                  "example": "id=; Path=v1; Max-Age=-1; HttpOnly; Secure"
+                }
+              }
+            }
           },
           "401": {
             "description": "Unauthorized."
+          },
+          "419": {
+            "description": "Invalid or expired csrf token."
           },
           "500": {
             "description": "Internal Server Error."
@@ -372,6 +404,18 @@
         "summary": "Request access token",
         "description": "Request short live token which can be used to perform protected operations",
         "operationId": "authToken",
+        "parameters": [
+          {
+            "name": "X-CSRF-Token",
+            "in": "header",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -408,6 +452,9 @@
           },
           "403": {
             "description": "Incorrect password."
+          },
+          "419": {
+            "description": "Invalid or expired csrf token."
           },
           "500": {
             "description": "Internal Server Error."
@@ -469,6 +516,16 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "X-CSRF-Token",
+            "in": "header",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -486,7 +543,10 @@
             }
           },
           "403": {
-            "description": "Access denied."
+            "description": "Invalid or expired access token."
+          },
+          "419": {
+            "description": "Invalid or expired csrf token."
           },
           "500": {
             "description": "Internal Server Error."
@@ -529,6 +589,16 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "X-CSRF-Token",
+            "in": "header",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -549,7 +619,10 @@
             "description": "Unauthorized."
           },
           "403": {
-            "description": "Access denied."
+            "description": "Invalid or expired access token."
+          },
+          "419": {
+            "description": "Invalid or expired csrf token."
           },
           "500": {
             "description": "Internal Server Error."

@@ -30,21 +30,20 @@ func newAuthHandler(handler *gin.RouterGroup, l logger.Interface, v validation.G
 
 	g := handler.Group("/auth")
 	{
-		g.POST("login", h.login)
+		g.POST("login", h.login).Use(setCSRFTokenMiddleware(l, cfg))
 
 		social := g.Group("/social")
 		{
 			social.GET("", h.socialAuthorizationURL)
-			social.POST("github", h.githubLogin)
+			social.POST("github", h.githubLogin).Use(setCSRFTokenMiddleware(l, cfg))
 		}
 
-		authenticated := g.Group("/", sessionMiddleware(l, s))
+		protected := g.Group("/", csrfMiddleware(l, cfg), sessionMiddleware(l, s))
 		{
-			authenticated.POST("logout", h.logout)
-			authenticated.POST("token", h.token)
+			protected.POST("logout", h.logout)
+			protected.POST("token", h.token)
 
 		}
-
 	}
 }
 

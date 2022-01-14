@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 
+	"github.com/ysomad/go-auth-service/config"
 	"github.com/ysomad/go-auth-service/internal/service"
 
 	"github.com/ysomad/go-auth-service/pkg/apperrors"
@@ -77,7 +78,51 @@ func sessionMiddleware(l logger.Interface, s service.Session) gin.HandlerFunc {
 	}
 }
 
-func setCSRFTokenMiddleware(l logger.Interface) gin.HandlerFunc {
+func csrfMiddleware(l logger.Interface, cfg *config.Config) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		ht := c.Request.Header.Get(cfg.CSRFToken.HeaderKey)
+		if ht == "" {
+			l.Error(fmt.Errorf("http - v1 - middleware - csrfMiddleware - c.Request.Header.Get: %w", apperrors.ErrCSRFTokenHeaderNotFound))
+			c.AbortWithStatus(http.StatusForbidden)
+			return
+		}
+
+		ct, err := c.Cookie(cfg.CSRFToken.CookieKey)
+		if err != nil || ct == "" {
+			l.Error(fmt.Errorf("http - v1 - middleware - csrfMiddleware - c.Cookie: %w", apperrors.ErrCSRFTokenCookieNotFound))
+			c.AbortWithStatus(http.StatusForbidden)
+			return
+		}
+
+		if ht != ct {
+			l.Error(fmt.Errorf("http - v1 - middleware - csrfMiddleware: %w", apperrors.ErrCSRFDetected))
+			c.AbortWithStatus(http.StatusForbidden)
+			return
+		}
+
+		t, err := utils.UniqueString(32)
+		if err != nil {
+			l.Error(fmt.Errorf("http - v1 - middleware - csrfMiddleware: %w", err))
+			c.AbortWithStatus(http.StatusInternalServerError)
+			return
+		}
+
+		c.Next()
+
+		c.Header(cfg.CSRFToken.HeaderKey, t)
+		c.SetCookie(
+			cfg.CSRFToken.CookieKey,
+			t,
+			int(cfg.CSRFToken.TTL.Seconds()),
+			apiPath,
+			"",
+			cfg.Session.CookieSecure,
+			cfg.Session.CookieHTTPOnly,
+		)
+	}
+}
+
+func setCSRFTokenMiddleware(l logger.Interface, cfg *config.Config) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		t, err := utils.UniqueString(32)
 		if err != nil {
@@ -88,8 +133,16 @@ func setCSRFTokenMiddleware(l logger.Interface) gin.HandlerFunc {
 
 		c.Next()
 
-		c.Header("X-CSRF-Token", t)
-		c.SetCookie("CSRF-Token", t, 10, apiPath, "", false, true)
+		c.Header(cfg.CSRFToken.HeaderKey, t)
+		c.SetCookie(
+			cfg.CSRFToken.CookieKey,
+			t,
+			int(cfg.CSRFToken.TTL.Seconds()),
+			apiPath,
+			"",
+			cfg.Session.CookieSecure,
+			cfg.Session.CookieHTTPOnly,
+		)
 	}
 }
 
