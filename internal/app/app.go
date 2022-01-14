@@ -11,8 +11,8 @@ import (
 	"github.com/ysomad/go-auth-service/config"
 
 	v1 "github.com/ysomad/go-auth-service/internal/handler/http/v1"
+	"github.com/ysomad/go-auth-service/internal/repository"
 	"github.com/ysomad/go-auth-service/internal/service"
-	"github.com/ysomad/go-auth-service/internal/service/repository"
 
 	"github.com/ysomad/go-auth-service/pkg/httpserver"
 	"github.com/ysomad/go-auth-service/pkg/jwt"
