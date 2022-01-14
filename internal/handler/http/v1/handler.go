@@ -3,7 +3,6 @@ package v1
 
 import (
 	"fmt"
-	"net/http"
 	"strings"
 
 	"github.com/gin-contrib/cors"
@@ -38,9 +37,6 @@ func SetupHandlers(
 	corsCfg.AllowCredentials = true
 
 	handler.Use(cors.New(corsCfg))
-
-	// K8s probe
-	handler.GET("/healthz", func(c *gin.Context) { c.Status(http.StatusOK) })
 
 	// Swagger UI
 	handler.Static(fmt.Sprintf("%s/swagger/", apiPath), "third_party/swaggerui")
