@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"github.com/ysomad/go-auth-service/config"
 	"github.com/ysomad/go-auth-service/internal/service"
 
 	"github.com/ysomad/go-auth-service/pkg/apperrors"
@@ -17,14 +18,15 @@ import (
 type authHandler struct {
 	log logger.Interface
 	validation.Gin
+	cfg               *config.Config
 	authService       service.Auth
 	socialAuthService service.SocialAuth
 }
 
-func newAuthHandler(handler *gin.RouterGroup, l logger.Interface, v validation.Gin, s service.Session,
+func newAuthHandler(handler *gin.RouterGroup, l logger.Interface, v validation.Gin, cfg *config.Config, s service.Session,
 	a service.Auth, sa service.SocialAuth) {
 
-	h := &authHandler{l, v, a, sa}
+	h := &authHandler{l, v, cfg, a, sa}
 
 	g := handler.Group("/auth")
 	{
@@ -60,11 +62,14 @@ func (h *authHandler) login(c *gin.Context) {
 		return
 	}
 
-	cookie, err := h.authService.EmailLogin(
+	s, err := h.authService.EmailLogin(
 		c.Request.Context(),
 		r.Email,
 		r.Password,
-		service.NewDevice(c.Request.Header.Get("User-Agent"), c.ClientIP()),
+		service.Device{
+			IP:        c.ClientIP(),
+			UserAgent: c.Request.Header.Get("User-Agent"),
+		},
 	)
 	if err != nil {
 		h.log.Error(fmt.Errorf("http - v1 - auth - login: %w", err))
@@ -79,7 +84,15 @@ func (h *authHandler) login(c *gin.Context) {
 		return
 	}
 
-	setSessionCookie(c, cookie)
+	c.SetCookie(
+		h.cfg.Session.CookieKey,
+		s.ID,
+		s.TTL,
+		apiPath,
+		h.cfg.Session.CookieDomain,
+		h.cfg.Session.CookieSecure,
+		h.cfg.Session.CookieHTTPOnly,
+	)
 	c.Status(http.StatusOK)
 }
 
@@ -97,6 +110,15 @@ func (h *authHandler) logout(c *gin.Context) {
 		return
 	}
 
+	c.SetCookie(
+		h.cfg.Session.CookieKey,
+		"",
+		-1,
+		apiPath,
+		h.cfg.Session.CookieDomain,
+		h.cfg.Session.CookieSecure,
+		h.cfg.Session.CookieHTTPOnly,
+	)
 	c.Status(http.StatusNoContent)
 }
 
@@ -124,7 +146,7 @@ func (h *authHandler) token(c *gin.Context) {
 		return
 	}
 
-	token, err := h.authService.NewAccessToken(c.Request.Context(), aid, r.Password)
+	t, err := h.authService.NewAccessToken(c.Request.Context(), aid, r.Password)
 	if err != nil {
 		h.log.Error(fmt.Errorf("http - v1 - auth - token: %w", err))
 
@@ -137,7 +159,7 @@ func (h *authHandler) token(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, tokenResponse{token})
+	c.JSON(http.StatusOK, tokenResponse{t})
 }
 
 type getOAuthURIResponse struct {
@@ -162,14 +184,6 @@ func (h *authHandler) socialAuthorizationURL(c *gin.Context) {
 }
 
 func (h *authHandler) githubLogin(c *gin.Context) {
-	cbErr, found := c.GetQuery("error")
-	if found && cbErr != "" {
-		desc, _ := c.GetQuery("error_description")
-		h.log.Error(fmt.Errorf("http - v1 - auth - githubCallback - %s(%s)", cbErr, desc))
-		c.AbortWithStatus(http.StatusInternalServerError)
-		return
-	}
-
 	code, found := c.GetQuery("code")
 	if !found || code == "" {
 		c.AbortWithStatus(http.StatusNotFound)
@@ -183,10 +197,13 @@ func (h *authHandler) githubLogin(c *gin.Context) {
 		return
 	}
 
-	cookie, err := h.socialAuthService.GitHubLogin(
+	s, err := h.socialAuthService.GitHubLogin(
 		c.Request.Context(),
 		code,
-		service.NewDevice(c.Request.Header.Get("User-Agent"), c.ClientIP()),
+		service.Device{
+			UserAgent: c.Request.Header.Get("User-Agent"),
+			IP:        c.ClientIP(),
+		},
 	)
 	if err != nil {
 		h.log.Error(fmt.Errorf("http - v1 - auth - githubCallback: %w", err))
@@ -194,6 +211,14 @@ func (h *authHandler) githubLogin(c *gin.Context) {
 		return
 	}
 
-	setSessionCookie(c, cookie)
+	c.SetCookie(
+		h.cfg.Session.CookieKey,
+		s.ID,
+		s.TTL,
+		apiPath,
+		h.cfg.Session.CookieDomain,
+		h.cfg.Session.CookieSecure,
+		h.cfg.Session.CookieHTTPOnly,
+	)
 	c.Status(http.StatusOK)
 }

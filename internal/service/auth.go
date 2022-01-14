@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/ysomad/go-auth-service/config"
+	"github.com/ysomad/go-auth-service/internal/domain"
 	"github.com/ysomad/go-auth-service/pkg/jwt"
 )
 
@@ -24,24 +25,25 @@ func NewAuthService(cfg *config.Config, t jwt.Token, a Account, s Session) *auth
 	}
 }
 
-func (s *authService) EmailLogin(ctx context.Context, email, password string, d Device) (SessionCookie, error) {
+func (s *authService) EmailLogin(ctx context.Context, email, password string, d Device) (domain.Session, error) {
 	a, err := s.account.GetByEmail(ctx, email)
 	if err != nil {
-		return SessionCookie{}, fmt.Errorf("authService - EmailLogin - s.account.GetByEmail: %w", err)
+		return domain.Session{}, fmt.Errorf("authService - EmailLogin - s.account.GetByEmail: %w", err)
 	}
 
 	a.Password = password
 
 	if err = a.CompareHashAndPassword(); err != nil {
-		return SessionCookie{}, fmt.Errorf("authService - EmailLogin - a.CompareHashAndPassword: %w", err)
+		return domain.Session{}, fmt.Errorf("authService - EmailLogin - a.CompareHashAndPassword: %w", err)
 	}
 
 	sess, err := s.session.Create(ctx, a.ID, providerEmail, d)
 	if err != nil {
-		return SessionCookie{}, fmt.Errorf("authService - EmailLogin - s.session.Create: %w", err)
+		return domain.Session{}, fmt.Errorf("authService - EmailLogin - s.session.Create: %w", err)
 	}
 
-	return NewSessionCookie(sess.ID, sess.TTL, &s.cfg.Session), nil
+	return sess, nil
+
 }
 
 func (s *authService) Logout(ctx context.Context, sid string) error {

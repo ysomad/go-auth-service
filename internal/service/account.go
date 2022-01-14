@@ -53,16 +53,16 @@ func (s *accountService) GetByEmail(ctx context.Context, email string) (domain.A
 	return acc, nil
 }
 
-func (s *accountService) Delete(ctx context.Context, aid, sid string) (SessionCookie, error) {
+func (s *accountService) Delete(ctx context.Context, aid, sid string) error {
 	if err := s.repo.Archive(ctx, aid, true); err != nil {
-		return SessionCookie{}, fmt.Errorf("accountService - Archive - s.repo.Archive: %w", err)
+		return fmt.Errorf("accountService - Archive - s.repo.Archive: %w", err)
 	}
 
 	if err := s.session.TerminateAll(ctx, aid, sid); err != nil {
-		return SessionCookie{}, fmt.Errorf("accountService - Archive - s.session.TerminateAll: %w", err)
+		return fmt.Errorf("accountService - Archive - s.session.TerminateAll: %w", err)
 	}
 
-	return NewSessionCookie(sid, -1, &s.cfg.Session), nil
+	return nil
 }
 
 func (s *accountService) Verify(ctx context.Context, code string) error {

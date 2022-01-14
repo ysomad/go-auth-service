@@ -61,28 +61,28 @@ func (s *socialAuthService) AuthorizationURL(ctx context.Context, provider strin
 	return u, nil
 }
 
-func (s *socialAuthService) GitHubLogin(ctx context.Context, code string, d Device) (SessionCookie, error) {
-	token, err := s.exchangeCode(ctx, providerGitHub, code)
+func (s *socialAuthService) GitHubLogin(ctx context.Context, code string, d Device) (domain.Session, error) {
+	t, err := s.exchangeCode(ctx, providerGitHub, code)
 	if err != nil {
-		return SessionCookie{}, fmt.Errorf("socialAuthService  - GitHubLogin - s.exchangeCode: %w", err)
+		return domain.Session{}, fmt.Errorf("socialAuthService  - GitHubLogin - s.exchangeCode: %w", err)
 	}
 
-	u, err := s.getGitHubUser(ctx, token)
+	u, err := s.getGitHubUser(ctx, t)
 	if err != nil {
-		return SessionCookie{}, fmt.Errorf("socialAuthService - GitHubLogin - s.getGitHubUser: %w", err)
+		return domain.Session{}, fmt.Errorf("socialAuthService - GitHubLogin - s.getGitHubUser: %w", err)
 	}
 
-	c, err := s.loginOrSignUp(ctx, *u.Email, *u.Login, providerGitHub, d)
+	sess, err := s.loginOrSignUp(ctx, *u.Email, *u.Login, providerGitHub, d)
 	if err != nil {
-		return SessionCookie{}, fmt.Errorf("socialAuthService - GitHubLogin - s.loginOrSignUp: %w", err)
+		return domain.Session{}, fmt.Errorf("socialAuthService - GitHubLogin - s.loginOrSignUp: %w", err)
 	}
 
-	return c, nil
+	return sess, nil
 }
 
-func (s *socialAuthService) GoogleLogin(ctx context.Context, code string, d Device) (SessionCookie, error) {
+func (s *socialAuthService) GoogleLogin(ctx context.Context, code string, d Device) (domain.Session, error) {
 	panic("implement")
-	return SessionCookie{}, nil
+	return domain.Session{}, nil
 }
 
 // private methods ----------------------------------------------------------------------------------------------------
@@ -126,31 +126,31 @@ func (s *socialAuthService) getGitHubUser(ctx context.Context, t *oauth2.Token) 
 // loginOrSignUp logs in user with received data from OAuth2 data provider if account exist or creates
 // new account with random password and logs it in.
 func (s *socialAuthService) loginOrSignUp(
-	ctx context.Context, email, username, provider string, d Device) (SessionCookie, error) {
+	ctx context.Context, email, username, provider string, d Device) (domain.Session, error) {
 
 	var aid string
 
-	acc, err := s.accountService.GetByEmail(ctx, email)
+	a, err := s.accountService.GetByEmail(ctx, email)
 	if err == nil {
-		aid = acc.ID
+		aid = a.ID
 	} else {
 		if !errors.Is(err, apperrors.ErrAccountNotFound) {
-			return SessionCookie{}, fmt.Errorf("s.accountService.GetByEmail: %w", err)
+			return domain.Session{}, fmt.Errorf("s.accountService.GetByEmail: %w", err)
 		}
 
-		acc = domain.Account{Email: email, Username: username, IsVerified: true}
-		acc.RandomPassword()
+		a = domain.Account{Email: email, Username: username, IsVerified: true}
+		a.RandomPassword()
 
-		aid, err = s.accountService.Create(ctx, acc)
+		aid, err = s.accountService.Create(ctx, a)
 		if err != nil {
-			return SessionCookie{}, fmt.Errorf("s.accountService.Create: %w", err)
+			return domain.Session{}, fmt.Errorf("s.accountService.Create: %w", err)
 		}
 	}
 
 	sess, err := s.sessionService.Create(ctx, aid, provider, d)
 	if err != nil {
-		return SessionCookie{}, fmt.Errorf("s.sessionService.Create: %w", err)
+		return domain.Session{}, fmt.Errorf("s.sessionService.Create: %w", err)
 	}
 
-	return NewSessionCookie(sess.ID, sess.TTL, &s.cfg.Session), nil
+	return sess, nil
 }

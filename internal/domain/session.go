@@ -8,7 +8,6 @@ import (
 	"github.com/ysomad/go-auth-service/pkg/utils"
 )
 
-// Session represents refresh token session for JWT authentication
 type Session struct {
 	ID        string    `json:"id" bson:"_id"`
 	AccountID string    `json:"accountId" bson:"accountId"`

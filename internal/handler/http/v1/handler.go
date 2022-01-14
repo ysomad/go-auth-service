@@ -44,8 +44,8 @@ func SetupHandlers(
 	// Resource handlers
 	h := handler.Group(apiPath)
 	{
-		newAccountHandler(h, l, v, &cfg.Session, acc, sess, auth)
+		newAccountHandler(h, l, v, cfg, acc, sess, auth)
 		newSessionHandler(h, l, v, sess, auth)
-		newAuthHandler(h, l, v, sess, auth, social)
+		newAuthHandler(h, l, v, cfg, sess, auth, social)
 	}
 }

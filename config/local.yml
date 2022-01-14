@@ -33,6 +33,14 @@ session:
   cookie_secure: false
   cookie_httponly: true
 
+csrf:
+  ttl: 60m
+  cookie_key: "X-CSRF-Token"
+  cookie_domain: ""
+  cookie_secure: false
+  cookie_httponly: true
+  header_key: "CSRF-Token"
+
 access_token:
   ttl: 1m
   signing_key: "secret"

@@ -11,33 +11,34 @@ import (
 
 	"github.com/ysomad/go-auth-service/pkg/apperrors"
 	"github.com/ysomad/go-auth-service/pkg/logger"
+	"github.com/ysomad/go-auth-service/pkg/utils"
 )
 
-func tokenMiddleware(log logger.Interface, auth service.Auth) gin.HandlerFunc {
+func tokenMiddleware(l logger.Interface, a service.Auth) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		aid, err := accountID(c)
 		if err != nil {
-			log.Error(fmt.Errorf("http - v1 - middleware - tokenMiddleware - accountID: %w", err))
+			l.Error(fmt.Errorf("http - v1 - middleware - tokenMiddleware - accountID: %w", err))
 			c.AbortWithStatus(http.StatusUnauthorized)
 			return
 		}
 
 		t, found := c.GetQuery("token")
 		if !found || t == "" {
-			log.Error(fmt.Errorf("http - v1 - middleware - tokenMiddleware - c.GetQuery: %w", err))
+			l.Error(fmt.Errorf("http - v1 - middleware - tokenMiddleware - c.GetQuery: %w", err))
 			c.AbortWithStatus(http.StatusForbidden)
 			return
 		}
 
-		sub, err := auth.ParseAccessToken(c.Request.Context(), t)
+		sub, err := a.ParseAccessToken(c.Request.Context(), t)
 		if err != nil {
-			log.Error(fmt.Errorf("http - v1 - middleware - tokenMiddleware - authService.ParseAccessToken: %w", err))
+			l.Error(fmt.Errorf("http - v1 - middleware - tokenMiddleware - auth.ParseAccessToken: %w", err))
 			c.AbortWithStatus(http.StatusForbidden)
 			return
 		}
 
 		if sub != aid {
-			log.Error(fmt.Errorf("http - v1 - middleware - tokenMiddleware: %w", err))
+			l.Error(fmt.Errorf("http - v1 - middleware - tokenMiddleware: %w", err))
 			c.AbortWithStatus(http.StatusForbidden)
 			return
 		}
@@ -46,26 +47,26 @@ func tokenMiddleware(log logger.Interface, auth service.Auth) gin.HandlerFunc {
 	}
 }
 
-func sessionMiddleware(log logger.Interface, session service.Session) gin.HandlerFunc {
+func sessionMiddleware(l logger.Interface, s service.Session) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		sid, err := c.Cookie("id")
 		if err != nil {
-			log.Error(fmt.Errorf("http - v1 - middleware - sessionMiddleware - c.Cookie: %w", err))
+			l.Error(fmt.Errorf("http - v1 - middleware - sessionMiddleware - c.Cookie: %w", err))
 			c.AbortWithStatus(http.StatusUnauthorized)
 			return
 		}
 
-		s, err := session.GetByID(c.Request.Context(), sid)
+		s, err := s.GetByID(c.Request.Context(), sid)
 		if err != nil {
-			log.Error(fmt.Errorf("http - v1 - middleware - sessionMiddleware - s.Get: %w", err))
+			l.Error(fmt.Errorf("http - v1 - middleware - sessionMiddleware - s.Get: %w", err))
 			c.AbortWithStatus(http.StatusUnauthorized)
 			return
 		}
 
-		d := service.NewDevice(c.Request.UserAgent(), c.ClientIP())
+		d := service.Device{UserAgent: c.Request.Header.Get("User-Agent"), IP: c.ClientIP()}
 
 		if s.IP != d.IP || s.UserAgent != d.UserAgent {
-			log.Error(fmt.Errorf("http - v1 - middleware - sessionMiddleware: %w", apperrors.ErrSessionDeviceMismatch))
+			l.Error(fmt.Errorf("http - v1 - middleware - sessionMiddleware: %w", apperrors.ErrSessionDeviceMismatch))
 			c.AbortWithStatus(http.StatusUnauthorized)
 			return
 		}
@@ -73,6 +74,22 @@ func sessionMiddleware(log logger.Interface, session service.Session) gin.Handle
 		c.Set("sid", s.ID)
 		c.Set("aid", s.AccountID)
 		c.Next()
+	}
+}
+
+func setCSRFTokenMiddleware(l logger.Interface) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		t, err := utils.UniqueString(32)
+		if err != nil {
+			l.Error(fmt.Errorf("http - v1 - middleware - setCSRFTokenMiddleware: %w", err))
+			c.AbortWithStatus(http.StatusInternalServerError)
+			return
+		}
+
+		c.Next()
+
+		c.Header("X-CSRF-Token", t)
+		c.SetCookie("CSRF-Token", t, 10, apiPath, "", false, true)
 	}
 }
 

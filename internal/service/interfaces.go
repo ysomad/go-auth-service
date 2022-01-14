@@ -19,7 +19,7 @@ type (
 		GetByEmail(ctx context.Context, email string) (domain.Account, error)
 
 		// Delete sets account IsArchive state to true.
-		Delete(ctx context.Context, aid, sid string) (SessionCookie, error)
+		Delete(ctx context.Context, aid, sid string) error
 
 		// Verify verifies account using provided code.
 		Verify(ctx context.Context, code string) error
@@ -41,7 +41,7 @@ type (
 
 	Auth interface {
 		// EmailLogin creates new session using provided account email and password.
-		EmailLogin(ctx context.Context, email, password string, d Device) (SessionCookie, error)
+		EmailLogin(ctx context.Context, email, password string, d Device) (domain.Session, error)
 
 		// Logout logs out session by id.
 		Logout(ctx context.Context, sid string) error
@@ -59,10 +59,10 @@ type (
 		AuthorizationURL(ctx context.Context, provider string) (*url.URL, error)
 
 		// GitHubLogin handles OAuth2 login via GitHub.
-		GitHubLogin(ctx context.Context, code string, d Device) (SessionCookie, error)
+		GitHubLogin(ctx context.Context, code string, d Device) (domain.Session, error)
 
 		// GoogleLogin handles OAuth2 login via Google.
-		GoogleLogin(ctx context.Context, code string, d Device) (SessionCookie, error)
+		GoogleLogin(ctx context.Context, code string, d Device) (domain.Session, error)
 	}
 
 	Session interface {
@@ -75,10 +75,10 @@ type (
 		// GetAll account sessions using provided account id.
 		GetAll(ctx context.Context, aid string) ([]domain.Session, error)
 
-		// Terminate session by id excluding current one.
+		// Terminate session by id excluding current session with id.
 		Terminate(ctx context.Context, sid, currSid string) error
 
-		// TerminateAll account sessions excluding current one.
+		// TerminateAll account sessions excluding current session with id.
 		TerminateAll(ctx context.Context, aid, sid string) error
 	}
 

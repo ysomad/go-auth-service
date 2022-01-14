@@ -21,39 +21,10 @@ func NewSessionService(cfg *config.Config, s SessionRepo) *sessionService {
 	}
 }
 
-// SessionCookie represents data transfer object which
-// contains data needed to create a cookie.
-type SessionCookie struct {
-	ID       string
-	TTL      int
-	Domain   string
-	Secure   bool
-	HTTPOnly bool
-	Key      string
-}
-
-func NewSessionCookie(sid string, ttl int, cfg *config.Session) SessionCookie {
-	return SessionCookie{
-		ID:       sid,
-		TTL:      ttl,
-		Domain:   cfg.CookieDomain,
-		Secure:   cfg.CookieSecure,
-		HTTPOnly: cfg.CookieHTTPOnly,
-		Key:      cfg.CookieKey,
-	}
-}
-
 // Device represents data transfer object with user device data
 type Device struct {
 	UserAgent string
 	IP        string
-}
-
-func NewDevice(ua string, ip string) Device {
-	return Device{
-		UserAgent: ua,
-		IP:        ip,
-	}
 }
 
 func (s *sessionService) Create(ctx context.Context, aid, provider string, d Device) (domain.Session, error) {
@@ -93,7 +64,7 @@ func (s *sessionService) Terminate(ctx context.Context, sid, currSid string) err
 	}
 
 	if err := s.repo.Delete(ctx, sid); err != nil {
-		return fmt.Errorf("sessionService - Terminate - s.sessionRepo.Delete: %w", err)
+		return fmt.Errorf("sessionService - Terminate - s.repo.Delete: %w", err)
 	}
 
 	return nil

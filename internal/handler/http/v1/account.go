@@ -19,12 +19,12 @@ import (
 type accountHandler struct {
 	log logger.Interface
 	validation.Gin
-	sessionCfg     *config.Session
+	cfg            *config.Config
 	accountService service.Account
 	sessionService service.Session
 }
 
-func newAccountHandler(handler *gin.RouterGroup, l logger.Interface, v validation.Gin, cfg *config.Session,
+func newAccountHandler(handler *gin.RouterGroup, l logger.Interface, v validation.Gin, cfg *config.Config,
 	acc service.Account, s service.Session, auth service.Auth) {
 
 	h := &accountHandler{l, v, cfg, acc, s}
@@ -93,14 +93,21 @@ func (h *accountHandler) archive(c *gin.Context) {
 		return
 	}
 
-	cookie, err := h.accountService.Delete(c.Request.Context(), aid, sid)
-	if err != nil {
+	if err := h.accountService.Delete(c.Request.Context(), aid, sid); err != nil {
 		h.log.Error(fmt.Errorf("http - v1 - auth - archive - h.accountService.Delete: %w", err))
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 
-	setSessionCookie(c, cookie)
+	c.SetCookie(
+		h.cfg.Session.CookieKey,
+		"",
+		-1,
+		apiPath,
+		h.cfg.Session.CookieDomain,
+		h.cfg.Session.CookieSecure,
+		h.cfg.Session.CookieHTTPOnly,
+	)
 	c.Status(http.StatusNoContent)
 }
 

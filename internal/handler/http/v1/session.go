@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 
@@ -8,6 +9,7 @@ import (
 
 	"github.com/ysomad/go-auth-service/internal/service"
 
+	"github.com/ysomad/go-auth-service/pkg/apperrors"
 	"github.com/ysomad/go-auth-service/pkg/logger"
 	"github.com/ysomad/go-auth-service/pkg/validation"
 )
@@ -66,6 +68,12 @@ func (h *sessionHandler) terminate(c *gin.Context) {
 
 	if err := h.sessionService.Terminate(c.Request.Context(), c.Param("sessionID"), currSid); err != nil {
 		h.log.Error(fmt.Errorf("http - v1 - sessionService - terminate - h.sessionService.Terminate: %w", err))
+
+		if errors.Is(err, apperrors.ErrSessionNotTerminated) {
+			abortWithError(c, http.StatusBadRequest, apperrors.ErrSessionNotTerminated)
+			return
+		}
+
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
