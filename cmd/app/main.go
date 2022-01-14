@@ -13,7 +13,7 @@ func main() {
 	var cfg config.Config
 
 	// TODO: read configuration from flag
-	err := cleanenv.ReadConfig("./configs/local.yml", &cfg)
+	err := cleanenv.ReadConfig("./config/local.yml", &cfg)
 	if err != nil {
 		log.Fatalf("Config error: %s", err)
 	}
