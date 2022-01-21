@@ -3,7 +3,7 @@ package apperrors
 import "errors"
 
 var (
-	ErrCSRFTokenHeaderNotFound = errors.New("csrf token not found in request headers")
+	ErrCSRFTokenPublicNotFound = errors.New("csrf token not found in request headers or query")
 	ErrCSRFTokenCookieNotFound = errors.New("csrf token not found in cookies")
-	ErrCSRFDetected = errors.New("csrf tokens in headers and cookies are not the same")
+	ErrCSRFDetected            = errors.New("csrf tokens in headers and cookies are not the same")
 )

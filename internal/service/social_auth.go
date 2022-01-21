@@ -44,12 +44,12 @@ func (s *socialAuthService) AuthorizationURL(ctx context.Context, provider strin
 
 	scope, err := utils.UniqueString(32)
 	if err != nil {
-		return nil, fmt.Errorf("socialAuthService - GetAuthorizeURI - util.UniqueString: %w", err)
+		return nil, fmt.Errorf("socialAuthService - AuthorizationURL - util.UniqueString: %w", err)
 	}
 
 	u, err := url.Parse(s.cfg.Endpoints()[provider].AuthURL)
 	if err != nil {
-		return nil, fmt.Errorf("socialAuthService - GetAuthorizeURI - url.Parse: %w", err)
+		return nil, fmt.Errorf("socialAuthService - AuthorizationURL - url.Parse: %w", err)
 	}
 
 	q := u.Query()
@@ -138,7 +138,7 @@ func (s *socialAuthService) loginOrSignUp(
 			return domain.Session{}, fmt.Errorf("s.accountService.GetByEmail: %w", err)
 		}
 
-		a = domain.Account{Email: email, Username: username, IsVerified: true}
+		a = domain.Account{Email: email, Username: username, Verified: true}
 		a.RandomPassword()
 
 		aid, err = s.accountService.Create(ctx, a)

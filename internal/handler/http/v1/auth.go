@@ -32,10 +32,10 @@ func newAuthHandler(handler *gin.RouterGroup, l logger.Interface, v validation.G
 	{
 		g.POST("login", h.login).Use(setCSRFTokenMiddleware(l, cfg))
 
-		social := g.Group("/social")
+		social := g.Group("/social", setCSRFTokenMiddleware(l, cfg))
 		{
 			social.GET("", h.socialAuthorizationURL)
-			social.POST("github", h.githubLogin).Use(setCSRFTokenMiddleware(l, cfg))
+			social.POST("github", h.githubLogin).Use(csrfMiddleware(l, cfg))
 		}
 
 		protected := g.Group("/", csrfMiddleware(l, cfg), sessionMiddleware(l, s))
@@ -57,7 +57,7 @@ func (h *authHandler) login(c *gin.Context) {
 
 	if err := c.ShouldBindJSON(&r); err != nil {
 		h.log.Info(err.Error())
-		c.AbortWithStatusJSON(http.StatusBadRequest, h.TranslateError(err))
+		abortWithValidationError(c, http.StatusBadRequest, h.TranslateError(err))
 		return
 	}
 
@@ -134,7 +134,7 @@ func (h *authHandler) token(c *gin.Context) {
 
 	if err := c.ShouldBindJSON(&r); err != nil {
 		h.log.Info(err.Error())
-		c.AbortWithStatusJSON(http.StatusBadRequest, h.TranslateError(err))
+		abortWithValidationError(c, http.StatusBadRequest, h.TranslateError(err))
 		return
 	}
 

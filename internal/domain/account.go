@@ -19,8 +19,8 @@ type Account struct {
 	PasswordHash string    `json:"-"`
 	CreatedAt    time.Time `json:"createdAt"`
 	UpdatedAt    time.Time `json:"updatedAt"`
-	IsArchive    bool      `json:"isArchive"`
-	IsVerified   bool      `json:"isVerified"`
+	Archive      bool      `json:"archive"`
+	Verified     bool      `json:"verified"`
 }
 
 func (a *Account) GeneratePasswordHash() error {

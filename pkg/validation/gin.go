@@ -54,5 +54,5 @@ func (v *ginValidator) TranslateError(err error) map[string]string {
 	}
 
 	return errs
-	// return err.(validator.ValidationErrors).Translate(v.trans)
 }
+

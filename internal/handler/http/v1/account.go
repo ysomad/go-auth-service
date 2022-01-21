@@ -31,17 +31,17 @@ func newAccountHandler(handler *gin.RouterGroup, l logger.Interface, v validatio
 
 	g := handler.Group("/accounts")
 	{
-		g.POST("", h.create)
-
 		authenticated := g.Group("/", sessionMiddleware(l, s))
 		{
-			authenticated.GET("", h.get)
-
 			secure := authenticated.Group("/", tokenMiddleware(l, auth))
 			{
 				secure.DELETE("", h.archive)
 			}
+
+			authenticated.GET("", h.get)
 		}
+
+		g.POST("", h.create)
 	}
 }
 
@@ -55,7 +55,7 @@ func (h *accountHandler) create(c *gin.Context) {
 	var r accountCreateRequest
 
 	if err := c.ShouldBindJSON(&r); err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, h.TranslateError(err))
+		abortWithValidationError(c, http.StatusBadRequest, h.TranslateError(err))
 		return
 	}
 

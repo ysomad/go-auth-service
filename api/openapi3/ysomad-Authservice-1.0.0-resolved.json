@@ -129,16 +129,6 @@
             "schema": {
               "type": "string"
             }
-          },
-          {
-            "name": "X-CSRF-Token",
-            "in": "header",
-            "required": true,
-            "style": "simple",
-            "explode": false,
-            "schema": {
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -160,9 +150,6 @@
           },
           "403": {
             "description": "Invalid or expired access token."
-          },
-          "419": {
-            "description": "Invalid or expired csrf token."
           },
           "500": {
             "description": "Internal Server Error."
@@ -269,6 +256,16 @@
         "responses": {
           "200": {
             "description": "Successful operation.",
+            "headers": {
+              "Sеt-Cookie": {
+                "style": "simple",
+                "explode": false,
+                "schema": {
+                  "type": "string",
+                  "example": "CSRF-Token=XN6StCMLLT4Ijc1fGhZPj83PJ2gjHrPB; Path=v1; Max-Age=60; HttpOnly; Secure"
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -382,8 +379,8 @@
           "401": {
             "description": "Unauthorized."
           },
-          "419": {
-            "description": "Invalid or expired csrf token."
+          "403": {
+            "description": "Forbidden."
           },
           "500": {
             "description": "Internal Server Error."
@@ -451,10 +448,7 @@
             "description": "Unauthorized."
           },
           "403": {
-            "description": "Incorrect password."
-          },
-          "419": {
-            "description": "Invalid or expired csrf token."
+            "description": "Forbidden."
           },
           "500": {
             "description": "Internal Server Error."
@@ -516,16 +510,6 @@
             "schema": {
               "type": "string"
             }
-          },
-          {
-            "name": "X-CSRF-Token",
-            "in": "header",
-            "required": true,
-            "style": "simple",
-            "explode": false,
-            "schema": {
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -544,9 +528,6 @@
           },
           "403": {
             "description": "Invalid or expired access token."
-          },
-          "419": {
-            "description": "Invalid or expired csrf token."
           },
           "500": {
             "description": "Internal Server Error."
@@ -589,16 +570,6 @@
             "schema": {
               "type": "string"
             }
-          },
-          {
-            "name": "X-CSRF-Token",
-            "in": "header",
-            "required": true,
-            "style": "simple",
-            "explode": false,
-            "schema": {
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -620,9 +591,6 @@
           },
           "403": {
             "description": "Invalid or expired access token."
-          },
-          "419": {
-            "description": "Invalid or expired csrf token."
           },
           "500": {
             "description": "Internal Server Error."
@@ -670,17 +638,21 @@
             "type": "string",
             "format": "date-time"
           },
-          "isArchive": {
+          "archive": {
             "type": "boolean",
             "description": "false by default"
+          },
+          "verified": {
+            "type": "boolean",
+            "description": "false by default, true for social auth"
           }
         }
       },
       "AccountCreateRequest": {
         "required": [
-          "confirmPassword",
           "email",
-          "password"
+          "password",
+          "username"
         ],
         "type": "object",
         "properties": {
@@ -731,6 +703,11 @@
             "description": "UUID v4",
             "format": "uuid"
           },
+          "provider": {
+            "type": "string",
+            "description": "OAuth2 data provider",
+            "format": "string"
+          },
           "userAgent": {
             "type": "string"
           },
@@ -749,7 +726,7 @@
           },
           "createdAt": {
             "type": "integer",
-            "description": "unit timestamp",
+            "description": "unix timestamp",
             "format": "int64"
           }
         }
@@ -794,12 +771,20 @@
       "ErrorResponse": {
         "type": "object",
         "properties": {
-          "message": {
+          "error": {
             "type": "string"
           }
         }
       },
       "ValidationErrorResponse": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "$ref": "#/components/schemas/ValidationErrorResponse_error"
+          }
+        }
+      },
+      "ValidationErrorResponse_error": {
         "type": "object",
         "properties": {
           "fieldName": {

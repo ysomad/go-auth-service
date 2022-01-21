@@ -80,9 +80,16 @@ func sessionMiddleware(l logger.Interface, s service.Session) gin.HandlerFunc {
 
 func csrfMiddleware(l logger.Interface, cfg *config.Config) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		var pt string
+
+		qt := c.Query("state")
 		ht := c.Request.Header.Get(cfg.CSRFToken.HeaderKey)
-		if ht == "" {
-			l.Error(fmt.Errorf("http - v1 - middleware - csrfMiddleware - c.Request.Header.Get: %w", apperrors.ErrCSRFTokenHeaderNotFound))
+		if qt != "" {
+			pt = qt
+		} else if ht != "" {
+			pt = ht
+		} else {
+			l.Error(fmt.Errorf("http - v1 - middleware - csrfMiddleware - c.Request.Header.Get: %w", apperrors.ErrCSRFTokenPublicNotFound))
 			c.AbortWithStatus(http.StatusForbidden)
 			return
 		}
@@ -94,7 +101,7 @@ func csrfMiddleware(l logger.Interface, cfg *config.Config) gin.HandlerFunc {
 			return
 		}
 
-		if ht != ct {
+		if pt != ct {
 			l.Error(fmt.Errorf("http - v1 - middleware - csrfMiddleware: %w", apperrors.ErrCSRFDetected))
 			c.AbortWithStatus(http.StatusForbidden)
 			return

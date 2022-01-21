@@ -31,7 +31,7 @@ func (r *accountRepo) Create(ctx context.Context, a domain.Account) (string, err
 	sql, args, err := r.Builder.
 		Insert(_accTable).
 		Columns("username, email, password, is_verified").
-		Values(a.Username, a.Email, a.PasswordHash, a.IsVerified).
+		Values(a.Username, a.Email, a.PasswordHash, a.Verified).
 		Suffix("RETURNING id").
 		ToSql()
 	if err != nil {
